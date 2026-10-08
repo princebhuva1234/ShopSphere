@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}
+ShopSphere - Products
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Products</h1>
+
+{% if products %}
+
+    <div style="
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    ">
+
+        {% for product in products %}
+
+            <div style="
+                background: white;
+                width: 250px;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            ">
+
+                <!-- Product Image -->
+
+                {% with image=product.images.all.0 %}
+
+                    {% if image %}
+
+                        <img
+                            src="{{ image.image.url }}"
+                            alt="{{ product.name }}"
+                            style="
+                                width: 100%;
+                                height: 200px;
+                                object-fit: contain;
+                            "
+                        >
+
+                    {% endif %}
+
+                {% endwith %}
+
+
+                <!-- Product Name -->
+
+                <h2>
+                    {{ product.name }}
+                </h2>
+
+
+                <!-- Brand -->
+
+                <p>
+                    Brand: {{ product.brand }}
+                </p>
+
+
+                <!-- Price -->
+
+                {% if product.discount_price %}
+
+                    <p>
+                        <del>₹{{ product.price }}</del>
+
+                        <strong>
+                            ₹{{ product.discount_price }}
+                        </strong>
+                    </p>
+
+                {% else %}
+
+                    <p>
+                        <strong>
+                            ₹{{ product.price }}
+                        </strong>
+                    </p>
+
+                {% endif %}
+
+
+                <!-- View Product -->
+
+                <a
+                    href="{% url 'product_detail' product.slug %}"
+                    style="
+                        display: inline-block;
+                        background: #007bff;
+                        color: white;
+                        padding: 10px 15px;
+                        text-decoration: none;
+                        border-radius: 5px;
+                    "
+                >
+                    View Product
+                </a>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <p>No products available.</p>
+
+{% endif %}
+
+{% endblock %}

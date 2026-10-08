@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Redirecting to Payment - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<div class="payment-loading">
+
+    <div class="loading-card">
+
+        <div class="loader">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+
+        <h1>Opening Secure Payment</h1>
+
+        <p>
+            Please wait while we open Razorpay securely...
+        </p>
+
+        <p class="order-text">
+            Order #{{ order.id }}
+        </p>
+
+        <button
+            type="button"
+            id="pay-button"
+            class="pay-button"
+        >
+            Continue to Razorpay
+        </button>
+
+    </div>
+
+</div>
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+
+    const options = {
+
+        key: "{{ razorpay_key_id }}",
+
+        amount: "{{ amount }}",
+
+        currency: "INR",
+
+        name: "ShopSphere",
+
+        description:
+            "Payment for Order #{{ order.id }}",
+
+        order_id:
+            "{{ razorpay_order_id }}",
+
+        prefill: {
+
+            name:
+                "{{ order.user.get_full_name|escapejs }}",
+
+            email:
+                "{{ order.user.email|escapejs }}"
+
+        },
+
+        notes: {
+
+            shopsphere_order_id:
+                "{{ order.id }}"
+
+        },
+
+        theme: {
+
+            color: "#007bff"
+
+        },
+
+        handler: function(response) {
+
+            const form =
+                document.createElement("form");
+
+            form.method = "POST";
+
+            form.action =
+                "{% url 'verify_payment' %}";
+
+
+            const csrf =
+                document.createElement("input");
+
+            csrf.type = "hidden";
+
+            csrf.name =
+                "csrfmiddlewaretoken";
+
+            csrf.value =
+                "{{ csrf_token }}";
+
+            form.appendChild(csrf);
+
+
+            const paymentId =
+                document.createElement("input");
+
+            paymentId.type = "hidden";
+
+            paymentId.name =
+                "razorpay_payment_id";
+
+            paymentId.value =
+                response.razorpay_payment_id;
+
+            form.appendChild(paymentId);
+
+
+            const orderId =
+                document.createElement("input");
+
+            orderId.type = "hidden";
+
+            orderId.name =
+                "razorpay_order_id";
+
+            orderId.value =
+                response.razorpay_order_id;
+
+            form.appendChild(orderId);
+
+
+            const signature =
+                document.createElement("input");
+
+            signature.type = "hidden";
+
+            signature.name =
+                "razorpay_signature";
+
+            signature.value =
+                response.razorpay_signature;
+
+            form.appendChild(signature);
+
+
+            document.body.appendChild(form);
+
+            form.submit();
+
+        },
+
+        modal: {
+
+            ondismiss: function() {
+
+                console.log(
+                    "Razorpay checkout closed."
+                );
+
+            }
+
+        }
+
+    };
+
+
+    const razorpay =
+        new Razorpay(options);
+
+
+   razorpay.on(
+    "payment.failed",
+    function(response) {
+
+        const form =
+            document.createElement("form");
+
+        form.method = "POST";
+
+        form.action =
+            "{% url 'payment_failed' %}";
+
+
+        const csrf =
+            document.createElement("input");
+
+        csrf.type = "hidden";
+
+        csrf.name =
+            "csrfmiddlewaretoken";
+
+        csrf.value =
+            "{{ csrf_token }}";
+
+        form.appendChild(csrf);
+
+
+        const orderId =
+            document.createElement("input");
+
+        orderId.type = "hidden";
+
+        orderId.name = "order_id";
+
+        orderId.value =
+            "{{ order.id }}";
+
+        form.appendChild(orderId);
+
+
+        const errorMessage =
+            document.createElement("input");
+
+        errorMessage.type = "hidden";
+
+        errorMessage.name = "error_message";
+
+        errorMessage.value =
+            response.error.description ||
+            "Payment failed.";
+
+        form.appendChild(errorMessage);
+
+
+        document.body.appendChild(form);
+
+        form.submit();
+
+    }
+);
+
+
+    function openRazorpay() {
+
+        razorpay.open();
+
+    }
+
+
+    document
+        .getElementById("pay-button")
+        .addEventListener(
+            "click",
+            openRazorpay
+        );
+
+
+    // Automatically open Razorpay.
+    window.addEventListener(
+        "load",
+        function() {
+
+            setTimeout(
+                openRazorpay,
+                500
+            );
+
+        }
+    );
+
+</script>
+
+
+<style>
+
+    .payment-loading {
+
+        min-height: 70vh;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        padding: 20px;
+
+    }
+
+
+    .loading-card {
+
+        width: 100%;
+
+        max-width: 500px;
+
+        padding: 45px 30px;
+
+        background: white;
+
+        border-radius: 15px;
+
+        text-align: center;
+
+        box-shadow:
+            0 4px 18px rgba(0, 0, 0, 0.10);
+
+    }
+
+
+    .loading-card h1 {
+
+        margin: 20px 0 10px;
+
+    }
+
+
+    .loading-card p {
+
+        color: #666;
+
+        line-height: 1.5;
+
+    }
+
+
+    .order-text {
+
+        font-weight: bold;
+
+        color: #333 !important;
+
+    }
+
+
+    .loader {
+
+        display: flex;
+
+        justify-content: center;
+
+        gap: 7px;
+
+    }
+
+
+    .loader div {
+
+        width: 10px;
+
+        height: 10px;
+
+        border-radius: 50%;
+
+        background: #007bff;
+
+        animation: bounce 1s infinite alternate;
+
+    }
+
+
+    .loader div:nth-child(2) {
+
+        animation-delay: 0.2s;
+
+    }
+
+
+    .loader div:nth-child(3) {
+
+        animation-delay: 0.4s;
+
+    }
+
+
+    @keyframes bounce {
+
+        from {
+
+            transform: translateY(0);
+
+        }
+
+        to {
+
+            transform: translateY(-10px);
+
+        }
+
+    }
+
+
+    .pay-button {
+
+        width: 100%;
+
+        margin-top: 25px;
+
+        padding: 14px;
+
+        border: none;
+
+        border-radius: 8px;
+
+        background: #007bff;
+
+        color: white;
+
+        font-size: 16px;
+
+        font-weight: bold;
+
+        cursor: pointer;
+
+    }
+
+
+    .pay-button:hover {
+
+        background: #0056d6;
+
+    }
+
+</style>
+
+{% endblock %}

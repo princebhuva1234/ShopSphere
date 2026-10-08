@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Cart - ShopSphere</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        .cart-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .cart-item img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-info h2 {
+            margin: 0 0 10px;
+        }
+
+        .price {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .quantity {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-btn {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .increase-btn {
+            background-color: #007bff;
+        }
+
+        .decrease-btn {
+            background-color: #dc3545;
+        }
+
+        .quantity-number {
+            display: inline-block;
+            margin: 0 15px;
+            font-weight: bold;
+            font-size: 18px;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .summary {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: right;
+        }
+
+        .total {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .checkout-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .continue-btn {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .empty-cart {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+        }
+        
+        .subtotal {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #555;
+       }
+
+        .subtotal strong {
+            color: #222;
+            font-size: 18px;
+       }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🛒 My Cart</h1>
+
+    {% if cart_items %}
+
+        {% for item in cart_items %}
+
+            <div class="cart-item">
+
+                <!-- Product Image -->
+                {% with image=item.product.images.all.0 %}
+
+                    {% if image %}
+                        <img
+                            src="{{ image.image.url }}"
+                            alt="{{ item.product.name }}"
+                        >
+                    {% endif %}
+
+                {% endwith %}
+
+
+                <!-- Product Information -->
+                <div class="product-info">
+
+                    <h2>
+                        {{ item.product.name }}
+                    </h2>
+
+                    <p>
+                        Brand: {{ item.product.brand }}
+                    </p>
+
+                    <p class="price">
+                        ₹{{ item.product.discount_price|default:item.product.price }}
+                    </p>
+<p class="subtotal">
+    Subtotal:
+    <strong>₹{{ item.subtotal }}</strong>
+</p>
+
+                    <!-- Quantity Controls -->
+                    <div class="quantity">
+
+                        <!-- Increase Quantity -->
+                        <a
+                            href="{% url 'increase_quantity' item.id %}"
+                            class="quantity-btn increase-btn"
+                        >
+                            +
+                        </a>
+
+
+                        <!-- Current Quantity -->
+                        <span class="quantity-number">
+                            {{ item.quantity }}
+                        </span>
+
+
+                        <!-- Decrease Quantity -->
+                        <a
+                            href="{% url 'decrease_quantity' item.id %}"
+                            class="quantity-btn decrease-btn"
+                        >
+                            −
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+
+        <!-- Cart Summary -->
+        <div class="summary">
+
+            <div class="total">
+                Total: ₹{{ total }}
+            </div>
+
+          <a
+             href="{% url 'checkout' %}"
+             class="checkout-btn"
+          >
+              Proceed to Checkout
+          </a>
+
+        </div>
+
+
+        <!-- Continue Shopping -->
+        <a href="/" class="continue-btn">
+            ← Continue Shopping
+        </a>
+
+
+    {% else %}
+
+        <!-- Empty Cart -->
+        <div class="empty-cart">
+
+            <h2>Your cart is empty</h2>
+
+            <p>
+                Add some products to your cart.
+            </p>
+
+            <a href="/" class="continue-btn">
+                Continue Shopping
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

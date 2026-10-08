@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}ShopSphere{% endblock %}
+    </title>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .navbar {
+            background-color: #222;
+            padding: 15px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+        }
+
+        .nav-links a:hover {
+            background-color: #444;
+            border-radius: 5px;
+        }
+
+        .welcome {
+            color: #ddd;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- Navigation Bar -->
+
+    <nav class="navbar">
+
+        <a href="/" class="logo">
+            ShopSphere
+        </a>
+
+
+        <div class="nav-links">
+
+     {% if user.is_authenticated %}
+        
+        <span class="welcome">Hello, {{ user.username }}</span>
+
+        <a href="{% url 'cart_detail' %}">🛒 Cart</a>
+
+        <a href="{% url 'my_orders' %}">📦 My Orders</a>
+
+        <a href="{% url 'address_list' %}">📍 My Addresses</a>
+
+        <a href="{% url 'logout' %}">Logout</a>
+    
+    {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'register' %}">Register</a>
+    {% endif %}
+
+        </div>
+
+    </nav>
+
+
+    <!-- Page Content -->
+
+    <main class="content">
+
+        {% block content %}
+
+        {% endblock %}
+
+    </main>
+
+
+</body>
+
+</html>

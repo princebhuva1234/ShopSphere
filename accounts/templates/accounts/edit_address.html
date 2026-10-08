@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Edit Address - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<div class="address-form-container">
+
+    <h1>Edit Address</h1>
+
+    <form method="POST" class="address-form">
+
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input
+                type="text"
+                id="full_name"
+                name="full_name"
+                value="{{ address.full_name }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input
+                type="text"
+                id="phone"
+                name="phone"
+                value="{{ address.phone }}"
+                maxlength="15"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="address_line">Address</label>
+            <textarea
+                id="address_line"
+                name="address_line"
+                rows="3"
+                required
+            >{{ address.address_line }}</textarea>
+        </div>
+
+        <div class="form-row">
+
+            <div class="form-group">
+                <label for="city">City</label>
+                <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value="{{ address.city }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="state">State</label>
+                <input
+                    type="text"
+                    id="state"
+                    name="state"
+                    value="{{ address.state }}"
+                    required
+                >
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            <label for="pincode">Pincode</label>
+            <input
+                type="text"
+                id="pincode"
+                name="pincode"
+                value="{{ address.pincode }}"
+                maxlength="10"
+                required
+            >
+        </div>
+
+        <div class="checkbox-group">
+
+            <input
+                type="checkbox"
+                id="is_default"
+                name="is_default"
+                {% if address.is_default %}checked{% endif %}
+            >
+
+            <label for="is_default">
+                Make this my default address
+            </label>
+
+        </div>
+
+        <div class="form-actions">
+
+            <a
+                href="{% url 'address_list' %}"
+                class="back-btn"
+            >
+                ← Back
+            </a>
+
+            <button
+                type="submit"
+                class="save-btn"
+            >
+                Update Address
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+<style>
+
+    .address-form-container {
+        max-width: 700px;
+        margin: auto;
+    }
+
+    .address-form-container h1 {
+        margin-bottom: 25px;
+    }
+
+    .address-form {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 11px;
+        border: 1px solid #ccc;
+        border-radius: 7px;
+        font-size: 15px;
+        font-family: Arial, sans-serif;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 25px;
+    }
+
+    .checkbox-group input {
+        width: auto;
+    }
+
+    .checkbox-group label {
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .back-btn {
+        padding: 11px 18px;
+        background: #f1f1f1;
+        color: #333;
+        text-decoration: none;
+        border-radius: 7px;
+        font-weight: bold;
+    }
+
+    .save-btn {
+        padding: 12px 22px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 7px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    .save-btn:hover {
+        background: #0056d6;
+    }
+
+    @media (max-width: 600px) {
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .back-btn,
+        .save-btn {
+            text-align: center;
+        }
+
+    }
+
+</style>
+
+{% endblock %}

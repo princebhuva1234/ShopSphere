@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}
+My Addresses - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<div class="addresses-container">
+
+    <div class="page-header">
+        <div>
+            <h1>My Addresses</h1>
+            <p>Manage your saved delivery addresses.</p>
+        </div>
+
+         <a href="{% url 'add_address' %}" class="add-address-btn">
+            + Add Address
+         </a>
+      </div>
+
+    {% if addresses %}
+
+        <div class="address-grid">
+
+            {% for address in addresses %}
+
+                <div class="address-card">
+
+                    <div class="address-card-header">
+
+                        <h2>{{ address.full_name }}</h2>
+
+                        {% if address.is_default %}
+                            <span class="default-badge">
+                                Default
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+                    <p>
+                        {{ address.address_line }}
+                    </p>
+
+                    <p>
+                        {{ address.city }},
+                        {{ address.state }}
+                        - {{ address.pincode }}
+                    </p>
+
+                    <p>
+                        <strong>Phone:</strong>
+                        {{ address.phone }}
+                    </p>
+
+                    <div class="address-actions">
+                        <a
+                            href="{% url 'edit_address' address.id %}"
+                            class="edit-btn"
+                        >
+                             Edit
+                        </a>
+
+                     <form
+                             method="POST"
+                             action="{% url 'delete_address' address.id %}"
+                             style="display: inline;"
+                             onsubmit="return confirm('Are you sure you want to delete this address?');"
+>
+                        {% csrf_token %}
+
+                        <button type="submit" class="delete-btn">
+                             Delete
+                        </button>
+                    </form>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-addresses">
+
+            <div class="empty-icon">
+                📍
+            </div>
+
+            <h2>No Saved Addresses</h2>
+
+            <p>
+                You don't have any delivery addresses yet.
+            </p>
+
+           <a href="{% url 'add_address' %}" class="add-address-empty-btn">
+                + Add Your First Address
+           </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+<style>
+
+    .addresses-container {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    .page-header {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .page-header h1 {
+        margin: 0 0 8px;
+    }
+
+    .page-header p {
+        margin: 0;
+        color: #666;
+    }
+
+    .add-address-btn,
+    .add-address-empty-btn {
+        display: inline-block;
+        padding: 12px 20px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 7px;
+        font-weight: bold;
+    }
+
+    .add-address-btn:hover,
+    .add-address-empty-btn:hover {
+        background: #0056d6;
+    }
+
+    .address-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .address-card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .address-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .address-card-header h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .default-badge {
+        padding: 6px 10px;
+        background: #d1e7dd;
+        color: #0f5132;
+        border-radius: 15px;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .address-card p {
+        color: #555;
+        margin: 8px 0;
+        line-height: 1.5;
+    }
+
+    .address-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .edit-btn,
+    .delete-btn {
+        padding: 9px 15px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .edit-btn {
+        background: #e7f1ff;
+        color: #007bff;
+    }
+
+    .delete-btn {
+        padding: 9px 15px;
+        border: none;
+        border-radius: 6px;
+        background: #f8d7da;
+        color: #842029;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        background: #f1b0b7;
+    }
+
+    .empty-addresses {
+        background: white;
+        padding: 60px 30px;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-icon {
+        font-size: 50px;
+        margin-bottom: 15px;
+    }
+
+    .empty-addresses h2 {
+        margin-bottom: 10px;
+    }
+
+    .empty-addresses p {
+        color: #666;
+        margin-bottom: 25px;
+    }
+
+    @media (max-width: 768px) {
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .address-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+</style>
+
+{% endblock %}

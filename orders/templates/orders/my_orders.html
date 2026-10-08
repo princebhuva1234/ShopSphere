@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}
+My Orders - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<div class="orders-container">
+
+    <h1>My Orders</h1>
+
+    {% if orders %}
+
+        {% for order in orders %}
+
+            <div class="order-card">
+
+                <div class="order-header">
+
+                    <div>
+                       <h2>
+    <a href="{% url 'order_detail' order.id %}" class="order-link">
+        Order #{{ order.id }}
+    </a>
+</h2>
+                        <p>
+                            Date:
+                            {{ order.created_at|date:"d M Y, h:i A" }}
+                        </p>
+                    </div>
+
+                    <div class="order-status">
+                        {{ order.get_status_display }}
+                    </div>
+
+                </div>
+
+                <div class="order-details">
+
+                    <p>
+                        <strong>Total Amount:</strong>
+                        ₹{{ order.total_amount }}
+                    </p>
+
+                    <p>
+                        <strong>Items:</strong>
+                        {{ order.items.count }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty-orders">
+
+            <h2>No Orders Yet</h2>
+
+            <p>You haven't placed any orders yet.</p>
+
+            <a href="{% url 'product_list' %}">
+                Start Shopping
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+<style>
+
+    .orders-container {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    .orders-container h1 {
+        margin-bottom: 25px;
+    }
+
+    .order-card {
+        background: white;
+        padding: 25px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 15px;
+    }
+
+    .order-header h2 {
+        margin: 0 0 8px;
+    }
+
+    .order-header p {
+        margin: 0;
+        color: #666;
+    }
+
+    .order-status {
+        padding: 8px 15px;
+        background: #fff3cd;
+        color: #856404;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+
+    .order-details {
+        padding-top: 15px;
+    }
+
+    .order-details p {
+        margin: 8px 0;
+    }
+
+    .empty-orders {
+        background: white;
+        padding: 50px;
+        text-align: center;
+        border-radius: 10px;
+    }
+
+    .empty-orders p {
+        color: #666;
+    }
+
+    .empty-orders a {
+        display: inline-block;
+        margin-top: 15px;
+        padding: 12px 22px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 7px;
+        font-weight: bold;
+    }
+
+</style>
+
+{% endblock %}

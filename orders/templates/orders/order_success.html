@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Order Successful - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<div class="success-container">
+
+    <div class="success-box">
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+        <h1>Order Placed Successfully!</h1>
+
+        <p class="message">
+            Thank you for shopping with ShopSphere.
+        </p>
+
+        <div class="order-info">
+
+            <p>
+                <strong>Order ID:</strong>
+                #{{ order.id }}
+            </p>
+
+            <p>
+                <strong>Total Amount:</strong>
+                ₹{{ order.total_amount }}
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                {{ order.get_status_display }}
+            </p>
+
+        </div>
+
+        <a href="{% url 'product_list' %}" class="shop-btn">
+            Continue Shopping
+        </a>
+
+    </div>
+
+</div>
+
+<style>
+
+    .success-container {
+        max-width: 700px;
+        margin: 60px auto;
+        text-align: center;
+    }
+
+    .success-box {
+        background: white;
+        padding: 45px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .success-icon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 20px;
+        background: #28a745;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 42px;
+        font-weight: bold;
+    }
+
+    .success-box h1 {
+        margin-bottom: 10px;
+        color: #222;
+    }
+
+    .message {
+        color: #666;
+        font-size: 17px;
+    }
+
+    .order-info {
+        margin: 30px 0;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        text-align: left;
+    }
+
+    .order-info p {
+        margin: 10px 0;
+    }
+
+    .shop-btn {
+        display: inline-block;
+        padding: 13px 25px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 7px;
+        font-weight: bold;
+    }
+
+    .shop-btn:hover {
+        background: #0056d6;
+    }
+
+</style>
+
+{% endblock %}
