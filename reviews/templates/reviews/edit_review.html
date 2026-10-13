@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Edit Review - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .edit-review-page {
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .edit-review-container {
+        padding: 30px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .edit-review-container h1 {
+        margin-top: 0;
+        color: #222;
+    }
+
+    .edit-review-container label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .edit-review-container input,
+    .edit-review-container select,
+    .edit-review-container textarea {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 8px;
+        border: 1px solid #ddd;
+        border-radius: 7px;
+        box-sizing: border-box;
+        font: inherit;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .field-error {
+        color: #d32f2f;
+        font-size: 13px;
+    }
+
+    .save-button {
+        width: 100%;
+        padding: 13px;
+        border: none;
+        border-radius: 7px;
+        background: #2874f0;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .save-button:hover {
+        background: #1558c0;
+    }
+
+    .cancel-link {
+        display: block;
+        margin-top: 20px;
+        text-align: center;
+        color: #2874f0;
+        text-decoration: none;
+    }
+</style>
+
+<div class="edit-review-page">
+
+    <div class="edit-review-container">
+
+        <h1>✏️ Edit Your Review</h1>
+
+        <p>
+            Product: <strong>{{ product.name }}</strong>
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% for field in form %}
+
+                <div class="form-group">
+
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% for error in field.errors %}
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+            {% if form.non_field_errors %}
+                <div class="field-error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <button type="submit" class="save-button">
+                Save Changes
+            </button>
+
+        </form>
+
+        <a
+            href="{% url 'product_detail' product.slug %}"
+            class="cancel-link"
+        >
+            ← Back to Product
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

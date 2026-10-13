@@ -1,173 +1,593 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'base.html' %}
 
-    <title>{{ product.name }} - ShopSphere</title>
+{% block title %}
+    {{ product.name }} - ShopSphere
+{% endblock %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #f5f5f5;
+{% block content %}
+
+<style>
+    /* ========================================
+       MAIN CONTAINER
+    ======================================== */
+
+    .product-detail-page {
+        max-width: 1250px;
+        margin: 0 auto;
+        padding: 35px 20px;
+        color: #222;
+    }
+
+    .breadcrumb {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 25px;
+        color: #777;
+        font-size: 14px;
+    }
+
+    .breadcrumb a {
+        color: #2874f0;
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+
+    /* ========================================
+       PRODUCT LAYOUT
+    ======================================== */
+
+    .product-detail-container {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 45px;
+        align-items: start;
+    }
+
+
+    /* ========================================
+       PRODUCT IMAGE GALLERY
+    ======================================== */
+
+    .product-gallery {
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 12px;
+    }
+
+    .main-image-container {
+        width: 100%;
+        height: 460px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #f8f8f8;
+    }
+
+    .main-product-image {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        object-fit: contain;
+        display: block;
+    }
+
+    .image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f4f4f4;
+        color: #777;
+        text-align: center;
+    }
+
+    .placeholder-icon {
+        font-size: 60px;
+        margin-bottom: 15px;
+    }
+
+    .product-thumbnails {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 15px;
+        border-top: 1px solid #eee;
+    }
+
+    .product-thumbnail {
+        width: 75px;
+        height: 75px;
+        padding: 4px;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 7px;
+        object-fit: contain;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .product-thumbnail:hover,
+    .product-thumbnail:focus {
+        border-color: #2874f0;
+        outline: none;
+    }
+
+
+    /* ========================================
+       PRODUCT INFORMATION
+    ======================================== */
+
+    .product-information {
+        padding: 5px 0;
+    }
+
+    .product-category {
+        margin-bottom: 12px;
+        color: #2874f0;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .product-title {
+        margin: 0 0 12px;
+        font-size: 32px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .product-brand {
+        margin-bottom: 15px;
+        color: #777;
+        font-size: 15px;
+    }
+
+    .product-brand strong {
+        color: #333;
+    }
+
+    .product-description {
+        margin: 22px 0;
+        color: #555;
+        font-size: 15px;
+        line-height: 1.9;
+        overflow-wrap: anywhere;
+    }
+
+    .product-description h3 {
+        margin-bottom: 10px;
+        color: #222;
+        font-size: 19px;
+    }
+
+
+    /* ========================================
+       PRODUCT RATING
+    ======================================== */
+
+    .product-rating-summary {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0 18px;
+    }
+
+    .rating-stars {
+        color: #f5a623;
+        font-size: 22px;
+        letter-spacing: 2px;
+    }
+
+    .rating-value {
+        color: #222;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .rating-count {
+        color: #777;
+        font-size: 13px;
+    }
+
+    .no-rating {
+        color: #777;
+        font-size: 14px;
+    }
+
+
+    /* ========================================
+       PRICE AND DISCOUNT
+    ======================================== */
+
+    .product-pricing {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 22px 0;
+    }
+
+    .current-price {
+        color: #222;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .original-price {
+        color: #888;
+        font-size: 19px;
+        text-decoration: line-through;
+    }
+
+    .discount-label {
+        padding: 6px 9px;
+        border-radius: 5px;
+        background: #e3f8e8;
+        color: #168039;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+
+    /* ========================================
+       STOCK STATUS
+    ======================================== */
+
+    .stock-information {
+        margin: 20px 0;
+    }
+
+    .stock-status {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .stock-available {
+        background: #e3f8e8;
+        color: #18753b;
+    }
+
+    .stock-low {
+        background: #fff0d9;
+        color: #9a5b00;
+    }
+
+    .stock-unavailable {
+        background: #ffe3e3;
+        color: #c62828;
+    }
+
+
+    /* ========================================
+       PRODUCT BUTTONS
+    ======================================== */
+
+    .product-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .action-button {
+        display: block;
+        width: 100%;
+        padding: 14px 18px;
+        box-sizing: border-box;
+        border: none;
+        border-radius: 7px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .add-to-cart-button {
+        background: #2874f0;
+        color: #fff;
+    }
+
+    .add-to-cart-button:hover {
+        background: #1558c0;
+    }
+
+    .wishlist-button {
+        border: 1px solid #e53955;
+        background: #fff;
+        color: #e53955;
+    }
+
+    .wishlist-button:hover {
+        background: #fff0f2;
+    }
+
+    .disabled-button {
+        background: #bbb;
+        color: #fff;
+        cursor: not-allowed;
+    }
+
+
+    /* ========================================
+       ADDITIONAL INFORMATION
+    ======================================== */
+
+    .product-extra-information {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .product-extra-information p {
+        margin: 12px 0;
+        color: #555;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }
+
+
+    /* ========================================
+       REVIEWS SECTION
+    ======================================== */
+
+    .reviews-section {
+        margin-top: 60px;
+        padding-top: 30px;
+        border-top: 1px solid #e5e5e5;
+    }
+
+    .reviews-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .reviews-header h2 {
+        margin: 0;
+        font-size: 27px;
+    }
+
+    .write-review-button {
+        display: inline-block;
+        padding: 12px 18px;
+        border-radius: 7px;
+        background: #2874f0;
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+        transition: background 0.2s;
+    }
+
+    .write-review-button:hover {
+        background: #1558c0;
+    }
+
+    .review-card {
+        padding: 22px;
+        margin-bottom: 18px;
+        border: 1px solid #e5e5e5;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    .review-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .review-title {
+        margin: 0;
+        color: #222;
+        font-size: 18px;
+        overflow-wrap: anywhere;
+    }
+
+    .review-stars {
+        color: #f5a623;
+        font-size: 20px;
+        letter-spacing: 2px;
+        white-space: nowrap;
+    }
+
+    .review-comment {
+        color: #555;
+        font-size: 14px;
+        line-height: 1.9;
+        overflow-wrap: anywhere;
+    }
+
+    .review-meta {
+        margin-top: 15px;
+        padding-top: 12px;
+        border-top: 1px solid #eee;
+        color: #777;
+        font-size: 13px;
+    }
+
+    .no-reviews {
+        padding: 40px 20px;
+        border-radius: 10px;
+        background: #f8f9fa;
+        color: #777;
+        text-align: center;
+    }
+
+    .no-reviews h3 {
+        margin-top: 0;
+        color: #333;
+    }
+
+
+    /* ========================================
+       RESPONSIVE DESIGN
+    ======================================== */
+
+    @media (max-width: 800px) {
+        .product-detail-container {
+            grid-template-columns: 1fr;
+            gap: 30px;
         }
 
-        header {
-            background-color: #222;
-            color: white;
-            padding: 20px;
-            text-align: center;
+        .main-image-container {
+            height: 350px;
         }
 
-        .container {
-            width: 90%;
-            max-width: 1100px;
-            margin: 40px auto;
+        .product-title {
+            font-size: 27px;
         }
 
-        .product-detail {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            display: flex;
-            gap: 40px;
+        .current-price {
+            font-size: 26px;
         }
 
-        .product-images {
-            width: 50%;
+        .reviews-header h2 {
+            font-size: 23px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .product-detail-page {
+            padding: 20px 12px;
         }
 
-        .product-image {
-            width: 100%;
-            max-height: 450px;
-            object-fit: contain;
-            border-radius: 10px;
+        .main-image-container {
+            height: 280px;
         }
 
-        .product-info {
-            width: 50%;
+        .product-title {
+            font-size: 24px;
         }
 
-        .product-name {
-            font-size: 32px;
-            margin-top: 0;
+        .current-price {
+            font-size: 23px;
         }
 
-        .brand,
-        .category {
-            color: #666;
-            font-size: 18px;
+        .review-card {
+            padding: 15px;
         }
+    }
+</style>
 
-        .description {
-            line-height: 1.6;
-            margin-top: 25px;
-        }
 
-        .discount-price {
-            color: green;
-            font-size: 30px;
-            font-weight: bold;
-        }
+<div class="product-detail-page">
 
-        .old-price {
-            color: #888;
-            text-decoration: line-through;
-            font-size: 20px;
-            margin-left: 10px;
-        }
+    <!-- =====================================
+         BREADCRUMB
+    ====================================== -->
 
-        .price {
-            font-size: 30px;
-            font-weight: bold;
-        }
+    <div class="breadcrumb">
 
-        .add-cart {
-            margin-top: 30px;
-            padding: 15px 30px;
-            background-color: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 18px;
-            cursor: pointer;
-        }
+        <a href="{% url 'product_list' %}">
+            Products
+        </a>
 
-        .back {
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #333;
-        }
-        .add-cart-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+        <span>/</span>
 
-    margin-top: 20px;
+        {% if product.category %}
 
-    padding: 14px 28px;
+            <span>{{ product.category.name }}</span>
+            <span>/</span>
 
-    background: linear-gradient(135deg, #007bff, #0056d6);
+        {% endif %}
 
-    color: white;
+        <span>{{ product.name }}</span>
 
-    font-size: 17px;
-    font-weight: bold;
+    </div>
 
-    text-decoration: none;
 
-    border-radius: 8px;
+    <!-- =====================================
+         PRODUCT DETAILS
+    ====================================== -->
 
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+    <div class="product-detail-container">
 
-    transition: all 0.2s ease;
-}
 
-.add-cart-btn:hover {
-    background: linear-gradient(135deg, #0056d6, #0041a8);
+        <!-- PRODUCT IMAGE GALLERY -->
 
-    transform: translateY(-2px);
+        <div class="product-gallery">
 
-    box-shadow: 0 6px 14px rgba(0, 123, 255, 0.4);
-}
+            <div class="main-image-container">
 
-.add-cart-btn:active {
-    transform: translateY(0);
+                {% with product_image=product.images.first %}
 
-    box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
-}
-    </style>
-</head>
+                    {% if product_image %}
 
-<body>
+                        <img
+                            id="mainProductImage"
+                            src="{{ product_image.image.url }}"
+                            alt="{{ product.name }}"
+                            class="main-product-image"
+                        >
 
-<header>
-    <h1>ShopSphere</h1>
-</header>
+                    {% else %}
 
-<div class="container">
+                        <div class="image-placeholder">
 
-    <a href="/" class="back">← Back to Products</a>
+                            <span class="placeholder-icon">
+                                📦
+                            </span>
 
-    <div class="product-detail">
+                            <span>
+                                No image available for this product
+                            </span>
 
-        <div class="product-images">
+                        </div>
 
-            {% with primary_image=product.images.all.0 %}
+                    {% endif %}
 
-                {% if primary_image %}
+                {% endwith %}
 
-                    <img
-                        src="{{ primary_image.image.url }}"
-                        alt="{{ product.name }}"
-                        class="product-image"
-                    >
+            </div>
 
-                {% else %}
 
-                    <p>No image available.</p>
+            <!-- ADDITIONAL PRODUCT IMAGES -->
+
+            {% with images=product.images.all %}
+
+                {% if images %}
+
+                    <div class="product-thumbnails">
+
+                        {% for image in images %}
+
+                            <img
+                                src="{{ image.image.url }}"
+                                alt="{{ product.name }} image {{ forloop.counter }}"
+                                class="product-thumbnail"
+                                loading="lazy"
+                                tabindex="0"
+                                onclick="changeProductImage(this)"
+                                onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); changeProductImage(this); }"
+                            >
+
+                        {% endfor %}
+
+                    </div>
 
                 {% endif %}
 
@@ -175,53 +595,501 @@
 
         </div>
 
-        <div class="product-info">
 
-            <h1 class="product-name">
-                {{ product.name }}
-            </h1>
+        <!-- PRODUCT INFORMATION -->
 
-            <p class="brand">
-                <strong>Brand:</strong> {{ product.brand }}
-            </p>
+        <div class="product-information">
 
-            <p class="category">
-                <strong>Category:</strong> {{ product.category.name }}
-            </p>
 
-            {% if product.discount_price %}
+            <!-- CATEGORY -->
 
-                <span class="discount-price">
-                    ₹{{ product.discount_price }}
-                </span>
+            {% if product.category %}
 
-                <span class="old-price">
-                    ₹{{ product.price }}
-                </span>
-
-            {% else %}
-
-                <div class="price">
-                    ₹{{ product.price }}
+                <div class="product-category">
+                    {{ product.category.name }}
                 </div>
 
             {% endif %}
 
-            <p class="description">
-                {{ product.description }}
-            </p>
-<a
-    href="{% url 'add_to_cart' product.id %}"
-    class="add-cart-btn"
->
-    🛒 Add to Cart
-</a>
+
+            <!-- PRODUCT NAME -->
+
+            <h1 class="product-title">
+                {{ product.name }}
+            </h1>
+
+
+            <!-- AVERAGE PRODUCT RATING -->
+
+            <div class="product-rating-summary">
+
+                {% if product.review_count > 0 %}
+
+                    <span class="rating-stars">★</span>
+
+                    <span class="rating-value">
+                        {{ product.average_rating|floatformat:1 }} / 5
+                    </span>
+
+                    <span class="rating-count">
+                        ({{ product.review_count }}
+                        {% if product.review_count == 1 %}
+                            review
+                        {% else %}
+                            reviews
+                        {% endif %})
+                    </span>
+
+                {% else %}
+
+                    <span class="no-rating">
+                        No ratings yet
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- BRAND -->
+
+            {% if product.brand %}
+
+                <div class="product-brand">
+                    Brand:
+                    <strong>{{ product.brand }}</strong>
+                </div>
+
+            {% endif %}
+
+
+            <!-- PRODUCT PRICE -->
+
+            <div class="product-pricing">
+
+                {% if product.discount_price %}
+
+                    <span class="current-price">
+                        ₹{{ product.discount_price|floatformat:2 }}
+                    </span>
+
+                    <span class="original-price">
+                        ₹{{ product.price|floatformat:2 }}
+                    </span>
+
+                    <span class="discount-label">
+                        Special Price
+                    </span>
+
+                {% else %}
+
+                    <span class="current-price">
+                        ₹{{ product.price|floatformat:2 }}
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- STOCK STATUS -->
+
+            <div class="stock-information">
+
+                {% if product.stock_quantity <= 0 %}
+
+                    <span class="stock-status stock-unavailable">
+                        🚫 Out of Stock
+                    </span>
+
+                {% elif product.stock_quantity <= 5 %}
+
+                    <span class="stock-status stock-low">
+                        ⚠️ Only {{ product.stock_quantity }} left in stock
+                    </span>
+
+                {% else %}
+
+                    <span class="stock-status stock-available">
+                        ✅ In Stock
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- PRODUCT DESCRIPTION -->
+
+            <div class="product-description">
+
+                <h3>Product Description</h3>
+
+                {% if product.description %}
+
+                    {{ product.description|linebreaksbr }}
+
+                {% else %}
+
+                    <p>
+                        No description is available for this product.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =====================================
+                 PRODUCT ACTION BUTTONS
+            ====================================== -->
+
+            <div class="product-actions">
+
+
+                <!-- ADD TO CART -->
+
+                {% if product.stock_quantity > 0 %}
+
+                    {% if user.is_authenticated %}
+
+                        <form
+                            method="POST"
+                            action="{% url 'add_to_cart' product.id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="action-button add-to-cart-button"
+                            >
+                                🛒 Add to Cart
+                            </button>
+
+                        </form>
+
+                    {% else %}
+
+                        <a
+                            href="{% url 'login' %}?next={{ request.path|urlencode }}"
+                            class="action-button add-to-cart-button"
+                        >
+                            Login to Add to Cart
+                        </a>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <button
+                        type="button"
+                        class="action-button disabled-button"
+                        disabled
+                    >
+                        🚫 Out of Stock
+                    </button>
+
+                {% endif %}
+
+
+                <!-- ADD TO WISHLIST -->
+
+                {% if user.is_authenticated %}
+
+                    <form
+                        method="POST"
+                        action="{% url 'add_to_wishlist' product.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="action-button wishlist-button"
+                        >
+                            ❤️ Add to Wishlist
+                        </button>
+
+                    </form>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'login' %}?next={{ request.path|urlencode }}"
+                        class="action-button wishlist-button"
+                    >
+                        ❤️ Login to Add to Wishlist
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ADDITIONAL PRODUCT INFORMATION -->
+
+            <div class="product-extra-information">
+
+                {% if product.category %}
+
+                    <p>
+                        <strong>Category:</strong>
+                        {{ product.category.name }}
+                    </p>
+
+                {% endif %}
+
+                {% if product.brand %}
+
+                    <p>
+                        <strong>Brand:</strong>
+                        {{ product.brand }}
+                    </p>
+
+                {% endif %}
+
+                <p>
+                    <strong>Availability:</strong>
+
+                    {% if product.stock_quantity > 0 %}
+                        Available
+                    {% else %}
+                        Currently unavailable
+                    {% endif %}
+
+                </p>
+
+                <p>
+                    <strong>Product Code:</strong>
+                    {{ product.slug }}
+                </p>
+
+            </div>
 
         </div>
 
     </div>
 
+
+    <!-- =====================================
+         CUSTOMER REVIEWS
+    ====================================== -->
+
+    <section class="reviews-section">
+
+
+        <!-- REVIEW HEADING AND BUTTON -->
+
+        <div class="reviews-header">
+
+            <h2>
+                ⭐ Customer Reviews
+                ({{ product.review_count }})
+            </h2>
+
+
+            {% if user.is_authenticated and user.role == 'CUSTOMER' %}
+
+                <a
+                    href="{% url 'add_review' product.slug %}"
+                    class="write-review-button"
+                >
+                    ✍️ Write a Review
+                </a>
+
+            {% elif not user.is_authenticated %}
+
+                <a
+                    href="{% url 'login' %}?next={{ request.path|urlencode }}"
+                    class="write-review-button"
+                >
+                    Login to Review
+                </a>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- REVIEW SUMMARY -->
+
+        {% if product.review_count > 0 %}
+
+            <div class="product-rating-summary">
+
+                <span class="rating-stars">
+                    ★
+                </span>
+
+                <span class="rating-value">
+                    {{ product.average_rating|floatformat:1 }} out of 5
+                </span>
+
+                <span class="rating-count">
+                    Based on {{ product.review_count }} customer
+                    {% if product.review_count == 1 %}
+                        review
+                    {% else %}
+                        reviews
+                    {% endif %}
+                </span>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- DISPLAY CUSTOMER REVIEWS -->
+
+        {% for review in product.reviews.all %}
+
+            <article class="review-card">
+
+                <div class="review-card-header">
+
+                    <h3 class="review-title">
+                        {{ review.title }}
+                    </h3>
+
+                    <!-- Individual Review Rating -->
+
+                    <div
+                        class="review-stars"
+                        aria-label="{{ review.rating }} out of 5 stars"
+                    >
+
+                        {% for star in "12345" %}
+
+                            {% if forloop.counter <= review.rating %}
+
+                                ★
+
+                            {% else %}
+
+                                ☆
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- REVIEW COMMENT -->
+
+                <div class="review-comment">
+                    {{ review.comment|linebreaksbr }}
+                </div>
+
+
+                <!-- REVIEW AUTHOR AND DATE -->
+
+                <div class="review-meta">
+
+                    Reviewed by
+                    <strong>
+                        {{ review.user.username }}
+                    </strong>
+
+                    &nbsp;|&nbsp;
+
+                    {{ review.created_at|date:"d M Y" }}
+
+                </div>
+
+                                                            
+                {% if user.is_authenticated and user == review.user %}
+
+    <div style="
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-top: 15px;
+    ">
+
+        <a
+            href="{% url 'edit_review' review.id %}"
+            style="
+                padding: 8px 14px;
+                color: white;
+                background: #2874f0;
+                border-radius: 5px;
+                text-decoration: none;
+                font-size: 13px;
+            "
+        >
+            ✏️ Edit Review
+        </a>
+
+        <form
+            method="POST"
+            action="{% url 'delete_review' review.id %}"
+            onsubmit="return confirm('Are you sure you want to delete this review?');"
+        >
+
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                style="
+                    padding: 8px 14px;
+                    color: white;
+                    background: #dc3545;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 13px;
+                "
+            >
+                🗑️ Delete Review
+            </button>
+
+        </form>
+
+    </div>
+
+{% endif %}
+
+
+
+
+
+            </article>
+
+        {% empty %}
+
+            <div class="no-reviews">
+
+                <h3>No Reviews Yet</h3>
+
+                <p>
+                    Be the first to share your experience with this product!
+                </p>
+
+            </div>
+
+        {% endfor %}
+
+    </section>
+
 </div>
 
-</body>
-</html>
+
+<!-- =====================================
+     PRODUCT IMAGE GALLERY JAVASCRIPT
+====================================== -->
+
+<script>
+    function changeProductImage(thumbnail) {
+        const mainImage = document.getElementById("mainProductImage");
+
+        if (mainImage && thumbnail && thumbnail.src) {
+            mainImage.src = thumbnail.src;
+        }
+    }
+</script>
+
+{% endblock %}

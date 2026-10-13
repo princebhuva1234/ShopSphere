@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Request a Return - ShopSphere{% endblock %}
+
+{% block content %}
+
+<div style="max-width:700px;margin:40px auto;padding:25px;">
+
+    <h1>Request a Return</h1>
+
+    <p>Order #{{ order.id }}</p>
+
+    <p>
+        Order total:
+        <strong>₹{{ order.total_amount|floatformat:2 }}</strong>
+    </p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding:12px;margin:12px 0;border-radius:6px;background:#f3f4f6;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div style="margin-bottom:20px;">
+
+            <label for="reason">
+                <strong>Reason for return</strong>
+            </label>
+
+            <select
+                id="reason"
+                name="reason"
+                required
+                style="display:block;width:100%;padding:12px;margin-top:8px;"
+            >
+
+                <option value="">Select a reason</option>
+
+                {% for value, label in return_reasons %}
+                    <option value="{{ value }}">
+                        {{ label }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+        <div style="margin-bottom:20px;">
+
+            <label for="description">
+                <strong>Additional details</strong>
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                rows="5"
+                maxlength="3000"
+                placeholder="Describe the problem with your order..."
+                style="display:block;width:100%;padding:12px;margin-top:8px;box-sizing:border-box;"
+            ></textarea>
+
+        </div>
+
+        <button
+            type="submit"
+            style="background:#2563eb;color:white;padding:12px 20px;border:0;border-radius:6px;cursor:pointer;"
+        >
+            Submit Return Request
+        </button>
+
+        <a
+            href="{% url 'order_detail' order.id %}"
+            style="margin-left:12px;"
+        >
+            Back to Order
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

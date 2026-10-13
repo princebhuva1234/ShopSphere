@@ -38,6 +38,12 @@ urlpatterns = [
         'payments/',
         include('payments.urls')
     ),
+
+    path('wishlist/', include('wishlist.urls')),
+
+    path('reviews/', include('reviews.urls')),
+
+    path('returns/', include('returns.urls')),
 ]
 
 

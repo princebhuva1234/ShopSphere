@@ -57,6 +57,7 @@ class OrderAdmin(admin.ModelAdmin):
         'user',
         'total_amount',
         'status',
+        'payment_status',
         'created_at',
     )
 
@@ -77,9 +78,29 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = (
         'created_at',
         'updated_at',
+        'payment_status',
+    )
+
+    fields = (
+        'user',
+        'total_amount',
+        'status',
+        'payment_status',
+        'created_at',
+        'updated_at',
     )
 
     inlines = [
         OrderItemInline,
         OrderAddressInline,
     ]
+
+    def payment_status(self, obj):
+
+        if hasattr(obj, 'payment') and obj.payment:
+
+            return obj.payment.get_status_display()
+
+        return 'No Payment'
+
+    payment_status.short_description = 'Payment Status'

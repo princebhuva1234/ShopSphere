@@ -1,0 +1,1484 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Seller Dashboard - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<div class="seller-dashboard">
+
+    <!-- =====================================================
+         DASHBOARD HEADER
+    ====================================================== -->
+
+    <div class="dashboard-header">
+
+        <div>
+            <h1>Seller Dashboard</h1>
+            <p>Manage your products, stock and customer orders.</p>
+        </div>
+
+        <div class="seller-badge">
+            🏪 Seller Account
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INVENTORY MANAGEMENT
+    ====================================================== -->
+
+    <section class="inventory-section">
+
+        <div class="section-header">
+
+            <div>
+                <h2>📦 Inventory Management</h2>
+                <p>Manage your products, prices and stock.</p>
+            </div>
+
+            <div class="inventory-header-actions">
+
+                <span class="product-count">
+                    {{ seller_products|length }} Products
+                </span>
+
+                <a
+                    href="{% url 'seller_add_product' %}"
+                    class="add-product-button"
+                >
+                    + Add New Product
+                </a>
+
+            </div>
+
+        </div>
+
+
+        {% if seller_products %}
+
+            <div class="inventory-list">
+
+                {% for product in seller_products %}
+
+                    <div class="inventory-card">
+
+                        <!-- =====================================
+                             PRODUCT IMAGE
+                        ====================================== -->
+
+                        <div class="inventory-image">
+
+                            {% with image=product.images.all.0 %}
+
+                                {% if image %}
+
+                                    <img
+                                        src="{{ image.image.url }}"
+                                        alt="{{ product.name }}"
+                                    >
+
+                                {% else %}
+
+                                    <div class="no-image">
+                                        📦
+                                    </div>
+
+                                {% endif %}
+
+                            {% endwith %}
+
+                        </div>
+
+
+                        <!-- =====================================
+                             PRODUCT INFORMATION
+                        ====================================== -->
+
+                        <div class="inventory-info">
+
+                            <h3>{{ product.name }}</h3>
+
+                            <p>
+                                Brand:
+                                {{ product.brand|default:"Not specified" }}
+                            </p>
+
+                            <p>
+                                Category:
+                                {{ product.category.name }}
+                            </p>
+
+
+                            <!-- PRICE -->
+
+                            <div class="inventory-price">
+
+                                {% if product.discount_price %}
+
+                                    <strong>
+                                        ₹{{ product.discount_price }}
+                                    </strong>
+
+                                    <del>
+                                        ₹{{ product.price }}
+                                    </del>
+
+                                {% else %}
+
+                                    <strong>
+                                        ₹{{ product.price }}
+                                    </strong>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- ACTIVE STATUS -->
+
+                            {% if product.is_active %}
+
+                                <span class="product-status active">
+                                    Active
+                                </span>
+
+                            {% else %}
+
+                                <span class="product-status inactive">
+                                    Inactive
+                                </span>
+
+                            {% endif %}
+
+
+                            <!-- CURRENT STOCK -->
+
+                            {% if product.stock_quantity == 0 %}
+
+                                <p class="stock-status out-of-stock">
+                                    Out of stock
+                                </p>
+
+                            {% elif product.stock_quantity <= 5 %}
+
+                                <p class="stock-status low-stock">
+                                    Only {{ product.stock_quantity }} left
+                                </p>
+
+                            {% else %}
+
+                                <p class="stock-status in-stock">
+                                    In stock: {{ product.stock_quantity }}
+                                </p>
+
+                            {% endif %}
+
+
+                            <!-- =================================
+                                 EDIT PRODUCT BUTTON
+                            ================================== -->
+
+                            <div class="product-actions">
+
+                                <a
+                                    href="{% url 'seller_edit_product' product.id %}"
+                                    class="edit-product-button"
+                                >
+                                    ✏️ Edit Product
+                                </a>
+
+
+                                <!-- =================================
+                                     ACTIVATE / DEACTIVATE
+                                ================================== -->
+
+                                <form
+                                    method="POST"
+                                    action="{% url 'seller_toggle_product' product.id %}"
+                                    onsubmit="return confirm('{% if product.is_active %}Deactivate{% else %}Activate{% endif %} {{ product.name|escapejs }}?');"
+                                >
+
+                                    {% csrf_token %}
+
+                                    {% if product.is_active %}
+
+                                        <button
+                                            type="submit"
+                                            class="deactivate-product-button"
+                                        >
+                                            Deactivate
+                                        </button>
+
+                                    {% else %}
+
+                                        <button
+                                            type="submit"
+                                            class="activate-product-button"
+                                        >
+                                            Activate
+                                        </button>
+
+                                    {% endif %}
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =====================================
+                             UPDATE STOCK
+                        ====================================== -->
+
+                        <div class="stock-update">
+
+                            <h4>Update Stock</h4>
+
+                            <form
+                                method="POST"
+                                class="stock-form"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="action"
+                                    value="update_stock"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="product_id"
+                                    value="{{ product.id }}"
+                                >
+
+                                <label for="stock-{{ product.id }}">
+                                    Stock Quantity
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="stock-{{ product.id }}"
+                                    name="stock_quantity"
+                                    value="{{ product.stock_quantity }}"
+                                    min="0"
+                                    step="1"
+                                    required
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="update-stock-button"
+                                >
+                                    Save Stock
+                                </button>
+
+                            </form>
+
+                            <!-- VIEW PRODUCT -->
+
+                            {% if product.is_active %}
+
+                                <a
+                                    href="{% url 'product_detail' product.slug %}"
+                                    class="view-product-button"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+                                    View in Store ↗
+                                </a>
+
+                            {% else %}
+
+                                <span class="inactive-note">
+                                    Hidden from customer store
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+        {% else %}
+
+            <!-- =============================================
+                 EMPTY INVENTORY
+            ============================================== -->
+
+            <div class="empty-inventory">
+
+                <div class="empty-icon">
+                    📦
+                </div>
+
+                <h3>No Products Yet</h3>
+
+                <p>
+                    Add your first product to start selling on ShopSphere.
+                </p>
+
+                <a
+                    href="{% url 'seller_add_product' %}"
+                    class="add-product-button empty-add-button"
+                >
+                    + Add Your First Product
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =====================================================
+         CUSTOMER ORDERS
+    ====================================================== -->
+
+    <section class="orders-section">
+
+        <div class="section-header">
+
+            <div>
+                <h2>🛍️ Customer Orders</h2>
+                <p>Manage orders containing your products.</p>
+            </div>
+
+        </div>
+
+
+        {% if orders %}
+
+            <div class="orders-list">
+
+                {% for order in orders %}
+
+                    <div class="order-card">
+
+                        <!-- =====================================
+                             ORDER HEADER
+                        ====================================== -->
+
+                        <div class="order-header">
+
+                            <div>
+
+                                <h3>Order #{{ order.id }}</h3>
+
+                                <p>
+                                    {{ order.created_at|date:"d M Y, h:i A" }}
+                                </p>
+
+                            </div>
+
+                            <span class="status-badge status-{{ order.status|lower }}">
+                                {{ order.get_status_display }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- =====================================
+                             PAYMENT
+                        ====================================== -->
+
+                        {% if order.payment %}
+
+                            <div class="payment-summary">
+
+                                <span>
+                                    Payment Status
+                                </span>
+
+                                <strong class="payment-{{ order.payment.status|lower }}">
+                                    {{ order.payment.get_status_display }}
+                                </strong>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- =====================================
+                             ORDERED PRODUCTS
+                        ====================================== -->
+
+                        <div class="ordered-products">
+
+                            <h4>Your Products in This Order</h4>
+
+                            {% for item in order.items.all %}
+
+                                {% if item.product.seller_id == request.user.id %}
+
+                                    <div class="ordered-product">
+
+                                        <!-- PRODUCT IMAGE -->
+
+                                        <div class="ordered-product-image">
+
+                                            {% with image=item.product.images.all.0 %}
+
+                                                {% if image %}
+
+                                                    <img
+                                                        src="{{ image.image.url }}"
+                                                        alt="{{ item.product.name }}"
+                                                    >
+
+                                                {% else %}
+
+                                                    <span>📦</span>
+
+                                                {% endif %}
+
+                                            {% endwith %}
+
+                                        </div>
+
+
+                                        <!-- PRODUCT DETAILS -->
+
+                                        <div class="ordered-product-info">
+
+                                            <h5>
+                                                {{ item.product.name }}
+                                            </h5>
+
+                                            <p>
+                                                Quantity:
+                                                <strong>
+                                                    {{ item.quantity }}
+                                                </strong>
+                                            </p>
+
+                                            <p>
+                                                Unit Price:
+                                                <strong>
+                                                    ₹{{ item.price }}
+                                                </strong>
+                                            </p>
+
+                                        </div>
+
+
+                                        <!-- SUBTOTAL -->
+
+                                        <div class="item-subtotal">
+                                            ₹{{ item.subtotal }}
+                                        </div>
+
+                                    </div>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- =====================================
+                             ORDER TOTAL
+                        ====================================== -->
+
+                        <div class="order-total">
+
+                            <span>
+                                Customer Order Total
+                            </span>
+
+                            <strong>
+                                ₹{{ order.total_amount }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- =====================================
+                             STATUS MANAGEMENT
+                        ====================================== -->
+
+                        <div class="status-management">
+
+                            <div class="status-description">
+
+                                <h4>
+                                    Update Order Status
+                                </h4>
+
+                                <p>
+                                    Move the order to the next delivery stage.
+                                </p>
+
+                            </div>
+
+
+                            {% if order.can_update_status %}
+
+
+                                {% if order.status == 'CONFIRMED' %}
+
+                                    <form method="POST" class="status-form">
+
+                                        {% csrf_token %}
+
+                                        <input
+                                            type="hidden"
+                                            name="order_id"
+                                            value="{{ order.id }}"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="status"
+                                            value="PROCESSING"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="status-button"
+                                        >
+                                            Start Processing
+                                        </button>
+
+                                    </form>
+
+
+                                {% elif order.status == 'PROCESSING' %}
+
+                                    <form method="POST" class="status-form">
+
+                                        {% csrf_token %}
+
+                                        <input
+                                            type="hidden"
+                                            name="order_id"
+                                            value="{{ order.id }}"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="status"
+                                            value="SHIPPED"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="status-button"
+                                        >
+                                            Mark as Shipped
+                                        </button>
+
+                                    </form>
+
+
+                                {% elif order.status == 'SHIPPED' %}
+
+                                    <form method="POST" class="status-form">
+
+                                        {% csrf_token %}
+
+                                        <input
+                                            type="hidden"
+                                            name="order_id"
+                                            value="{{ order.id }}"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="status"
+                                            value="DELIVERED"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="status-button"
+                                        >
+                                            Mark as Delivered
+                                        </button>
+
+                                    </form>
+
+
+                                {% elif order.status == 'DELIVERED' %}
+
+                                    <span class="completed-label">
+                                        ✓ Order Delivered
+                                    </span>
+
+
+                                {% elif order.status == 'PENDING' %}
+
+                                    <span class="waiting-label">
+                                        Waiting for payment confirmation
+                                    </span>
+
+
+                                {% elif order.status == 'CANCELLED' %}
+
+                                    <span class="cancelled-label">
+                                        Order Cancelled
+                                    </span>
+
+                                {% endif %}
+
+
+                            {% else %}
+
+                                <div class="mixed-order-warning">
+
+                                    ⚠ This order contains products from
+                                    another seller. The overall order
+                                    status cannot be changed here.
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- =====================================
+                             VIEW ORDER
+                        ====================================== -->
+
+                        <div class="order-footer">
+
+                            <a
+                                href="{% url 'order_detail' order.id %}"
+                                class="view-order-button"
+                            >
+                                View Full Order →
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+        {% else %}
+
+            <!-- EMPTY ORDERS -->
+
+            <div class="empty-orders">
+
+                <div class="empty-icon">
+                    🛍️
+                </div>
+
+                <h3>No Orders Yet</h3>
+
+                <p>
+                    Orders containing your products will appear here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+
+<!-- =========================================================
+     STYLES
+========================================================== -->
+
+<style>
+
+    /* =====================================================
+       MAIN DASHBOARD
+    ===================================================== */
+
+    .seller-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 25px 20px 60px;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+
+    .dashboard-header h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+    }
+
+    .dashboard-header p,
+    .section-header p {
+        margin: 0;
+        color: #777;
+    }
+
+    .seller-badge {
+        padding: 10px 16px;
+        border-radius: 20px;
+        background: #e9f2ff;
+        color: #0056b3;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       SECTION HEADER
+    ===================================================== */
+
+    .inventory-section,
+    .orders-section {
+        margin-bottom: 40px;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+        margin: 0 0 7px;
+        font-size: 23px;
+    }
+
+    .inventory-header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .product-count {
+        background: #e9f2ff;
+        color: #0056b3;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       ADD PRODUCT BUTTON
+    ===================================================== */
+
+    .add-product-button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 7px;
+        padding: 11px 16px;
+        background: #198754;
+        color: white;
+        border: none;
+        border-radius: 7px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.2s ease;
+    }
+
+    .add-product-button:hover {
+        background: #146c43;
+    }
+
+    .empty-add-button {
+        margin-top: 22px;
+    }
+
+
+    /* =====================================================
+       INVENTORY
+    ===================================================== */
+
+    .inventory-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .inventory-card {
+        background: white;
+        border-radius: 12px;
+        padding: 22px;
+        display: grid;
+        grid-template-columns: 115px minmax(180px, 1fr) 210px;
+        align-items: center;
+        gap: 22px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .inventory-image {
+        width: 115px;
+        height: 115px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f5f5f5;
+    }
+
+    .inventory-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .no-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 35px;
+    }
+
+    .inventory-info {
+        min-width: 0;
+    }
+
+    .inventory-info h3 {
+        margin: 0 0 10px;
+        font-size: 18px;
+        overflow-wrap: anywhere;
+    }
+
+    .inventory-info > p {
+        margin: 5px 0;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .inventory-price {
+        margin: 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .inventory-price strong {
+        color: #198754;
+        font-size: 18px;
+    }
+
+    .inventory-price del {
+        color: #888;
+        font-size: 14px;
+    }
+
+
+    /* =====================================================
+       PRODUCT STATUS
+    ===================================================== */
+
+    .product-status {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 5px;
+        margin: 4px 5px 4px 0;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .product-status.active {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .product-status.inactive {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    .stock-status {
+        margin-top: 9px !important;
+        font-weight: bold;
+        font-size: 14px !important;
+    }
+
+    .stock-status.in-stock {
+        color: #198754;
+    }
+
+    .stock-status.low-stock {
+        color: #b77900;
+    }
+
+    .stock-status.out-of-stock {
+        color: #dc3545;
+    }
+
+
+    /* =====================================================
+       EDIT AND ACTIVATE / DEACTIVATE BUTTONS
+    ===================================================== */
+
+    .product-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 9px;
+        margin-top: 15px;
+    }
+
+    .product-actions form {
+        margin: 0;
+    }
+
+    .edit-product-button,
+    .activate-product-button,
+    .deactivate-product-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 9px 11px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .edit-product-button {
+        background: #e9f2ff;
+        color: #0056b3;
+    }
+
+    .edit-product-button:hover {
+        background: #d5e6ff;
+    }
+
+    .activate-product-button {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .activate-product-button:hover {
+        background: #badbcc;
+    }
+
+    .deactivate-product-button {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    .deactivate-product-button:hover {
+        background: #f1aeb5;
+    }
+
+
+    /* =====================================================
+       STOCK UPDATE FORM
+    ===================================================== */
+
+    .stock-update {
+        padding: 16px;
+        border-radius: 9px;
+        background: #f8f9fa;
+    }
+
+    .stock-update h4 {
+        margin: 0 0 12px;
+        font-size: 15px;
+    }
+
+    .stock-form label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 13px;
+        font-weight: bold;
+        color: #555;
+    }
+
+    .stock-form input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        font-size: 15px;
+    }
+
+    .update-stock-button {
+        width: 100%;
+        padding: 11px 12px;
+        background: #198754;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .update-stock-button:hover {
+        background: #146c43;
+    }
+
+    .view-product-button {
+        display: block;
+        margin-top: 10px;
+        padding: 10px;
+        background: #e9f2ff;
+        color: #0056b3;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: bold;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .view-product-button:hover {
+        background: #d5e6ff;
+    }
+
+    .inactive-note {
+        display: block;
+        margin-top: 10px;
+        padding: 10px;
+        background: #f8d7da;
+        color: #842029;
+        border-radius: 6px;
+        font-size: 12px;
+        text-align: center;
+    }
+
+
+    /* =====================================================
+       ORDER LIST
+    ===================================================== */
+
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .order-header h3 {
+        margin: 0 0 5px;
+        font-size: 21px;
+    }
+
+    .order-header p {
+        margin: 0;
+        color: #777;
+        font-size: 13px;
+    }
+
+
+    /* =====================================================
+       ORDER STATUS BADGES
+    ===================================================== */
+
+    .status-badge {
+        display: inline-block;
+        padding: 7px 13px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-confirmed,
+    .status-delivered {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-processing {
+        background: #cff4fc;
+        color: #055160;
+    }
+
+    .status-shipped {
+        background: #cfe2ff;
+        color: #084298;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+
+    /* =====================================================
+       PAYMENT
+    ===================================================== */
+
+    .payment-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 0;
+        color: #666;
+        border-bottom: 1px solid #eee;
+    }
+
+    .payment-paid {
+        color: #198754;
+    }
+
+    .payment-pending {
+        color: #856404;
+    }
+
+    .payment-failed {
+        color: #dc3545;
+    }
+
+    .payment-refunded {
+        color: #6f42c1;
+    }
+
+
+    /* =====================================================
+       ORDERED PRODUCTS
+    ===================================================== */
+
+    .ordered-products {
+        padding: 20px 0 5px;
+    }
+
+    .ordered-products > h4 {
+        margin: 0 0 15px;
+        font-size: 17px;
+    }
+
+    .ordered-product {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .ordered-product:last-child {
+        border-bottom: none;
+    }
+
+    .ordered-product-image {
+        width: 65px;
+        height: 65px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f3f3f3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 27px;
+    }
+
+    .ordered-product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .ordered-product-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ordered-product-info h5 {
+        margin: 0 0 6px;
+        font-size: 15px;
+    }
+
+    .ordered-product-info p {
+        margin: 3px 0;
+        color: #666;
+        font-size: 13px;
+    }
+
+    .item-subtotal {
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-top: 1px solid #eee;
+        font-size: 15px;
+    }
+
+    .order-total strong {
+        font-size: 20px;
+    }
+
+
+    /* =====================================================
+       ORDER STATUS MANAGEMENT
+    ===================================================== */
+
+    .status-management {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-top: 10px;
+        padding: 18px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .status-description h4 {
+        margin: 0 0 5px;
+        font-size: 16px;
+    }
+
+    .status-description p {
+        margin: 0;
+        color: #777;
+        font-size: 13px;
+    }
+
+    .status-form {
+        margin: 0;
+    }
+
+    .status-button {
+        border: none;
+        padding: 11px 18px;
+        border-radius: 8px;
+        background: #007bff;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .status-button:hover {
+        background: #0056d6;
+    }
+
+    .completed-label,
+    .cancelled-label {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .completed-label {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .cancelled-label {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    .waiting-label {
+        color: #856404;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .mixed-order-warning {
+        max-width: 500px;
+        padding: 10px 13px;
+        border-radius: 8px;
+        background: #fff3cd;
+        color: #856404;
+        font-size: 13px;
+    }
+
+    .order-footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 18px;
+    }
+
+    .view-order-button {
+        display: inline-block;
+        padding: 10px 17px;
+        border-radius: 8px;
+        background: #f1f3f5;
+        color: #333;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .view-order-button:hover {
+        background: #e2e6ea;
+    }
+
+
+    /* =====================================================
+       EMPTY STATES
+    ===================================================== */
+
+    .empty-inventory,
+    .empty-orders {
+        text-align: center;
+        padding: 55px 20px;
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+    }
+
+    .empty-inventory h3,
+    .empty-orders h3 {
+        margin: 10px 0;
+    }
+
+    .empty-inventory p,
+    .empty-orders p {
+        color: #777;
+        margin: 0;
+    }
+
+
+    /* =====================================================
+       RESPONSIVE LAYOUT
+    ===================================================== */
+
+    @media (max-width: 1000px) {
+
+        .inventory-card {
+            grid-template-columns: 100px minmax(0, 1fr);
+        }
+
+        .inventory-image {
+            width: 100px;
+            height: 100px;
+        }
+
+        .stock-update {
+            grid-column: 1 / -1;
+        }
+
+    }
+
+    @media (max-width: 700px) {
+
+        .seller-dashboard {
+            padding: 20px 10px 40px;
+        }
+
+        .dashboard-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .dashboard-header h1 {
+            font-size: 27px;
+        }
+
+        .section-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .inventory-header-actions {
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .inventory-card {
+            padding: 15px;
+            gap: 13px;
+        }
+
+        .order-card {
+            padding: 16px;
+        }
+
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .status-management {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .status-form,
+        .status-button {
+            width: 100%;
+        }
+
+        .ordered-product {
+            flex-wrap: wrap;
+        }
+
+        .item-subtotal {
+            margin-left: 80px;
+        }
+
+        .product-actions {
+            align-items: stretch;
+        }
+
+        .product-actions form {
+            display: flex;
+        }
+
+        .edit-product-button,
+        .activate-product-button,
+        .deactivate-product-button {
+            min-height: 38px;
+        }
+
+    }
+
+</style>
+
+{% endblock %}

@@ -1,1555 +1,1049 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Order #{{ order.id }} - ShopSphere
+Order Details - ShopSphere
 {% endblock %}
 
 {% block content %}
 
-<div class="order-detail-container">
+<style>
+    /* =====================================
+       MAIN PAGE
+    ===================================== */
 
-    <!-- =====================================================
-         PAGE HEADER
-    ====================================================== -->
+    .order-detail-page {
+        max-width: 1150px;
+        margin: 0 auto;
+        padding: 35px 20px;
+        color: #222;
+    }
 
-    <div class="page-header">
+    .page-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+    .page-heading h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+    }
+
+    .page-heading p {
+        margin: 0;
+        color: #6b7280;
+        line-height: 1.7;
+    }
+
+    /* =====================================
+       SUMMARY CARDS
+    ===================================== */
+
+    .order-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        margin-bottom: 28px;
+    }
+
+    .summary-card,
+    .order-section {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        box-shadow: 0 5px 18px rgba(15, 23, 42, 0.045);
+    }
+
+    .summary-card {
+        padding: 22px;
+    }
+
+    .summary-card h3 {
+        margin: 0 0 12px;
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .summary-value {
+        font-size: 22px;
+        font-weight: 750;
+        overflow-wrap: anywhere;
+    }
+
+    .summary-subtitle {
+        margin-top: 8px;
+        color: #6b7280;
+        font-size: 12px;
+    }
+
+    /* =====================================
+       STATUS BADGES
+    ===================================== */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .status-pending {
+        background: #fff4d6;
+        color: #8a5200;
+    }
+
+    .status-confirmed {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-processing {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .status-shipped {
+        background: #cffafe;
+        color: #0e7490;
+    }
+
+    .status-delivered {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-cancelled,
+    .status-failed {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-refunded {
+        background: #f3e8ff;
+        color: #7e22ce;
+    }
+
+    /* =====================================
+       CONTENT SECTIONS
+    ===================================== */
+
+    .order-section {
+        margin-bottom: 26px;
+        padding: 25px;
+    }
+
+    .section-heading {
+        margin: 0 0 20px;
+        font-size: 21px;
+        font-weight: 750;
+    }
+
+    .section-description {
+        margin: -10px 0 20px;
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    /* =====================================
+       ORDER INFORMATION
+    ===================================== */
+
+    .information-grid,
+    .payment-information {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .information-item,
+    .payment-card {
+        min-width: 0;
+        padding: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #f9fafb;
+        overflow-wrap: anywhere;
+    }
+
+    .information-label,
+    .payment-card h3 {
+        margin: 0 0 8px;
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .information-value,
+    .payment-card p {
+        margin: 0;
+        color: #111827;
+        font-size: 15px;
+        font-weight: 650;
+        overflow-wrap: anywhere;
+    }
+
+    /* =====================================
+       PRODUCTS TABLE
+    ===================================== */
+
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .order-items-table {
+        width: 100%;
+        min-width: 560px;
+        border-collapse: collapse;
+    }
+
+    .order-items-table th {
+        padding: 14px;
+        background: #eff6ff;
+        color: #1e40af;
+        text-align: left;
+        font-size: 12px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .order-items-table td {
+        padding: 15px 14px;
+        border-bottom: 1px solid #edf0f4;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .order-items-table tbody tr:hover {
+        background: #f9fbff;
+    }
+
+    .order-product-name {
+        color: #1f2937;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .order-product-name:hover {
+        color: #2563eb;
+    }
+
+    .item-price {
+        white-space: nowrap;
+    }
+
+    .empty-items {
+        padding: 28px 15px;
+        color: #6b7280;
+        text-align: center;
+    }
+
+    /* =====================================
+       ORDER TOTAL
+    ===================================== */
+
+    .order-total-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 22px;
+    }
+
+    .order-total-box {
+        width: 100%;
+        max-width: 370px;
+        padding: 20px;
+        box-sizing: border-box;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        background: #f8fbff;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 13px;
+        color: #4b5563;
+        font-size: 14px;
+    }
+
+    .total-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .grand-total {
+        padding-top: 15px;
+        border-top: 1px solid #dbeafe;
+        color: #111827;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    /* =====================================
+       DELIVERY ADDRESS
+    ===================================== */
+
+    .address-box {
+        padding: 18px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #f9fafb;
+        color: #4b5563;
+        line-height: 1.8;
+        overflow-wrap: anywhere;
+    }
+
+    .address-box strong {
+        color: #111827;
+    }
+
+    /* =====================================
+       BUTTONS
+    ===================================== */
+
+    .order-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .order-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 45px;
+        padding: 12px 18px;
+        box-sizing: border-box;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 750;
+        cursor: pointer;
+        transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease,
+            background 0.18s ease;
+    }
+
+    .order-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+    }
+
+    .button-primary,
+    .invoice-button {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .button-primary:hover,
+    .invoice-button:hover {
+        background: #1d4ed8;
+        color: #fff;
+    }
+
+    .button-secondary {
+        background: #fff;
+        color: #374151;
+        border-color: #d1d5db;
+    }
+
+    .button-secondary:hover {
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    .button-danger {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .button-danger:hover {
+        background: #b91c1c;
+        color: #fff;
+    }
+
+    /* =====================================
+       PROFESSIONAL TRACKING BUTTON
+    ===================================== */
+
+    .track-order-button {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        min-height: 50px;
+        padding: 14px 23px;
+        border: none;
+        border-radius: 11px;
+        background: linear-gradient(
+            135deg,
+            #0f766e 0%,
+            #0d9488 48%,
+            #14b8a6 100%
+        );
+        color: #fff;
+        box-shadow: 0 7px 16px rgba(13, 148, 136, 0.24);
+        letter-spacing: 0.01em;
+    }
+
+    .track-order-button:hover {
+        background: linear-gradient(
+            135deg,
+            #115e59,
+            #0f766e
+        );
+        color: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(13, 148, 136, 0.32);
+    }
+
+    .track-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 25px;
+        height: 25px;
+        border-radius: 7px;
+        background: rgba(255, 255, 255, 0.18);
+        font-size: 16px;
+    }
+
+    .order-button:focus-visible {
+        outline: 3px solid #99f6e4;
+        outline-offset: 3px;
+    }
+
+    /* =====================================
+       RESPONSIVE DESIGN
+    ===================================== */
+
+    @media (max-width: 800px) {
+        .order-summary {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .page-heading h1 {
+            font-size: 27px;
+        }
+
+        .order-section {
+            padding: 19px;
+        }
+    }
+
+    @media (max-width: 560px) {
+        .order-detail-page {
+            padding: 22px 12px;
+        }
+
+        .order-summary,
+        .information-grid,
+        .payment-information {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-card {
+            padding: 18px;
+        }
+
+        .order-section {
+            padding: 16px;
+        }
+
+        .section-heading {
+            font-size: 19px;
+        }
+
+        .order-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .order-button {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="order-detail-page">
+
+    <!-- PAGE HEADING -->
+
+    <header class="page-heading">
 
         <div>
-            <h1>Order #{{ order.id }}</h1>
+            <h1>📦 Order Details</h1>
 
-            <p class="order-date">
-                Placed on {{ order.created_at|date:"d M Y, h:i A" }}
+            <p>
+                Review your order, check delivery progress,
+                review payment details, and download your invoice.
             </p>
         </div>
 
+        <!-- FIXED: JUMP TO ORDER STATUS INSTEAD OF MISSING URL -->
+
         <a
-            href="{% url 'my_orders' %}"
-            class="back-orders"
+            href="#order-status"
+            class="order-button track-order-button"
         >
-            ← My Orders
+            <span class="track-icon" aria-hidden="true">➜</span>
+            <span>Track Your Order</span>
+            <span aria-hidden="true">→</span>
         </a>
 
-    </div>
+    </header>
 
 
-    <!-- =====================================================
-         ORDER STATUS
-    ====================================================== -->
+    <!-- ORDER SUMMARY -->
 
-    <div class="status-card">
+    <div class="order-summary">
 
-        <div class="status-item">
+        <div class="summary-card">
 
-            <span class="status-label">
-                Order Status
-            </span>
+            <h3>Order Number</h3>
 
-            <span class="
-                status-badge
-                status-{{ order.status|lower }}
-            ">
-                {{ order.get_status_display }}
-            </span>
+            <div class="summary-value">
+                #{{ order.id }}
+            </div>
+
+            <div class="summary-subtitle">
+                ShopSphere Order
+            </div>
 
         </div>
 
 
-        {% if order.payment %}
+        <div class="summary-card">
 
-        <div class="status-item">
+            <h3>Order Date</h3>
 
-            <span class="status-label">
-                Payment Status
-            </span>
+            <div class="summary-value">
+                {{ order.created_at|date:"d M Y" }}
+            </div>
 
-            <span class="
-                status-badge
-                payment-{{ order.payment.status|lower }}
-            ">
-                {{ order.payment.get_status_display }}
-            </span>
+            <div class="summary-subtitle">
+                {{ order.created_at|date:"h:i A" }}
+            </div>
 
         </div>
 
 
-        <div class="status-item">
+        <!-- ORDER STATUS -->
 
-            <span class="status-label">
-                Payment Method
-            </span>
+        <div class="summary-card" id="order-status">
 
-            <strong>
-                {{ order.payment.get_method_display }}
-            </strong>
+            <h3>Order Status</h3>
 
-        </div>
+            {% if order.status == "PENDING" %}
 
+                <span class="status-badge status-pending">
+                    {{ order.get_status_display }}
+                </span>
 
-        {% if order.payment.gateway_method %}
+            {% elif order.status == "CONFIRMED" %}
 
-        <div class="status-item">
+                <span class="status-badge status-confirmed">
+                    {{ order.get_status_display }}
+                </span>
 
-            <span class="status-label">
-                Payment Type
-            </span>
+            {% elif order.status == "PROCESSING" %}
 
-            <strong>
-                {{ order.payment.gateway_method|title }}
-            </strong>
+                <span class="status-badge status-processing">
+                    {{ order.get_status_display }}
+                </span>
 
-        </div>
+            {% elif order.status == "SHIPPED" %}
 
-        {% endif %}
+                <span class="status-badge status-shipped">
+                    {{ order.get_status_display }}
+                </span>
 
-        {% endif %}
+            {% elif order.status == "DELIVERED" %}
 
-    </div>
+                <span class="status-badge status-delivered">
+                    {{ order.get_status_display }}
+                </span>
 
+            {% elif order.status == "CANCELLED" %}
 
-    <!-- =====================================================
-         RETRY PAYMENT
-    ====================================================== -->
+                <span class="status-badge status-cancelled">
+                    {{ order.get_status_display }}
+                </span>
 
-    {% if order.payment %}
+            {% else %}
 
-        {% if order.payment.status == 'FAILED' or order.payment.status == 'PENDING' %}
-
-            {% if order.status != 'CANCELLED' %}
-
-                <div class="retry-card">
-
-                    <div class="retry-content">
-
-                        <div class="retry-icon">
-                            💳
-                        </div>
-
-                        <div>
-
-                            {% if order.payment.status == 'FAILED' %}
-
-                                <h3>
-                                    Payment Failed
-                                </h3>
-
-                                <p>
-                                    Your payment was not completed.
-                                    You can try again using Razorpay.
-                                </p>
-
-                            {% else %}
-
-                                <h3>
-                                    Payment Pending
-                                </h3>
-
-                                <p>
-                                    Your payment has not been completed yet.
-                                </p>
-
-                            {% endif %}
-
-                        </div>
-
-                    </div>
-
-
-                    <a
-                        href="{% url 'retry_payment' order.id %}"
-                        class="retry-payment-button"
-                    >
-                        Pay Again with Razorpay
-                    </a>
-
-                </div>
+                <span class="status-badge status-pending">
+                    {{ order.get_status_display }}
+                </span>
 
             {% endif %}
 
-        {% endif %}
-
-    {% endif %}
-
-
-    <!-- =====================================================
-         DELIVERY ADDRESS
-    ====================================================== -->
-
-    <div class="section-card">
-
-        <div class="section-header">
-
-            <div class="section-number">
-                1
-            </div>
-
-            <div>
-                <h2>Delivery Address</h2>
-
-                <p>
-                    Shipping address used for this order
-                </p>
+            <div class="summary-subtitle">
+                Latest order status
             </div>
 
         </div>
 
+    </div>
 
-        {% if order.shipping_address %}
+
+    <!-- ORDER INFORMATION -->
+
+    <section class="order-section">
+
+        <h2 class="section-heading">
+            📋 Order Information
+        </h2>
+
+        <div class="information-grid">
+
+            <div class="information-item">
+
+                <div class="information-label">
+                    Order ID
+                </div>
+
+                <div class="information-value">
+                    #{{ order.id }}
+                </div>
+
+            </div>
+
+
+            <div class="information-item">
+
+                <div class="information-label">
+                    Customer
+                </div>
+
+                <div class="information-value">
+                    {{ order.user.get_full_name|default:order.user.username }}
+                </div>
+
+            </div>
+
+
+            <div class="information-item">
+
+                <div class="information-label">
+                    Order Date
+                </div>
+
+                <div class="information-value">
+                    {{ order.created_at|date:"d F Y, h:i A" }}
+                </div>
+
+            </div>
+
+
+            <div class="information-item">
+
+                <div class="information-label">
+                    Last Updated
+                </div>
+
+                <div class="information-value">
+                    {{ order.updated_at|date:"d F Y, h:i A" }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ORDERED PRODUCTS -->
+
+    <section class="order-section">
+
+        <h2 class="section-heading">
+            🛍️ Ordered Products
+        </h2>
+
+        <p class="section-description">
+            These are the products included in your order.
+        </p>
+
+        <div class="table-responsive">
+
+            <table class="order-items-table">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Product</th>
+                        <th>Unit Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in order_items %}
+
+                        <tr>
+
+                            <td>
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+
+                                {% if item.product %}
+
+                                    <a
+                                        href="{% url 'product_detail' item.product.slug %}"
+                                        class="order-product-name"
+                                    >
+                                        {{ item.product.name }}
+                                    </a>
+
+                                {% else %}
+
+                                    Product no longer available
+
+                                {% endif %}
+
+                            </td>
+
+                            <td class="item-price">
+                                ₹{{ item.price|floatformat:2 }}
+                            </td>
+
+                            <td>
+                                {{ item.quantity }}
+                            </td>
+
+                            <td class="item-price">
+                                ₹{{ item.subtotal|floatformat:2 }}
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="5" class="empty-items">
+                                No products were found for this order.
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- ORDER TOTAL -->
+
+        <div class="order-total-container">
+
+            <div class="order-total-box">
+
+                <div class="total-row">
+
+                    <span>Total Units</span>
+
+                    <strong>
+                        {{ total_items|default:0 }}
+                    </strong>
+
+                </div>
+
+                <div class="total-row grand-total">
+
+                    <span>Order Total</span>
+
+                    <span>
+                        ₹{{ order.total_amount|floatformat:2 }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- DELIVERY ADDRESS -->
+
+    <section class="order-section">
+
+        <h2 class="section-heading">
+            📍 Delivery Address
+        </h2>
+
+        {% if shipping_address %}
 
             <div class="address-box">
 
-                <h3>
-                    {{ order.shipping_address.full_name }}
-                </h3>
+                <strong>
+                    {{ shipping_address.full_name }}
+                </strong>
 
-                <p>
-                    {{ order.shipping_address.address_line }}
-                </p>
+                <br>
 
-                <p>
-                    {{ order.shipping_address.city }},
-                    {{ order.shipping_address.state }}
-                    - {{ order.shipping_address.pincode }}
-                </p>
+                {{ shipping_address.address_line }}
 
-                <p>
-                    <strong>Phone:</strong>
-                    {{ order.shipping_address.phone }}
-                </p>
+                <br>
+
+                {{ shipping_address.city }},
+                {{ shipping_address.state }}
+                - {{ shipping_address.pincode }}
+
+                <br>
+
+                Phone: {{ shipping_address.phone }}
 
             </div>
 
         {% else %}
 
-            <div class="empty-message">
-
-                Delivery address is not available for this order.
-
-            </div>
+            <p class="section-description">
+                No saved delivery address is available for this order.
+            </p>
 
         {% endif %}
 
-    </div>
+    </section>
 
 
-    <!-- =====================================================
-         ORDER ITEMS
-    ====================================================== -->
+    <!-- PAYMENT INFORMATION -->
 
-    <div class="section-card">
+    <section class="order-section">
 
-        <div class="section-header">
+        <h2 class="section-heading">
+            💳 Payment Information
+        </h2>
 
-            <div class="section-number">
-                2
+        <div class="payment-information">
+
+            <!-- PAYMENT STATUS -->
+
+            <div class="payment-card">
+
+                <h3>Payment Status</h3>
+
+                {% if payment %}
+
+                    {% if payment.status == "PAID" %}
+
+                        <span class="status-badge status-delivered">
+                            {{ payment.get_status_display }}
+                        </span>
+
+                    {% elif payment.status == "FAILED" %}
+
+                        <span class="status-badge status-failed">
+                            {{ payment.get_status_display }}
+                        </span>
+
+                    {% elif payment.status == "REFUNDED" %}
+
+                        <span class="status-badge status-refunded">
+                            {{ payment.get_status_display }}
+                        </span>
+
+                    {% else %}
+
+                        <span class="status-badge status-pending">
+                            {{ payment.get_status_display }}
+                        </span>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <p>
+                        Payment information unavailable
+                    </p>
+
+                {% endif %}
+
             </div>
 
-            <div>
-                <h2>Order Items</h2>
 
-                <p>
-                    Products included in this order
-                </p>
+            <!-- PAYMENT METHOD -->
+
+            <div class="payment-card">
+
+                <h3>Payment Method</h3>
+
+                {% if payment and payment.method %}
+
+                    <p>
+                        {{ payment.get_method_display|default:payment.method }}
+                    </p>
+
+                    {% if payment.gateway_method %}
+
+                        <div class="summary-subtitle">
+                            Gateway method: {{ payment.gateway_method|title }}
+                        </div>
+
+                    {% endif %}
+
+                {% elif payment and payment.provider %}
+
+                    <p>
+                        {{ payment.provider }}
+                    </p>
+
+                {% else %}
+
+                    <p>
+                        Payment method not recorded
+                    </p>
+
+                {% endif %}
+
             </div>
 
-        </div>
+
+            {% if payment %}
+
+                <!-- PAYMENT AMOUNT -->
+
+                <div class="payment-card">
+
+                    <h3>Payment Amount</h3>
+
+                    <p>
+                        ₹{{ payment.amount|floatformat:2 }}
+                    </p>
+
+                </div>
 
 
-        <div class="order-items">
+                <!-- PAYMENT REFERENCE -->
 
-            {% for item in order.items.all %}
+                <div class="payment-card">
 
-                <div class="order-item">
+                    <h3>Payment Reference</h3>
 
-                    <!-- PRODUCT IMAGE -->
+                    <p>
 
-                    <div class="product-image">
+                        {% if payment.provider_payment_id %}
 
-                        {% if item.product.image %}
+                            {{ payment.provider_payment_id }}
 
-                            <img
-                                src="{{ item.product.image.url }}"
-                                alt="{{ item.product.name }}"
-                            >
+                        {% elif payment.provider_order_id %}
+
+                            {{ payment.provider_order_id }}
 
                         {% else %}
 
-                            <div class="no-image">
-                                📦
-                            </div>
+                            Not available
 
                         {% endif %}
 
-                    </div>
-
-
-                    <!-- PRODUCT DETAILS -->
-
-                    <div class="product-details">
-
-                        <h3>
-                            {{ item.product.name }}
-                        </h3>
-
-
-                        {% if item.product.brand %}
-
-                            <p class="brand">
-                                {{ item.product.brand }}
-                            </p>
-
-                        {% endif %}
-
-
-                        <p class="quantity">
-                            Quantity:
-                            <strong>
-                                {{ item.quantity }}
-                            </strong>
-                        </p>
-
-
-                        <p class="unit-price">
-
-                            Unit Price:
-
-                            <strong>
-                                ₹{{ item.price }}
-                            </strong>
-
-                        </p>
-
-                    </div>
-
-
-                    <!-- ITEM TOTAL -->
-
-                    <div class="item-total">
-
-                        ₹{{ item.subtotal }}
-
-                    </div>
+                    </p>
 
                 </div>
 
-            {% empty %}
-
-                <div class="empty-message">
-                    No items found in this order.
-                </div>
-
-            {% endfor %}
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         ORDER SUMMARY
-    ====================================================== -->
-
-    <div class="section-card summary-card">
-
-        <div class="section-header">
-
-            <div class="section-number">
-                3
-            </div>
-
-            <div>
-                <h2>Order Summary</h2>
-            </div>
-
-        </div>
-
-
-        <div class="summary-row">
-
-            <span>
-                Items
-            </span>
-
-            <strong>
-                {{ order.items.all|length }}
-            </strong>
-
-        </div>
-
-
-        <div class="summary-row">
-
-            <span>
-                Subtotal
-            </span>
-
-            <strong>
-                ₹{{ order.total_amount }}
-            </strong>
-
-        </div>
-
-
-        <div class="summary-row">
-
-            <span>
-                Delivery
-            </span>
-
-            <strong class="free-delivery">
-                FREE
-            </strong>
-
-        </div>
-
-
-        <div class="summary-divider"></div>
-
-
-        <div class="summary-total">
-
-            <span>
-                Total Amount
-            </span>
-
-            <strong>
-                ₹{{ order.total_amount }}
-            </strong>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         PAYMENT INFORMATION
-    ====================================================== -->
-
-    {% if order.payment %}
-
-    <div class="section-card">
-
-        <div class="section-header">
-
-            <div class="section-number">
-                4
-            </div>
-
-            <div>
-                <h2>Payment Information</h2>
-
-                <p>
-                    Payment details for this order
-                </p>
-            </div>
-
-        </div>
-
-
-        <div class="payment-info">
-
-            <div class="payment-row">
-
-                <span>
-                    Payment Method
-                </span>
-
-                <strong>
-                    {{ order.payment.get_method_display }}
-                </strong>
-
-            </div>
-
-
-            <div class="payment-row">
-
-                <span>
-                    Payment Status
-                </span>
-
-                <strong
-                    class="
-                        payment-status
-                        payment-{{ order.payment.status|lower }}
-                    "
-                >
-                    {{ order.payment.get_status_display }}
-                </strong>
-
-            </div>
-
-
-            <div class="payment-row">
-
-                <span>
-                    Provider
-                </span>
-
-                <strong>
-                    {{ order.payment.get_provider_display }}
-                </strong>
-
-            </div>
-
-
-            {% if order.payment.gateway_method %}
-
-            <div class="payment-row">
-
-                <span>
-                    Gateway Method
-                </span>
-
-                <strong>
-                    {{ order.payment.gateway_method|title }}
-                </strong>
-
-            </div>
-
-            {% endif %}
-
-
-            {% if order.payment.provider_payment_id %}
-
-            <div class="payment-row">
-
-                <span>
-                    Payment ID
-                </span>
-
-                <strong class="payment-id">
-                    {{ order.payment.provider_payment_id }}
-                </strong>
-
-            </div>
-
-            {% endif %}
-
-
-            {% if order.payment.created_at %}
-
-            <div class="payment-row">
-
-                <span>
-                    Payment Created
-                </span>
-
-                <strong>
-                    {{ order.payment.created_at|date:"d M Y, h:i A" }}
-                </strong>
-
-            </div>
-
             {% endif %}
 
         </div>
 
-    </div>
-
-    {% endif %}
+    </section>
 
 
-    <!-- =====================================================
-         ACTIONS
-    ====================================================== -->
+    <!-- INVOICE AND ORDER ACTIONS -->
 
-    <div class="order-actions">
+    <section class="order-section">
 
-        <a
-            href="{% url 'my_orders' %}"
-            class="secondary-button"
-        >
-            ← Back to My Orders
-        </a>
+        <h2 class="section-heading">
+            🧾 Your Order Invoice
+        </h2>
 
+        <p class="section-description">
+            Download your order invoice for your records.
+        </p>
 
-        {% if order.status == 'PENDING' %}
+        <div class="order-actions">
 
-            <form
-                method="POST"
-                action="{% url 'cancel_order' order.id %}"
-                class="cancel-form"
+            <!-- DOWNLOAD PDF INVOICE -->
+
+            <a
+                href="{% url 'download_order_invoice' order.id %}"
+                class="order-button invoice-button"
             >
+                📄 Download Invoice PDF
+            </a>
 
-                {% csrf_token %}
 
-                <button
-                    type="submit"
-                    class="cancel-button"
-                    onclick="
-                        return confirm(
-                            'Are you sure you want to cancel this order?'
-                        );
-                    "
+            <!-- TRACK ORDER: SCROLL TO STATUS -->
+
+            <a
+                href="#order-status"
+                class="order-button track-order-button"
+            >
+                <span class="track-icon" aria-hidden="true">➜</span>
+                Track Order
+                <span aria-hidden="true">→</span>
+            </a>
+
+
+            <!-- BACK TO MY ORDERS -->
+
+            <a
+                href="{% url 'my_orders' %}"
+                class="order-button button-secondary"
+            >
+                ← Back to My Orders
+            </a>
+
+
+            <!-- CANCEL ORDER -->
+
+            {% if order.status == "PENDING" %}
+
+                <form
+                    method="post"
+                    action="{% url 'cancel_order' order.id %}"
+                    style="margin: 0;"
                 >
-                    Cancel Order
-                </button>
 
-            </form>
+                    {% csrf_token %}
 
-        {% endif %}
+                    <button
+                        type="submit"
+                        class="order-button button-danger"
+                        onclick="return confirm('Are you sure you want to cancel this order?');"
+                    >
+                        Cancel Order
+                    </button>
 
-    </div>
+                </form>
+
+            {% endif %}
+
+        </div>
+
+    </section>
 
 </div>
-
-
-<style>
-
-    /* =====================================================
-       PAGE
-    ====================================================== */
-
-    .order-detail-container {
-
-        max-width: 1050px;
-
-        margin: 0 auto;
-
-        padding: 25px 20px 50px;
-
-    }
-
-
-    /* =====================================================
-       HEADER
-    ====================================================== */
-
-    .page-header {
-
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: center;
-
-        gap: 20px;
-
-        margin-bottom: 25px;
-
-    }
-
-
-    .page-header h1 {
-
-        margin: 0 0 7px;
-
-        font-size: 30px;
-
-    }
-
-
-    .order-date {
-
-        margin: 0;
-
-        color: #777;
-
-        font-size: 14px;
-
-    }
-
-
-    .back-orders {
-
-        color: #007bff;
-
-        text-decoration: none;
-
-        font-weight: bold;
-
-    }
-
-
-    .back-orders:hover {
-
-        text-decoration: underline;
-
-    }
-
-
-    /* =====================================================
-       STATUS
-    ====================================================== */
-
-    .status-card {
-
-        display: grid;
-
-        grid-template-columns:
-            repeat(3, 1fr);
-
-        gap: 15px;
-
-        background: white;
-
-        border-radius: 12px;
-
-        padding: 20px;
-
-        margin-bottom: 25px;
-
-        box-shadow:
-            0 3px 12px rgba(0, 0, 0, 0.08);
-
-    }
-
-
-    .status-item {
-
-        display: flex;
-
-        flex-direction: column;
-
-        gap: 7px;
-
-        padding-right: 15px;
-
-        border-right: 1px solid #eee;
-
-    }
-
-
-    .status-item:last-child {
-
-        border-right: none;
-
-    }
-
-
-    .status-label {
-
-        color: #777;
-
-        font-size: 13px;
-
-    }
-
-
-    .status-badge {
-
-        display: inline-block;
-
-        width: fit-content;
-
-        padding: 6px 12px;
-
-        border-radius: 20px;
-
-        font-size: 13px;
-
-        font-weight: bold;
-
-    }
-
-
-    /* ORDER STATUS */
-
-    .status-pending {
-
-        background: #fff3cd;
-
-        color: #856404;
-
-    }
-
-
-    .status-confirmed {
-
-        background: #d1e7dd;
-
-        color: #0f5132;
-
-    }
-
-
-    .status-processing {
-
-        background: #cff4fc;
-
-        color: #055160;
-
-    }
-
-
-    .status-shipped {
-
-        background: #cfe2ff;
-
-        color: #084298;
-
-    }
-
-
-    .status-delivered {
-
-        background: #d1e7dd;
-
-        color: #0f5132;
-
-    }
-
-
-    .status-cancelled {
-
-        background: #f8d7da;
-
-        color: #842029;
-
-    }
-
-
-    /* PAYMENT STATUS */
-
-    .payment-pending {
-
-        background: #fff3cd;
-
-        color: #856404;
-
-    }
-
-
-    .payment-paid {
-
-        background: #d1e7dd;
-
-        color: #0f5132;
-
-    }
-
-
-    .payment-failed {
-
-        background: #f8d7da;
-
-        color: #842029;
-
-    }
-
-
-    .payment-refunded {
-
-        background: #e2e3e5;
-
-        color: #41464b;
-
-    }
-
-
-    /* =====================================================
-       RETRY
-    ====================================================== */
-
-    .retry-card {
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: space-between;
-
-        gap: 20px;
-
-        background: #fff8e6;
-
-        border: 1px solid #ffe4a8;
-
-        border-radius: 12px;
-
-        padding: 20px;
-
-        margin-bottom: 25px;
-
-    }
-
-
-    .retry-content {
-
-        display: flex;
-
-        align-items: center;
-
-        gap: 15px;
-
-    }
-
-
-    .retry-icon {
-
-        width: 50px;
-
-        height: 50px;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        background: white;
-
-        border-radius: 50%;
-
-        font-size: 25px;
-
-        flex-shrink: 0;
-
-    }
-
-
-    .retry-content h3 {
-
-        margin: 0 0 5px;
-
-    }
-
-
-    .retry-content p {
-
-        margin: 0;
-
-        color: #666;
-
-        font-size: 14px;
-
-        line-height: 1.5;
-
-    }
-
-
-    .retry-payment-button {
-
-        display: inline-block;
-
-        padding: 12px 20px;
-
-        background: #007bff;
-
-        color: white;
-
-        text-decoration: none;
-
-        border-radius: 8px;
-
-        font-weight: bold;
-
-        white-space: nowrap;
-
-    }
-
-
-    .retry-payment-button:hover {
-
-        background: #0056d6;
-
-    }
-
-
-    /* =====================================================
-       SECTION CARD
-    ====================================================== */
-
-    .section-card {
-
-        background: white;
-
-        border-radius: 12px;
-
-        padding: 25px;
-
-        margin-bottom: 25px;
-
-        box-shadow:
-            0 3px 12px rgba(0, 0, 0, 0.08);
-
-    }
-
-
-    .section-header {
-
-        display: flex;
-
-        align-items: flex-start;
-
-        gap: 14px;
-
-        margin-bottom: 20px;
-
-    }
-
-
-    .section-number {
-
-        width: 32px;
-
-        height: 32px;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        background: #007bff;
-
-        color: white;
-
-        border-radius: 50%;
-
-        font-weight: bold;
-
-        flex-shrink: 0;
-
-    }
-
-
-    .section-header h2 {
-
-        margin: 0 0 4px;
-
-        font-size: 21px;
-
-    }
-
-
-    .section-header p {
-
-        margin: 0;
-
-        color: #777;
-
-        font-size: 13px;
-
-    }
-
-
-    /* =====================================================
-       ADDRESS
-    ====================================================== */
-
-    .address-box {
-
-        background: #f8f9fa;
-
-        border-radius: 10px;
-
-        padding: 18px;
-
-        line-height: 1.6;
-
-    }
-
-
-    .address-box h3 {
-
-        margin: 0 0 8px;
-
-    }
-
-
-    .address-box p {
-
-        margin: 5px 0;
-
-        color: #555;
-
-    }
-
-
-    /* =====================================================
-       ORDER ITEMS
-    ====================================================== */
-
-    .order-items {
-
-        display: flex;
-
-        flex-direction: column;
-
-    }
-
-
-    .order-item {
-
-        display: flex;
-
-        align-items: center;
-
-        gap: 18px;
-
-        padding: 18px 0;
-
-        border-bottom: 1px solid #eee;
-
-    }
-
-
-    .order-item:last-child {
-
-        border-bottom: none;
-
-    }
-
-
-    .product-image {
-
-        width: 80px;
-
-        height: 80px;
-
-        flex-shrink: 0;
-
-        overflow: hidden;
-
-        border-radius: 10px;
-
-        background: #f3f3f3;
-
-    }
-
-
-    .product-image img {
-
-        width: 100%;
-
-        height: 100%;
-
-        object-fit: cover;
-
-    }
-
-
-    .no-image {
-
-        width: 100%;
-
-        height: 100%;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        font-size: 30px;
-
-    }
-
-
-    .product-details {
-
-        flex: 1;
-
-    }
-
-
-    .product-details h3 {
-
-        margin: 0 0 5px;
-
-        font-size: 17px;
-
-    }
-
-
-    .product-details p {
-
-        margin: 4px 0;
-
-        font-size: 14px;
-
-    }
-
-
-    .brand {
-
-        color: #777;
-
-    }
-
-
-    .quantity,
-
-    .unit-price {
-
-        color: #555;
-
-    }
-
-
-    .item-total {
-
-        font-size: 18px;
-
-        font-weight: bold;
-
-        white-space: nowrap;
-
-    }
-
-
-    /* =====================================================
-       SUMMARY
-    ====================================================== */
-
-    .summary-card {
-
-        max-width: 650px;
-
-        margin-left: auto;
-
-    }
-
-
-    .summary-row {
-
-        display: flex;
-
-        justify-content: space-between;
-
-        padding: 12px 0;
-
-        color: #555;
-
-    }
-
-
-    .free-delivery {
-
-        color: #16803c;
-
-    }
-
-
-    .summary-divider {
-
-        height: 1px;
-
-        background: #ddd;
-
-        margin: 8px 0;
-
-    }
-
-
-    .summary-total {
-
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: center;
-
-        padding-top: 15px;
-
-        font-size: 21px;
-
-    }
-
-
-    .summary-total strong {
-
-        font-size: 24px;
-
-    }
-
-
-    /* =====================================================
-       PAYMENT INFO
-    ====================================================== */
-
-    .payment-info {
-
-        background: #f8f9fa;
-
-        border-radius: 10px;
-
-        padding: 8px 18px;
-
-    }
-
-
-    .payment-row {
-
-        display: flex;
-
-        justify-content: space-between;
-
-        gap: 20px;
-
-        padding: 13px 0;
-
-        border-bottom: 1px solid #ddd;
-
-    }
-
-
-    .payment-row:last-child {
-
-        border-bottom: none;
-
-    }
-
-
-    .payment-row span {
-
-        color: #666;
-
-    }
-
-
-    .payment-status {
-
-        display: inline-block;
-
-        padding: 4px 10px;
-
-        border-radius: 15px;
-
-    }
-
-
-    .payment-id {
-
-        font-size: 12px;
-
-        word-break: break-all;
-
-        text-align: right;
-
-    }
-
-
-    /* =====================================================
-       EMPTY
-    ====================================================== */
-
-    .empty-message {
-
-        padding: 20px;
-
-        text-align: center;
-
-        background: #f8f9fa;
-
-        color: #777;
-
-        border-radius: 8px;
-
-    }
-
-
-    /* =====================================================
-       ACTIONS
-    ====================================================== */
-
-    .order-actions {
-
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: center;
-
-        gap: 15px;
-
-        margin-top: 10px;
-
-    }
-
-
-    .secondary-button {
-
-        display: inline-block;
-
-        padding: 11px 18px;
-
-        background: #f1f3f5;
-
-        color: #333;
-
-        text-decoration: none;
-
-        border-radius: 8px;
-
-        font-weight: bold;
-
-    }
-
-
-    .secondary-button:hover {
-
-        background: #e2e6ea;
-
-    }
-
-
-    .cancel-form {
-
-        margin: 0;
-
-    }
-
-
-    .cancel-button {
-
-        padding: 11px 18px;
-
-        border: none;
-
-        background: #dc3545;
-
-        color: white;
-
-        border-radius: 8px;
-
-        font-weight: bold;
-
-        cursor: pointer;
-
-    }
-
-
-    .cancel-button:hover {
-
-        background: #b02a37;
-
-    }
-
-
-    /* =====================================================
-       MOBILE
-    ====================================================== */
-
-    @media (max-width: 800px) {
-
-        .status-card {
-
-            grid-template-columns: 1fr;
-
-        }
-
-
-        .status-item {
-
-            border-right: none;
-
-            border-bottom: 1px solid #eee;
-
-            padding-bottom: 12px;
-
-            padding-right: 0;
-
-        }
-
-
-        .status-item:last-child {
-
-            border-bottom: none;
-
-            padding-bottom: 0;
-
-        }
-
-
-        .retry-card {
-
-            flex-direction: column;
-
-            align-items: flex-start;
-
-        }
-
-
-        .retry-payment-button {
-
-            width: 100%;
-
-            text-align: center;
-
-        }
-
-    }
-
-
-    @media (max-width: 600px) {
-
-        .order-detail-container {
-
-            padding: 15px 10px 40px;
-
-        }
-
-
-        .page-header {
-
-            flex-direction: column;
-
-            align-items: flex-start;
-
-        }
-
-
-        .order-item {
-
-            align-items: flex-start;
-
-        }
-
-
-        .product-image {
-
-            width: 65px;
-
-            height: 65px;
-
-        }
-
-
-        .item-total {
-
-            font-size: 15px;
-
-        }
-
-
-        .payment-row {
-
-            flex-direction: column;
-
-            gap: 5px;
-
-        }
-
-
-        .payment-id {
-
-            text-align: left;
-
-        }
-
-
-        .order-actions {
-
-            flex-direction: column;
-
-            align-items: stretch;
-
-        }
-
-
-        .secondary-button,
-
-        .cancel-button {
-
-            width: 100%;
-
-            text-align: center;
-
-        }
-
-    }
-
-</style>
 
 {% endblock %}

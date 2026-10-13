@@ -6,11 +6,137 @@ Redirecting to Payment - ShopSphere
 
 {% block content %}
 
+<style>
+    /* =====================================
+       PAYMENT LOADING PAGE
+    ===================================== */
+
+    .payment-loading {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .loading-card {
+        width: 100%;
+        max-width: 500px;
+        padding: 45px 30px;
+        box-sizing: border-box;
+        background: #fff;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.10);
+    }
+
+    .loading-card h1 {
+        margin: 20px 0 10px;
+        color: #222;
+        font-size: 26px;
+    }
+
+    .loading-card p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .order-text {
+        color: #333 !important;
+        font-weight: 700;
+    }
+
+    /* =====================================
+       LOADER
+    ===================================== */
+
+    .loader {
+        display: flex;
+        justify-content: center;
+        gap: 7px;
+    }
+
+    .loader div {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #2874f0;
+        animation: bounce 1s infinite alternate;
+    }
+
+    .loader div:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .loader div:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+        from {
+            transform: translateY(0);
+        }
+
+        to {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* =====================================
+       PAYMENT BUTTON
+    ===================================== */
+
+    .pay-button {
+        width: 100%;
+        margin-top: 25px;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        background: #2874f0;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .pay-button:hover {
+        background: #1558c0;
+    }
+
+    .pay-button:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    .payment-error {
+        display: none;
+        margin-top: 15px;
+        padding: 12px;
+        border-radius: 7px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 500px) {
+        .loading-card {
+            padding: 35px 20px;
+        }
+
+        .loading-card h1 {
+            font-size: 23px;
+        }
+    }
+</style>
+
+
 <div class="payment-loading">
 
     <div class="loading-card">
 
-        <div class="loader">
+        <div class="loader" aria-hidden="true">
             <div></div>
             <div></div>
             <div></div>
@@ -19,7 +145,7 @@ Redirecting to Payment - ShopSphere
         <h1>Opening Secure Payment</h1>
 
         <p>
-            Please wait while we open Razorpay securely...
+            Please wait while we securely open Razorpay.
         </p>
 
         <p class="order-text">
@@ -34,117 +160,144 @@ Redirecting to Payment - ShopSphere
             Continue to Razorpay
         </button>
 
+        <div
+            id="payment-error"
+            class="payment-error"
+            role="alert"
+        ></div>
+
     </div>
 
 </div>
 
 
+<!-- RAZORPAY CHECKOUT SDK -->
+
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+
 <script>
+    "use strict";
+
+    // =========================================
+    // SHOPSPHERE PAYMENT CONFIGURATION
+    // =========================================
+
+    const checkoutConfigurationId = "config_TnKAhrrHfRdtOG";
+
+    const csrfToken = "{{ csrf_token }}";
+
+    const verifyPaymentUrl = "{% url 'verify_payment' %}";
+
+    const paymentFailedUrl = "{% url 'payment_failed' %}";
+
+
+    // =========================================
+    // RAZORPAY CHECKOUT OPTIONS
+    // =========================================
 
     const options = {
 
-        key: "{{ razorpay_key_id }}",
+        key: "{{ razorpay_key_id|escapejs }}",
 
-        amount: "{{ amount }}",
+        amount: "{{ amount|escapejs }}",
 
         currency: "INR",
 
         name: "ShopSphere",
 
-        description:
-            "Payment for Order #{{ order.id }}",
+        description: "Payment for Order #{{ order.id }}",
 
-        order_id:
-            "{{ razorpay_order_id }}",
+        order_id: "{{ razorpay_order_id|escapejs }}",
+
+        // IMPORTANT:
+        // Apply the saved Razorpay payment configuration.
+        // Wallets must also be enabled in this configuration.
+
+        checkout_config_id: checkoutConfigurationId,
 
         prefill: {
 
-            name:
-                "{{ order.user.get_full_name|escapejs }}",
+            name: "{{ order.user.get_full_name|default:order.user.username|escapejs }}",
 
-            email:
-                "{{ order.user.email|escapejs }}"
+            email: "{{ order.user.email|escapejs }}"
 
         },
 
         notes: {
 
-            shopsphere_order_id:
-                "{{ order.id }}"
+            shopsphere_order_id: "{{ order.id }}"
 
         },
 
         theme: {
 
-            color: "#007bff"
+            color: "#2874f0"
 
         },
 
+
+        // =====================================
+        // PAYMENT SUCCESS HANDLER
+        // =====================================
+
         handler: function(response) {
 
-            const form =
-                document.createElement("form");
+            const form = document.createElement("form");
 
             form.method = "POST";
 
-            form.action =
-                "{% url 'verify_payment' %}";
+            form.action = verifyPaymentUrl;
 
 
-            const csrf =
-                document.createElement("input");
+            // CSRF token
+
+            const csrf = document.createElement("input");
 
             csrf.type = "hidden";
 
-            csrf.name =
-                "csrfmiddlewaretoken";
+            csrf.name = "csrfmiddlewaretoken";
 
-            csrf.value =
-                "{{ csrf_token }}";
+            csrf.value = csrfToken;
 
             form.appendChild(csrf);
 
 
-            const paymentId =
-                document.createElement("input");
+            // Razorpay payment ID
+
+            const paymentId = document.createElement("input");
 
             paymentId.type = "hidden";
 
-            paymentId.name =
-                "razorpay_payment_id";
+            paymentId.name = "razorpay_payment_id";
 
-            paymentId.value =
-                response.razorpay_payment_id;
+            paymentId.value = response.razorpay_payment_id;
 
             form.appendChild(paymentId);
 
 
-            const orderId =
-                document.createElement("input");
+            // Razorpay order ID
+
+            const orderId = document.createElement("input");
 
             orderId.type = "hidden";
 
-            orderId.name =
-                "razorpay_order_id";
+            orderId.name = "razorpay_order_id";
 
-            orderId.value =
-                response.razorpay_order_id;
+            orderId.value = response.razorpay_order_id;
 
             form.appendChild(orderId);
 
 
-            const signature =
-                document.createElement("input");
+            // Razorpay signature
+
+            const signature = document.createElement("input");
 
             signature.type = "hidden";
 
-            signature.name =
-                "razorpay_signature";
+            signature.name = "razorpay_signature";
 
-            signature.value =
-                response.razorpay_signature;
+            signature.value = response.razorpay_signature;
 
             form.appendChild(signature);
 
@@ -155,13 +308,16 @@ Redirecting to Payment - ShopSphere
 
         },
 
+
+        // =====================================
+        // CHECKOUT MODAL
+        // =====================================
+
         modal: {
 
             ondismiss: function() {
 
-                console.log(
-                    "Razorpay checkout closed."
-                );
+                console.log("Razorpay checkout closed.");
 
             }
 
@@ -170,253 +326,182 @@ Redirecting to Payment - ShopSphere
     };
 
 
-    const razorpay =
-        new Razorpay(options);
+    // =========================================
+    // CREATE RAZORPAY CHECKOUT INSTANCE
+    // =========================================
+
+    let razorpay = null;
+
+    let paymentOpened = false;
+
+    let paymentFailedSubmitted = false;
 
 
-   razorpay.on(
-    "payment.failed",
-    function(response) {
+    function displayPaymentError(message) {
 
-        const form =
-            document.createElement("form");
+        const errorBox = document.getElementById("payment-error");
 
-        form.method = "POST";
+        errorBox.textContent = message;
 
-        form.action =
-            "{% url 'payment_failed' %}";
-
-
-        const csrf =
-            document.createElement("input");
-
-        csrf.type = "hidden";
-
-        csrf.name =
-            "csrfmiddlewaretoken";
-
-        csrf.value =
-            "{{ csrf_token }}";
-
-        form.appendChild(csrf);
-
-
-        const orderId =
-            document.createElement("input");
-
-        orderId.type = "hidden";
-
-        orderId.name = "order_id";
-
-        orderId.value =
-            "{{ order.id }}";
-
-        form.appendChild(orderId);
-
-
-        const errorMessage =
-            document.createElement("input");
-
-        errorMessage.type = "hidden";
-
-        errorMessage.name = "error_message";
-
-        errorMessage.value =
-            response.error.description ||
-            "Payment failed.";
-
-        form.appendChild(errorMessage);
-
-
-        document.body.appendChild(form);
-
-        form.submit();
+        errorBox.style.display = "block";
 
     }
-);
 
 
     function openRazorpay() {
 
-        razorpay.open();
+        if (paymentOpened) {
+            return;
+        }
+
+        if (typeof Razorpay === "undefined") {
+
+            displayPaymentError(
+                "Unable to load Razorpay Checkout. " +
+                "Please check your internet connection and try again."
+            );
+
+            return;
+        }
+
+        try {
+
+            if (!razorpay) {
+
+                razorpay = new Razorpay(options);
+
+                registerPaymentFailureHandler();
+
+            }
+
+            paymentOpened = true;
+
+            document.getElementById("pay-button").disabled = true;
+
+            document.getElementById("pay-button").textContent =
+                "Opening Razorpay...";
+
+            razorpay.open();
+
+        } catch (error) {
+
+            paymentOpened = false;
+
+            const button = document.getElementById("pay-button");
+
+            button.disabled = false;
+
+            button.textContent = "Continue to Razorpay";
+
+            displayPaymentError(
+                "Unable to open Razorpay Checkout. " +
+                "Please click Continue to Razorpay to try again."
+            );
+
+            console.error("Razorpay checkout error:", error);
+
+        }
 
     }
 
+
+    // =========================================
+    // PAYMENT FAILURE HANDLER
+    // =========================================
+
+    function registerPaymentFailureHandler() {
+
+        razorpay.on("payment.failed", function(response) {
+
+            if (paymentFailedSubmitted) {
+                return;
+            }
+
+            paymentFailedSubmitted = true;
+
+            const form = document.createElement("form");
+
+            form.method = "POST";
+
+            form.action = paymentFailedUrl;
+
+
+            // CSRF token
+
+            const csrf = document.createElement("input");
+
+            csrf.type = "hidden";
+
+            csrf.name = "csrfmiddlewaretoken";
+
+            csrf.value = csrfToken;
+
+            form.appendChild(csrf);
+
+
+            // Order ID
+
+            const orderId = document.createElement("input");
+
+            orderId.type = "hidden";
+
+            orderId.name = "order_id";
+
+            orderId.value = "{{ order.id }}";
+
+            form.appendChild(orderId);
+
+
+            // Error description
+
+            const errorMessage = document.createElement("input");
+
+            errorMessage.type = "hidden";
+
+            errorMessage.name = "error_message";
+
+            errorMessage.value =
+                (
+                    response &&
+                    response.error &&
+                    response.error.description
+                ) || "Payment failed.";
+
+            form.appendChild(errorMessage);
+
+
+            document.body.appendChild(form);
+
+            form.submit();
+
+        });
+
+    }
+
+
+    // =========================================
+    // BUTTON EVENT
+    // =========================================
 
     document
         .getElementById("pay-button")
-        .addEventListener(
-            "click",
-            openRazorpay
-        );
+        .addEventListener("click", openRazorpay);
 
 
-    // Automatically open Razorpay.
-    window.addEventListener(
-        "load",
-        function() {
+    // =========================================
+    // AUTOMATICALLY OPEN CHECKOUT
+    // =========================================
 
-            setTimeout(
-                openRazorpay,
-                500
-            );
+    window.addEventListener("load", function() {
 
-        }
-    );
+        setTimeout(function() {
+
+            openRazorpay();
+
+        }, 500);
+
+    });
 
 </script>
-
-
-<style>
-
-    .payment-loading {
-
-        min-height: 70vh;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        padding: 20px;
-
-    }
-
-
-    .loading-card {
-
-        width: 100%;
-
-        max-width: 500px;
-
-        padding: 45px 30px;
-
-        background: white;
-
-        border-radius: 15px;
-
-        text-align: center;
-
-        box-shadow:
-            0 4px 18px rgba(0, 0, 0, 0.10);
-
-    }
-
-
-    .loading-card h1 {
-
-        margin: 20px 0 10px;
-
-    }
-
-
-    .loading-card p {
-
-        color: #666;
-
-        line-height: 1.5;
-
-    }
-
-
-    .order-text {
-
-        font-weight: bold;
-
-        color: #333 !important;
-
-    }
-
-
-    .loader {
-
-        display: flex;
-
-        justify-content: center;
-
-        gap: 7px;
-
-    }
-
-
-    .loader div {
-
-        width: 10px;
-
-        height: 10px;
-
-        border-radius: 50%;
-
-        background: #007bff;
-
-        animation: bounce 1s infinite alternate;
-
-    }
-
-
-    .loader div:nth-child(2) {
-
-        animation-delay: 0.2s;
-
-    }
-
-
-    .loader div:nth-child(3) {
-
-        animation-delay: 0.4s;
-
-    }
-
-
-    @keyframes bounce {
-
-        from {
-
-            transform: translateY(0);
-
-        }
-
-        to {
-
-            transform: translateY(-10px);
-
-        }
-
-    }
-
-
-    .pay-button {
-
-        width: 100%;
-
-        margin-top: 25px;
-
-        padding: 14px;
-
-        border: none;
-
-        border-radius: 8px;
-
-        background: #007bff;
-
-        color: white;
-
-        font-size: 16px;
-
-        font-weight: bold;
-
-        cursor: pointer;
-
-    }
-
-
-    .pay-button:hover {
-
-        background: #0056d6;
-
-    }
-
-</style>
 
 {% endblock %}

@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,54 +16,271 @@
 
     <style>
 
-        body {
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
+        * {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            padding: 0;
+            box-sizing: border-box;
         }
 
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f6f8;
+            color: #222;
+            min-height: 100vh;
+        }
+
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
         .navbar {
-            background-color: #222;
-            padding: 15px 30px;
+            background: #111827;
+            color: white;
+            padding: 15px 40px;
 
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
         .logo {
             color: white;
-            font-size: 24px;
-            font-weight: bold;
             text-decoration: none;
+            font-size: 25px;
+            font-weight: bold;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 18px;
+            flex-wrap: wrap;
         }
 
         .nav-links a {
             color: white;
             text-decoration: none;
-            padding: 8px 12px;
+            font-size: 14px;
+            transition: color 0.2s ease;
         }
 
         .nav-links a:hover {
-            background-color: #444;
-            border-radius: 5px;
+            color: #60a5fa;
         }
 
-        .welcome {
-            color: #ddd;
+
+        /* =====================================================
+           MAIN CONTAINER
+        ===================================================== */
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
         }
 
-        .content {
-            padding: 30px;
+
+        /* =====================================================
+           POPUP NOTIFICATIONS
+        ===================================================== */
+
+        .toast-notification {
+            position: fixed;
+
+            top: 25px;
+            right: 25px;
+
+            z-index: 99999;
+
+            width: max-content;
+            max-width: 450px;
+            min-width: 300px;
+
+            padding: 18px 48px 18px 20px;
+
+            border-radius: 10px;
+
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.5;
+
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.20);
+
+            overflow-wrap: anywhere;
+
+            animation: toastSlideIn 0.3s ease;
+        }
+
+        .toast-notification.success {
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #a3cfbb;
+        }
+
+        .toast-notification.error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f1aeb5;
+        }
+
+        .toast-notification.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffe69c;
+        }
+
+        .toast-notification.info {
+            background: #cff4fc;
+            color: #055160;
+            border: 1px solid #9eeaf9;
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+
+            background: transparent;
+            border: none;
+
+            color: inherit;
+            font-size: 25px;
+            font-weight: bold;
+            line-height: 1;
+
+            padding: 2px 5px;
+            cursor: pointer;
+        }
+
+        .toast-close:hover {
+            opacity: 0.65;
+        }
+
+        .toast-hide {
+            opacity: 0;
+            transform: translateX(30px);
+
+            transition:
+                opacity 0.3s ease,
+                transform 0.3s ease;
+        }
+
+        @keyframes toastSlideIn {
+
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+        }
+
+
+        /* =====================================================
+           GENERAL BUTTONS
+        ===================================================== */
+
+        button,
+        .btn {
+            display: inline-block;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 18px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        button:hover,
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+
+        /* =====================================================
+           GENERAL FORMS
+        ===================================================== */
+
+        input,
+        textarea,
+        select {
+            max-width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        footer {
+            margin-top: 50px;
+            background: #111827;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 768px) {
+
+            .navbar {
+                padding: 15px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav-links {
+                width: 100%;
+                gap: 14px;
+            }
+
+            .container {
+                width: 94%;
+            }
+
+            .toast-notification {
+                top: 15px;
+                right: 15px;
+                left: 15px;
+                width: auto;
+                max-width: none;
+                min-width: 0;
+            }
+
         }
 
     </style>
+
+    {% block extra_css %}
+    {% endblock %}
 
 </head>
 
@@ -69,48 +288,218 @@
 <body>
 
 
-    <!-- Navigation Bar -->
+    <!-- =====================================================
+         NAVBAR
+    ===================================================== -->
 
     <nav class="navbar">
 
-        <a href="/" class="logo">
+        <a href="{% url 'product_list' %}"
+           class="logo">
             ShopSphere
         </a>
 
-
         <div class="nav-links">
 
-     {% if user.is_authenticated %}
-        
-        <span class="welcome">Hello, {{ user.username }}</span>
+            {% if user.is_authenticated %}
 
-        <a href="{% url 'cart_detail' %}">🛒 Cart</a>
+                <!-- CUSTOMER -->
 
-        <a href="{% url 'my_orders' %}">📦 My Orders</a>
+                {% if user.role == 'CUSTOMER' %}
 
-        <a href="{% url 'address_list' %}">📍 My Addresses</a>
+                    <a href="{% url 'product_list' %}">
+                        🛍️ Products
+                    </a>
 
-        <a href="{% url 'logout' %}">Logout</a>
-    
-    {% else %}
-        <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'register' %}">Register</a>
-    {% endif %}
+                    <a href="{% url 'cart_detail' %}">
+                        🛒 Cart
+                    </a>
+
+                    <a href="{% url 'my_orders' %}">
+                        📦 My Orders
+                    </a>
+
+                    <a href="{% url 'wishlist' %}">
+                        ❤️ My Wishlist
+                    </a>
+
+                    <a href="{% url 'profile' %}">
+                        👤 My Profile
+                    </a>
+
+
+                <!-- SELLER -->
+
+                {% elif user.role == 'SELLER' %}
+
+                    <a href="{% url 'seller_dashboard' %}">
+                        🏪 Seller Dashboard
+                    </a>
+
+                    <a href="{% url 'product_list' %}">
+                        View Store
+                    </a>
+
+
+                <!-- ADMIN -->
+
+                {% elif user.role == 'ADMIN' or user.is_superuser %}
+
+                    {% if user.is_staff or user.is_superuser %}
+
+                        <a href="/admin/">
+                            ⚙️ Admin Panel
+                        </a>
+
+                    {% endif %}
+
+                {% endif %}
+
+
+                <a href="{% url 'logout' %}">
+                    Logout
+                </a>
+
+
+            {% else %}
+
+                <a href="{% url 'product_list' %}">
+                    Products
+                </a>
+
+                <a href="{% url 'user_login' %}">
+                    Login
+                </a>
+
+                <a href="{% url 'register' %}">
+                    Register
+                </a>
+
+            {% endif %}
 
         </div>
 
     </nav>
 
 
-    <!-- Page Content -->
+    <!-- =====================================================
+         POPUP MESSAGES
+    ===================================================== -->
 
-    <main class="content">
+    {% if messages %}
+
+        {% for message in messages %}
+
+            {% if forloop.last %}
+
+                <div
+                    id="django-toast"
+                    class="toast-notification {{ message.tags }}"
+                    role="alert"
+                    aria-live="polite"
+                >
+
+                    <span>{{ message }}</span>
+
+                    <button
+                        type="button"
+                        class="toast-close"
+                        onclick="closeToast()"
+                        aria-label="Close notification"
+                    >
+                        &times;
+                    </button>
+
+                </div>
+
+            {% endif %}
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         PAGE CONTENT
+    ===================================================== -->
+
+    <main class="container">
 
         {% block content %}
-
         {% endblock %}
 
     </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ===================================================== -->
+
+    <footer>
+
+        <p>
+            &copy; 2026 ShopSphere. All rights reserved.
+        </p>
+
+    </footer>
+
+
+    {% block extra_js %}
+    {% endblock %}
+
+
+    <!-- =====================================================
+         POPUP JAVASCRIPT
+    ===================================================== -->
+
+    <script>
+
+        function closeToast() {
+
+            const toast = document.getElementById(
+                "django-toast"
+            );
+
+            if (toast) {
+                toast.remove();
+            }
+
+        }
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const toast = document.getElementById(
+                    "django-toast"
+                );
+
+                if (toast) {
+
+                    setTimeout(function () {
+
+                        if (!document.body.contains(toast)) {
+                            return;
+                        }
+
+                        toast.classList.add("toast-hide");
+
+                        setTimeout(function () {
+
+                            if (document.body.contains(toast)) {
+                                toast.remove();
+                            }
+
+                        }, 300);
+
+                    }, 5000);
+
+                }
+
+            }
+        );
+
+    </script>
 
 
 </body>

@@ -1,0 +1,391 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Edit Profile - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<div class="edit-profile-container">
+
+    <div class="page-heading">
+
+        <a href="{% url 'profile' %}" class="back-link">
+            ← Back to My Profile
+        </a>
+
+        <h1>Edit Profile</h1>
+
+        <p>Update your personal information.</p>
+
+    </div>
+
+
+    <div class="edit-profile-card">
+
+        <div class="form-heading">
+
+            <div class="form-icon">✏️</div>
+
+            <div>
+                <h2>Personal Information</h2>
+                <p>Keep your account information up to date.</p>
+            </div>
+
+        </div>
+
+
+        {% if error %}
+
+            <div class="form-error">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        <form method="POST" class="profile-form">
+
+            {% csrf_token %}
+
+
+            <div class="form-group">
+
+                <label for="username">
+                    Username <span>*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value="{{ profile_user.username }}"
+                    maxlength="150"
+                    required
+                    autocomplete="username"
+                >
+
+            </div>
+
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label for="first_name">
+                        First Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="first_name"
+                        name="first_name"
+                        value="{{ profile_user.first_name }}"
+                        maxlength="150"
+                        autocomplete="given-name"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="last_name">
+                        Last Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="last_name"
+                        name="last_name"
+                        value="{{ profile_user.last_name }}"
+                        maxlength="150"
+                        autocomplete="family-name"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="email">
+                    Email Address <span>*</span>
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ profile_user.email }}"
+                    maxlength="254"
+                    required
+                    autocomplete="email"
+                >
+
+            </div>
+
+
+            <div class="account-type">
+
+                <span class="account-type-label">
+                    Account Type
+                </span>
+
+                <strong>
+                    {{ profile_user.get_role_display }}
+                </strong>
+
+                <p>
+                    Your account type cannot be changed from this page.
+                </p>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <a
+                    href="{% url 'profile' %}"
+                    class="cancel-button"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="save-button"
+                >
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .edit-profile-container {
+        max-width: 750px;
+        margin: 0 auto;
+        padding: 20px 0 50px;
+    }
+
+    .page-heading {
+        margin-bottom: 25px;
+    }
+
+    .back-link {
+        display: inline-block;
+        color: #0056b3;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .page-heading h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+        color: #111827;
+    }
+
+    .page-heading p {
+        color: #6b7280;
+        margin: 0;
+    }
+
+    .edit-profile-card {
+        background: white;
+        border-radius: 14px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    }
+
+    .form-heading {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 22px;
+        margin-bottom: 25px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .form-icon {
+        width: 55px;
+        height: 55px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 25px;
+        background: #e9f2ff;
+        border-radius: 12px;
+    }
+
+    .form-heading h2 {
+        margin: 0 0 6px;
+        font-size: 21px;
+    }
+
+    .form-heading p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .form-error {
+        background: #f8d7da;
+        color: #842029;
+        border: 1px solid #f1aeb5;
+        border-radius: 7px;
+        padding: 13px 15px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .profile-form {
+        width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        min-width: 0;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        color: #374151;
+    }
+
+    .form-group label span {
+        color: #dc3545;
+    }
+
+    .form-group input {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        font-size: 15px;
+        background: white;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.12);
+    }
+
+    .account-type {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 10px 0 25px;
+    }
+
+    .account-type-label {
+        display: block;
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 8px;
+    }
+
+    .account-type strong {
+        display: block;
+        color: #0056b3;
+        font-size: 15px;
+    }
+
+    .account-type p {
+        color: #6b7280;
+        margin: 8px 0 0;
+        font-size: 13px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .cancel-button,
+    .save-button {
+        display: inline-block;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 7px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .cancel-button {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .save-button {
+        background: #007bff;
+        color: white;
+    }
+
+    .save-button:hover {
+        background: #0056b3;
+    }
+
+    @media (max-width: 600px) {
+
+        .edit-profile-container {
+            padding: 10px 0 35px;
+        }
+
+        .edit-profile-card {
+            padding: 20px;
+        }
+
+        .page-heading h1 {
+            font-size: 27px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .cancel-button,
+        .save-button {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+{% endblock %}

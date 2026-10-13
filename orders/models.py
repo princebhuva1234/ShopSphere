@@ -21,9 +21,40 @@ class Order(models.Model):
         related_name='orders'
     )
 
+    # Final amount the customer must pay.
     total_amount = models.DecimalField(
         max_digits=12,
         decimal_places=2
+    )
+
+    # Total before applying a coupon.
+    subtotal_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    # Amount deducted by the coupon.
+    discount_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    # Coupon used for this order.
+    coupon = models.ForeignKey(
+        'coupons.Coupon',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='orders'
+    )
+
+    # Preserve the code even if the coupon relationship is removed.
+    coupon_code = models.CharField(
+        max_length=50,
+        blank=True,
+        default=''
     )
 
     status = models.CharField(
@@ -42,6 +73,18 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} - {self.user.username}"
+
+    @property
+    def calculated_subtotal(self):
+        """
+        Calculate the subtotal from the order items.
+        Useful for displaying historical orders created
+        before subtotal_amount was introduced.
+        """
+        return sum(
+            (item.subtotal for item in self.items.all()),
+            start=0
+        )
 
 
 class OrderAddress(models.Model):

@@ -1,7 +1,7 @@
 from django.db import models
 from categories.models import Category
 from accounts.models import User
-
+from django.db.models import Avg
 
 class Product(models.Model):
 
@@ -18,7 +18,9 @@ class Product(models.Model):
         limit_choices_to={'role': 'SELLER'}
     )
 
-    name = models.CharField(max_length=200)
+    name = models.CharField(
+        max_length=200
+    )
 
     slug = models.SlugField(
         max_length=220,
@@ -44,7 +46,14 @@ class Product(models.Model):
         null=True
     )
 
-    is_active = models.BooleanField(default=True)
+    # Inventory / Stock
+    stock_quantity = models.PositiveIntegerField(
+        default=0
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
 
     created_at = models.DateTimeField(
         auto_now_add=True
@@ -61,7 +70,6 @@ class Product(models.Model):
         return self.name
 
 
-# ADD ProductImage HERE
 class ProductImage(models.Model):
 
     product = models.ForeignKey(
@@ -87,3 +95,17 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{self.product.name} Image"
+
+
+@property
+def average_rating(self):
+    result = self.reviews.aggregate(
+        average=Avg('rating')
+    )['average']
+
+    return round(result, 1) if result is not None else 0
+
+
+@property
+def review_count(self):
+    return self.reviews.count()

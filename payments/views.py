@@ -4,123 +4,67 @@ import json
 
 from django.conf import settings
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-import razorpay
+from orders.models import Order
+from payments.models import Payment
+from returns.models import ReturnRequest
 
-from .models import Payment
+from orders.views import reduce_stock_for_order
 
-
-# =========================================================
-# RAZORPAY WEBHOOK
-# =========================================================
 
 @csrf_exempt
 def razorpay_webhook(request):
 
-    # -----------------------------------------------------
-    # ONLY POST IS ALLOWED
-    # -----------------------------------------------------
-
+    # Only accept POST requests.
     if request.method != 'POST':
+        return HttpResponse('Method not allowed', status=405)
 
-        return JsonResponse(
-            {
-                'error': 'Method not allowed'
-            },
-            status=405
-        )
-
-    # -----------------------------------------------------
-    # GET WEBHOOK SECRET
-    # -----------------------------------------------------
-
+    # Get webhook secret.
     webhook_secret = getattr(
         settings,
         'RAZORPAY_WEBHOOK_SECRET',
-        None
+        '',
     )
 
     if not webhook_secret:
-
-        return JsonResponse(
-            {
-                'error':
-                    'Webhook secret is not configured.'
-            },
-            status=500
+        return HttpResponse(
+            'Webhook secret not configured',
+            status=500,
         )
 
-    # -----------------------------------------------------
-    # GET RAZORPAY SIGNATURE
-    # -----------------------------------------------------
-
+    # Get Razorpay signature.
     received_signature = request.headers.get(
-        'X-Razorpay-Signature'
+        'X-Razorpay-Signature',
+        '',
     )
 
     if not received_signature:
+        return HttpResponse('Missing signature', status=400)
 
-        return JsonResponse(
-            {
-                'error':
-                    'Missing Razorpay signature.'
-            },
-            status=400
-        )
-
-    # =====================================================
-    # VERIFY HMAC SIGNATURE
-    # =====================================================
-
+    # Verify webhook signature.
     expected_signature = hmac.new(
         webhook_secret.encode('utf-8'),
         request.body,
-        hashlib.sha256
+        hashlib.sha256,
     ).hexdigest()
 
     if not hmac.compare_digest(
         received_signature,
-        expected_signature
+        expected_signature,
     ):
+        return HttpResponse('Invalid signature', status=400)
 
-        return JsonResponse(
-            {
-                'error':
-                    'Invalid webhook signature.'
-            },
-            status=400
-        )
-
-    # =====================================================
-    # PARSE JSON
-    # =====================================================
-
+    # Parse JSON.
     try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return HttpResponse('Invalid JSON', status=400)
 
-        payload = json.loads(
-            request.body.decode('utf-8')
-        )
+    event = payload.get('event', '')
 
-    except (
-        json.JSONDecodeError,
-        UnicodeDecodeError
-    ):
-
-        return JsonResponse(
-            {
-                'error':
-                    'Invalid JSON payload.'
-            },
-            status=400
-        )
-
-    # -----------------------------------------------------
-    # EVENT
-    # -----------------------------------------------------
-
-    event = payload.get('event')
+    entities = payload.get('payload', {})
 
     # =====================================================
     # ORDER PAID
@@ -129,171 +73,114 @@ def razorpay_webhook(request):
     if event == 'order.paid':
 
         order_entity = (
-            payload
-            .get('payload', {})
-            .get('order', {})
-            .get('entity', {})
+            entities.get('order', {}).get('entity', {})
         )
 
         payment_entity = (
-            payload
-            .get('payload', {})
-            .get('payment', {})
-            .get('entity', {})
+            entities.get('payment', {}).get('entity', {})
         )
 
-        razorpay_order_id = order_entity.get(
-            'id'
-        )
+        provider_order_id = order_entity.get('id')
+        razorpay_payment_id = payment_entity.get('id')
+        gateway_method = payment_entity.get('method')
 
-        razorpay_payment_id = payment_entity.get(
-            'id'
-        )
+        razorpay_amount = order_entity.get('amount_paid')
 
-        gateway_method = payment_entity.get(
-            'method'
-        )
-
-        # -------------------------------------------------
-        # FIND OUR PAYMENT
-        # -------------------------------------------------
-
-        if not razorpay_order_id:
-
+        if not provider_order_id:
             return JsonResponse(
-                {
-                    'error':
-                        'Razorpay order ID missing.'
-                },
-                status=400
+                {'status': 'missing_order_id'},
+                status=400,
             )
 
-        payment = Payment.objects.filter(
-            provider_order_id=razorpay_order_id
-        ).select_related(
-            'order'
-        ).first()
+        payment = (
+            Payment.objects
+            .select_related('order')
+            .filter(provider_order_id=provider_order_id)
+            .first()
+        )
 
         if not payment:
-
-            # Return 200 so Razorpay does not keep retrying
-            # an event for an order that does not belong
-            # to this application.
             return JsonResponse(
-                {
-                    'status':
-                        'ignored'
-                },
-                status=200
+                {'status': 'payment_not_found'},
+                status=200,
             )
-
-        # =================================================
-        # IDEMPOTENCY
-        # =================================================
 
         with transaction.atomic():
 
-            payment = Payment.objects.select_for_update().get(
-                id=payment.id
+            payment = (
+                Payment.objects
+                .select_for_update()
+                .get(id=payment.id)
             )
 
-            order = payment.order
+            order = (
+                Order.objects
+                .select_for_update()
+                .get(id=payment.order_id)
+            )
 
-            # If we already processed this payment,
-            # do nothing.
-            if (
-                payment.status == 'PAID'
-                and (
-                    not razorpay_payment_id
-                    or
-                    payment.provider_payment_id
-                    == razorpay_payment_id
-                )
-            ):
-
+            # Idempotency: do not process an already-paid payment.
+            if payment.status == 'PAID':
                 return JsonResponse(
-                    {
-                        'status':
-                            'already_processed'
-                    },
-                    status=200
+                    {'status': 'already_processed'},
+                    status=200,
                 )
 
-            # -------------------------------------------------
-            # OPTIONAL AMOUNT CHECK
-            # -------------------------------------------------
-
-            razorpay_amount_paid = order_entity.get(
-                'amount_paid'
-            )
-
-            expected_amount = int(
-                payment.amount * 100
-            )
+            expected_amount = int(payment.amount * 100)
 
             if (
-                razorpay_amount_paid is not None
-                and int(razorpay_amount_paid)
-                != expected_amount
+                razorpay_amount is not None
+                and int(razorpay_amount) != expected_amount
             ):
-
-                return JsonResponse(
-                    {
-                        'error':
-                            'Payment amount mismatch.'
-                    },
-                    status=400
+                payment.status = 'FAILED'
+                payment.save(
+                    update_fields=['status', 'updated_at']
                 )
 
-            # -------------------------------------------------
-            # UPDATE PAYMENT
-            # -------------------------------------------------
+                return JsonResponse(
+                    {'status': 'amount_mismatch'},
+                    status=400,
+                )
+
+            # Reduce stock only after a successful payment.
+            stock_reduced = reduce_stock_for_order(order)
+
+            if not stock_reduced:
+                payment.status = 'FAILED'
+                payment.save(
+                    update_fields=['status', 'updated_at']
+                )
+
+                order.status = 'CANCELLED'
+                order.save(
+                    update_fields=['status', 'updated_at']
+                )
+
+                return JsonResponse(
+                    {'status': 'insufficient_stock'},
+                    status=409,
+                )
 
             payment.status = 'PAID'
-
-            if razorpay_payment_id:
-
-                payment.provider_payment_id = (
-                    razorpay_payment_id
-                )
-
-            if gateway_method:
-
-                payment.gateway_method = (
-                    gateway_method
-                )
+            payment.provider_payment_id = razorpay_payment_id
+            payment.gateway_method = gateway_method
 
             payment.save(
                 update_fields=[
                     'status',
                     'provider_payment_id',
                     'gateway_method',
-                    'updated_at'
+                    'updated_at',
                 ]
             )
 
-            # -------------------------------------------------
-            # UPDATE ORDER
-            # -------------------------------------------------
-
             if order.status != 'CONFIRMED':
-
                 order.status = 'CONFIRMED'
-
                 order.save(
-                    update_fields=[
-                        'status',
-                        'updated_at'
-                    ]
+                    update_fields=['status', 'updated_at']
                 )
 
-        return JsonResponse(
-            {
-                'status':
-                    'processed'
-            },
-            status=200
-        )
+        return JsonResponse({'status': 'success'}, status=200)
 
     # =====================================================
     # PAYMENT FAILED
@@ -302,121 +189,241 @@ def razorpay_webhook(request):
     if event == 'payment.failed':
 
         payment_entity = (
-            payload
-            .get('payload', {})
-            .get('payment', {})
-            .get('entity', {})
+            entities.get('payment', {}).get('entity', {})
         )
 
-        razorpay_payment_id = payment_entity.get(
-            'id'
-        )
-
-        razorpay_order_id = payment_entity.get(
-            'order_id'
-        )
-
-        gateway_method = payment_entity.get(
-            'method'
-        )
-
-        # -------------------------------------------------
-        # FIND PAYMENT
-        # -------------------------------------------------
+        provider_order_id = payment_entity.get('order_id')
+        razorpay_payment_id = payment_entity.get('id')
+        gateway_method = payment_entity.get('method')
 
         payment = None
 
-        if razorpay_order_id:
-
+        if provider_order_id:
             payment = Payment.objects.filter(
-                provider_order_id=razorpay_order_id
-            ).select_related(
-                'order'
+                provider_order_id=provider_order_id,
             ).first()
 
-        if (
-            not payment
-            and razorpay_payment_id
-        ):
-
+        if not payment and razorpay_payment_id:
             payment = Payment.objects.filter(
-                provider_payment_id=
-                    razorpay_payment_id
-            ).select_related(
-                'order'
+                provider_payment_id=razorpay_payment_id,
             ).first()
 
         if not payment:
-
             return JsonResponse(
-                {
-                    'status':
-                        'ignored'
-                },
-                status=200
+                {'status': 'payment_not_found'},
+                status=200,
             )
-
-        # =================================================
-        # IDEMPOTENT FAILURE HANDLING
-        # =================================================
 
         with transaction.atomic():
 
-            payment = Payment.objects.select_for_update().get(
-                id=payment.id
+            payment = (
+                Payment.objects
+                .select_for_update()
+                .get(id=payment.id)
             )
 
-            # Never change an already successful payment
-            # back to FAILED.
-            if payment.status == 'PAID':
-
+            # Never change a successful payment to FAILED.
+            if payment.status in ('PAID', 'REFUNDED'):
                 return JsonResponse(
-                    {
-                        'status':
-                            'already_paid'
-                    },
-                    status=200
+                    {'status': 'already_paid_or_refunded'},
+                    status=200,
                 )
 
             payment.status = 'FAILED'
 
             if razorpay_payment_id:
-
-                payment.provider_payment_id = (
-                    razorpay_payment_id
-                )
+                payment.provider_payment_id = razorpay_payment_id
 
             if gateway_method:
-
-                payment.gateway_method = (
-                    gateway_method
-                )
+                payment.gateway_method = gateway_method
 
             payment.save(
                 update_fields=[
                     'status',
                     'provider_payment_id',
                     'gateway_method',
-                    'updated_at'
+                    'updated_at',
                 ]
             )
 
         return JsonResponse(
-            {
-                'status':
-                    'processed'
-            },
-            status=200
+            {'status': 'payment_failed'},
+            status=200,
         )
 
     # =====================================================
-    # OTHER / UNKNOWN EVENT
+    # REFUND PROCESSED
+    # =====================================================
+
+    if event == 'refund.processed':
+
+        refund_entity = (
+            entities.get('refund', {}).get('entity', {})
+        )
+
+        refund_id = refund_entity.get('id')
+        razorpay_payment_id = refund_entity.get('payment_id')
+        refund_amount_paise = refund_entity.get('amount')
+
+        if not refund_id or not razorpay_payment_id:
+            return JsonResponse(
+                {'status': 'missing_refund_information'},
+                status=400,
+            )
+
+        with transaction.atomic():
+
+            payment = (
+                Payment.objects
+                .select_for_update()
+                .filter(
+                    provider_payment_id=razorpay_payment_id,
+                    provider='RAZORPAY',
+                )
+                .first()
+            )
+
+            if not payment:
+                return JsonResponse(
+                    {'status': 'payment_not_found'},
+                    status=200,
+                )
+
+            # Match this gateway refund to a ShopSphere return request.
+            return_request = (
+                ReturnRequest.objects
+                .select_for_update()
+                .filter(
+                    payment=payment,
+                    razorpay_refund_id=refund_id,
+                )
+                .first()
+            )
+
+            if not return_request:
+                return JsonResponse(
+                    {'status': 'return_request_not_found'},
+                    status=200,
+                )
+
+            # Validate the reported refund amount.
+            expected_refund_paise = int(
+                return_request.refund_amount * 100
+            )
+
+            if (
+                refund_amount_paise is not None
+                and int(refund_amount_paise) != expected_refund_paise
+            ):
+                return JsonResponse(
+                    {'status': 'refund_amount_mismatch'},
+                    status=400,
+                )
+
+            # A refund is final only after Razorpay confirms processing.
+            return_request.status = 'REFUNDED'
+
+            return_request.save(
+                update_fields=['status', 'updated_at']
+            )
+
+            # This implementation supports full refunds only.
+            # Do not mark the whole payment refunded for a partial refund.
+            if return_request.refund_amount == payment.amount:
+                payment.status = 'REFUNDED'
+                payment.save(
+                    update_fields=['status', 'updated_at']
+                )
+
+        return JsonResponse(
+            {'status': 'refund_processed'},
+            status=200,
+        )
+
+    # =====================================================
+    # REFUND FAILED
+    # =====================================================
+
+    if event == 'refund.failed':
+
+        refund_entity = (
+            entities.get('refund', {}).get('entity', {})
+        )
+
+        refund_id = refund_entity.get('id')
+        razorpay_payment_id = refund_entity.get('payment_id')
+
+        if not refund_id or not razorpay_payment_id:
+            return JsonResponse(
+                {'status': 'missing_refund_information'},
+                status=400,
+            )
+
+        with transaction.atomic():
+
+            payment = (
+                Payment.objects
+                .select_for_update()
+                .filter(
+                    provider_payment_id=razorpay_payment_id,
+                    provider='RAZORPAY',
+                )
+                .first()
+            )
+
+            if not payment:
+                return JsonResponse(
+                    {'status': 'payment_not_found'},
+                    status=200,
+                )
+
+            return_request = (
+                ReturnRequest.objects
+                .select_for_update()
+                .filter(
+                    payment=payment,
+                    razorpay_refund_id=refund_id,
+                    status='REFUND_PROCESSING',
+                )
+                .first()
+            )
+
+            if not return_request:
+                return JsonResponse(
+                    {'status': 'return_request_not_found_or_already_updated'},
+                    status=200,
+                )
+
+            # Do not automatically retry a failed refund.
+            # The administrator must review the failure first.
+            return_request.status = 'APPROVED'
+            return_request.admin_note = (
+                f'{return_request.admin_note}\n'
+                f'Razorpay reported refund {refund_id} as failed. '
+                'Review the Razorpay Dashboard before retrying.'
+            ).strip()
+
+            return_request.save(
+                update_fields=[
+                    'status',
+                    'admin_note',
+                    'updated_at',
+                ]
+            )
+
+        return JsonResponse(
+            {'status': 'refund_failed'},
+            status=200,
+        )
+
+    # =====================================================
+    # OTHER EVENTS
     # =====================================================
 
     return JsonResponse(
         {
-            'status':
-                'ignored'
+            'status': 'ignored',
+            'event': event,
         },
-        status=200
+        status=200,
     )

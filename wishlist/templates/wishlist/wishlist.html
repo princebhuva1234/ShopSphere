@@ -1,0 +1,632 @@
+{% extends 'base.html' %}
+
+{% block title %}
+My Wishlist - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<div class="wishlist-page">
+
+    <!-- PAGE HEADER -->
+
+    <div class="wishlist-header">
+
+        <div>
+            <h1>❤️ My Wishlist</h1>
+
+            <p>
+                Your favorite products, all in one place.
+            </p>
+        </div>
+
+        <div class="wishlist-icon">
+            ❤️
+        </div>
+
+    </div>
+
+
+    <!-- WISHLIST CONTENT -->
+
+    {% if wishlist_items %}
+
+        <div class="wishlist-count">
+            {{ wishlist_items|length }} saved product(s)
+        </div>
+
+
+        <div class="wishlist-grid">
+
+            {% for item in wishlist_items %}
+
+                <div class="wishlist-card">
+
+                    <!-- PRODUCT IMAGE -->
+
+                    <a
+                        href="{% url 'product_detail' item.product.slug %}"
+                        class="wishlist-image-link"
+                    >
+
+                        {% with image=item.product.images.all.0 %}
+
+                            {% if image %}
+
+                                <img
+                                    src="{{ image.image.url }}"
+                                    alt="{{ item.product.name }}"
+                                    class="wishlist-image"
+                                >
+
+                            {% else %}
+
+                                <div class="no-image">
+                                    📦
+                                    <span>No Image Available</span>
+                                </div>
+
+                            {% endif %}
+
+                        {% endwith %}
+
+
+                        {% if not item.product.is_active %}
+
+                            <span class="stock-badge unavailable">
+                                Unavailable
+                            </span>
+
+                        {% elif item.product.stock_quantity == 0 %}
+
+                            <span class="stock-badge out-of-stock">
+                                Out of Stock
+                            </span>
+
+                        {% elif item.product.stock_quantity <= 5 %}
+
+                            <span class="stock-badge low-stock">
+                                Only {{ item.product.stock_quantity }} left
+                            </span>
+
+                        {% else %}
+
+                            <span class="stock-badge in-stock">
+                                In Stock
+                            </span>
+
+                        {% endif %}
+
+                    </a>
+
+
+                    <!-- PRODUCT DETAILS -->
+
+                    <div class="wishlist-details">
+
+                        <p class="product-brand">
+                            {{ item.product.brand|default:"ShopSphere Product" }}
+                        </p>
+
+
+                        <h3>
+
+                            <a href="{% url 'product_detail' item.product.slug %}">
+                                {{ item.product.name }}
+                            </a>
+
+                        </h3>
+
+
+                        <p class="product-category">
+                            {{ item.product.category.name }}
+                        </p>
+
+
+                        <!-- PRICE -->
+
+                        <div class="product-price">
+
+                            {% if item.product.discount_price %}
+
+                                <strong class="current-price">
+                                    ₹{{ item.product.discount_price }}
+                                </strong>
+
+                                <del class="old-price">
+                                    ₹{{ item.product.price }}
+                                </del>
+
+                            {% else %}
+
+                                <strong class="current-price">
+                                    ₹{{ item.product.price }}
+                                </strong>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <p class="added-date">
+                            Added {{ item.added_at|date:"d M Y" }}
+                        </p>
+
+
+                        <!-- MOVE TO CART -->
+
+                        {% if item.product.is_active %}
+
+                            {% if item.product.stock_quantity > 0 %}
+
+                                <form
+                                    method="POST"
+                                    action="{% url 'move_to_cart' item.id %}"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="move-cart-button"
+                                    >
+                                        🛒 Move to Cart
+                                    </button>
+
+                                </form>
+
+                            {% else %}
+
+                                <button
+                                    type="button"
+                                    class="disabled-cart-button"
+                                    disabled
+                                >
+                                    Out of Stock
+                                </button>
+
+                            {% endif %}
+
+                        {% else %}
+
+                            <button
+                                type="button"
+                                class="disabled-cart-button"
+                                disabled
+                            >
+                                Unavailable
+                            </button>
+
+                        {% endif %}
+
+
+                        <!-- REMOVE FROM WISHLIST -->
+
+                        <form
+                            method="POST"
+                            action="{% url 'remove_from_wishlist' item.id %}"
+                            class="remove-form"
+                            onsubmit="return confirm('Remove this product from your wishlist?');"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="remove-button"
+                            >
+                                🗑️ Remove
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+    {% else %}
+
+
+        <!-- EMPTY WISHLIST -->
+
+        <div class="empty-wishlist">
+
+            <div class="empty-icon">
+                ❤️
+            </div>
+
+            <h2>Your Wishlist Is Empty</h2>
+
+            <p>
+                Save products you love and find them here whenever
+                you need them.
+            </p>
+
+            <a
+                href="{% url 'product_list' %}"
+                class="browse-button"
+            >
+                Explore Products
+            </a>
+
+        </div>
+
+
+    {% endif %}
+
+
+    <!-- CONTINUE SHOPPING -->
+
+    <div class="continue-shopping">
+
+        <a href="{% url 'product_list' %}">
+            ← Continue Shopping
+        </a>
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* =====================================================
+   MAIN PAGE
+===================================================== */
+
+.wishlist-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 0 50px;
+}
+
+.wishlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.wishlist-header h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+    color: #111827;
+}
+
+.wishlist-header p {
+    margin: 0;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+.wishlist-icon {
+    font-size: 35px;
+    padding: 15px;
+    background: #fce7f3;
+    border-radius: 50%;
+}
+
+.wishlist-count {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 8px 13px;
+    background: #fce7f3;
+    color: #9d174d;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+
+/* =====================================================
+   GRID
+===================================================== */
+
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.wishlist-card {
+    min-width: 0;
+    overflow: hidden;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #edf0f4;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wishlist-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.09);
+}
+
+
+/* =====================================================
+   IMAGE
+===================================================== */
+
+.wishlist-image-link {
+    position: relative;
+    height: 220px;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    text-decoration: none;
+}
+
+.wishlist-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.no-image {
+    color: #9ca3af;
+    text-align: center;
+    font-size: 42px;
+}
+
+.no-image span {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.stock-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 6px 9px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.stock-badge.in-stock {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.stock-badge.low-stock {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.stock-badge.out-of-stock {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.stock-badge.unavailable {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+
+/* =====================================================
+   PRODUCT INFORMATION
+===================================================== */
+
+.wishlist-details {
+    padding: 18px;
+}
+
+.product-brand {
+    color: #6b7280;
+    font-size: 12px;
+    margin: 0 0 7px;
+    text-transform: uppercase;
+}
+
+.wishlist-details h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.wishlist-details h3 a {
+    color: #111827;
+    text-decoration: none;
+}
+
+.wishlist-details h3 a:hover {
+    color: #007bff;
+}
+
+.product-category {
+    color: #6b7280;
+    font-size: 13px;
+    margin: 0 0 14px;
+}
+
+.product-price {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.current-price {
+    font-size: 22px;
+    color: #198754;
+}
+
+.old-price {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.added-date {
+    color: #9ca3af;
+    font-size: 12px;
+    margin: 0 0 15px;
+}
+
+
+/* =====================================================
+   MOVE TO CART
+===================================================== */
+
+.move-cart-button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 7px;
+    background: #007bff;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.move-cart-button:hover {
+    background: #0056b3;
+}
+
+.disabled-cart-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 7px;
+    background: #e5e7eb;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: not-allowed;
+}
+
+
+/* =====================================================
+   REMOVE BUTTON
+===================================================== */
+
+.remove-form {
+    margin-top: 10px;
+}
+
+.remove-button {
+    display: block;
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #f1aeb5;
+    border-radius: 7px;
+    background: #fff;
+    color: #b02a37;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.remove-button:hover {
+    background: #f8d7da;
+}
+
+
+/* =====================================================
+   EMPTY WISHLIST
+===================================================== */
+
+.empty-wishlist {
+    padding: 65px 20px;
+    background: white;
+    border-radius: 13px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.empty-icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+}
+
+.empty-wishlist h2 {
+    margin: 0 0 12px;
+    color: #111827;
+}
+
+.empty-wishlist p {
+    max-width: 480px;
+    margin: 0 auto 25px;
+    color: #6b7280;
+    line-height: 1.7;
+}
+
+.browse-button {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+    border-radius: 7px;
+    text-decoration: none;
+}
+
+.browse-button:hover {
+    background: #0056b3;
+}
+
+
+/* =====================================================
+   CONTINUE SHOPPING
+===================================================== */
+
+.continue-shopping {
+    margin-top: 25px;
+}
+
+.continue-shopping a {
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.continue-shopping a:hover {
+    text-decoration: underline;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 950px) {
+
+    .wishlist-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .wishlist-header h1 {
+        font-size: 27px;
+    }
+
+    .wishlist-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wishlist-image-link {
+        height: 240px;
+    }
+
+}
+
+</style>
+
+{% endblock %}

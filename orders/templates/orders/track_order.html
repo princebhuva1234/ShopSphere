@@ -1,0 +1,707 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Track Order - ShopSphere
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .tracking-page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 35px 20px;
+        color: #1f2937;
+    }
+
+    .tracking-header {
+        margin-bottom: 30px;
+    }
+
+    .tracking-header h1 {
+        margin: 0 0 10px;
+        font-size: 32px;
+    }
+
+    .tracking-header p {
+        color: #6b7280;
+        line-height: 1.7;
+    }
+
+    .tracking-card {
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 5px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .tracking-card h2 {
+        margin: 0 0 22px;
+        font-size: 22px;
+    }
+
+    .tracking-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .summary-box {
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #f9fafb;
+    }
+
+    .summary-label {
+        display: block;
+        margin-bottom: 9px;
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .summary-value {
+        font-size: 19px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .tracking-status {
+        display: inline-block;
+        padding: 8px 13px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .status-pending {
+        background: #fff4d6;
+        color: #8a5200;
+    }
+
+    .status-confirmed {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-processing {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .status-shipped {
+        background: #cffafe;
+        color: #0e7490;
+    }
+
+    .status-delivered {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    /* Tracking timeline */
+
+    .tracking-timeline {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .tracking-step {
+        display: flex;
+        gap: 18px;
+        min-height: 105px;
+    }
+
+    .tracking-marker-column {
+        position: relative;
+        display: flex;
+        flex: 0 0 44px;
+        justify-content: center;
+    }
+
+    .tracking-marker {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        width: 40px;
+        height: 40px;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        border: 2px solid #d1d5db;
+        border-radius: 50%;
+        background: #fff;
+        color: #9ca3af;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .tracking-line {
+        position: absolute;
+        top: 39px;
+        bottom: -2px;
+        left: 50%;
+        width: 3px;
+        background: #e5e7eb;
+        transform: translateX(-50%);
+    }
+
+    .tracking-step:last-child {
+        min-height: 60px;
+    }
+
+    .tracking-step:last-child .tracking-line {
+        display: none;
+    }
+
+    .tracking-step.completed .tracking-marker {
+        border-color: #0d9488;
+        background: #0d9488;
+        color: #fff;
+    }
+
+    .tracking-step.completed .tracking-line {
+        background: #0d9488;
+    }
+
+    .tracking-step.current .tracking-marker {
+        border-color: #0d9488;
+        background: #fff;
+        color: #0d9488;
+        box-shadow: 0 0 0 5px rgba(13, 148, 136, 0.12);
+    }
+
+    .tracking-step.current .tracking-title {
+        color: #0f766e;
+    }
+
+    .tracking-step-content {
+        flex: 1;
+        padding: 4px 0 30px;
+    }
+
+    .tracking-title {
+        margin: 0 0 7px;
+        color: #374151;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .tracking-description {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .tracking-date {
+        display: inline-block;
+        margin-top: 8px;
+        color: #0d9488;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .cancelled-notice {
+        padding: 22px;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
+        background: #fff1f2;
+        color: #991b1b;
+    }
+
+    .cancelled-notice h3 {
+        margin-top: 0;
+    }
+
+    .cancelled-notice p {
+        margin-bottom: 0;
+        line-height: 1.7;
+    }
+
+    /* Products */
+
+    .tracking-product-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .tracking-product {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        padding: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+    }
+
+    .tracking-product-name {
+        color: #1f2937;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .tracking-product-name:hover {
+        color: #2563eb;
+    }
+
+    .tracking-product-info {
+        margin-top: 8px;
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .tracking-product-price {
+        font-size: 15px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    /* Delivery address */
+
+    .delivery-address {
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #f9fafb;
+        line-height: 1.9;
+        overflow-wrap: anywhere;
+    }
+
+    /* Action buttons */
+
+    .tracking-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .tracking-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 13px 18px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        transition: background 0.2s;
+    }
+
+    .tracking-button-primary {
+        background: #0d9488;
+        color: #fff;
+    }
+
+    .tracking-button-primary:hover {
+        background: #0f766e;
+        color: #fff;
+    }
+
+    .tracking-button-secondary {
+        border-color: #d1d5db;
+        background: #fff;
+        color: #374151;
+    }
+
+    .tracking-button-secondary:hover {
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    @media (max-width: 750px) {
+        .tracking-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .tracking-header h1 {
+            font-size: 27px;
+        }
+
+        .tracking-card {
+            padding: 20px;
+        }
+    }
+
+    @media (max-width: 500px) {
+        .tracking-page {
+            padding: 22px 12px;
+        }
+
+        .tracking-card {
+            padding: 15px;
+        }
+
+        .tracking-product {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .tracking-actions {
+            flex-direction: column;
+        }
+
+        .tracking-button {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+</style>
+
+
+<div class="tracking-page">
+
+    <!-- Page header -->
+
+    <header class="tracking-header">
+
+        <h1>🚚 Track Your Order</h1>
+
+        <p>
+            Follow your ShopSphere order from confirmation
+            through delivery.
+        </p>
+
+    </header>
+
+
+    <!-- Order summary -->
+
+    <div class="tracking-summary">
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Order Number
+            </span>
+
+            <div class="summary-value">
+                #{{ order.id }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Order Date
+            </span>
+
+            <div class="summary-value">
+                {{ order.created_at|date:"d M Y" }}
+            </div>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <span class="summary-label">
+                Current Status
+            </span>
+
+            {% if order.status == "PENDING" %}
+
+                <span class="tracking-status status-pending">
+                    {{ order.get_status_display }}
+                </span>
+
+            {% elif order.status == "CONFIRMED" %}
+
+                <span class="tracking-status status-confirmed">
+                    {{ order.get_status_display }}
+                </span>
+
+            {% elif order.status == "PROCESSING" %}
+
+                <span class="tracking-status status-processing">
+                    {{ order.get_status_display }}
+                </span>
+
+            {% elif order.status == "SHIPPED" %}
+
+                <span class="tracking-status status-shipped">
+                    {{ order.get_status_display }}
+                </span>
+
+            {% elif order.status == "DELIVERED" %}
+
+                <span class="tracking-status status-delivered">
+                    {{ order.get_status_display }}
+                </span>
+
+            {% elif order.status == "CANCELLED" %}
+
+                <span class="tracking-status status-cancelled">
+                    {{ order.get_status_display }}
+                </span>
+
+            {% else %}
+
+                <span class="tracking-status status-pending">
+                    {{ order.get_status_display }}
+                </span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- Delivery timeline -->
+
+    <section class="tracking-card">
+
+        <h2>📍 Delivery Progress</h2>
+
+        {% if order.status == "CANCELLED" %}
+
+            <div class="cancelled-notice">
+
+                <h3>Order Cancelled</h3>
+
+                <p>
+                    Order #{{ order.id }} has been cancelled.
+                    Please visit your order details page for
+                    additional information.
+                </p>
+
+            </div>
+
+        {% else %}
+
+            <ol class="tracking-timeline">
+
+                {% for step in tracking_steps %}
+
+                    <li class="tracking-step {% if current_step >= forloop.counter0 %}completed{% endif %} {% if current_step == forloop.counter0 %}current{% endif %}">
+
+                        <div class="tracking-marker-column">
+
+                            <div class="tracking-marker">
+
+                                {% if current_step >= forloop.counter0 %}
+                                    ✓
+                                {% else %}
+                                    {{ forloop.counter }}
+                                {% endif %}
+
+                            </div>
+
+                            <div class="tracking-line"></div>
+
+                        </div>
+
+
+                        <div class="tracking-step-content">
+
+                            <h3 class="tracking-title">
+                                {{ step.title }}
+                            </h3>
+
+                            <p class="tracking-description">
+                                {{ step.description }}
+                            </p>
+
+                            {% if current_step == forloop.counter0 %}
+
+                                <span class="tracking-date">
+                                    ● Current Order Status
+                                </span>
+
+                            {% elif current_step > forloop.counter0 %}
+
+                                <span class="tracking-date">
+                                    ✓ Completed
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </li>
+
+                {% endfor %}
+
+            </ol>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- Products -->
+
+    <section class="tracking-card">
+
+        <h2>🛍️ Your Products</h2>
+
+        <div class="tracking-product-list">
+
+            {% for item in order_items %}
+
+                <div class="tracking-product">
+
+                    <div>
+
+                        {% if item.product %}
+
+                            <a
+                                href="{% url 'product_detail' item.product.slug %}"
+                                class="tracking-product-name"
+                            >
+                                {{ item.product.name }}
+                            </a>
+
+                        {% else %}
+
+                            <span class="tracking-product-name">
+                                Product no longer available
+                            </span>
+
+                        {% endif %}
+
+                        <div class="tracking-product-info">
+
+                            Quantity: {{ item.quantity }}
+
+                            <br>
+
+                            Unit Price: ₹{{ item.price|floatformat:2 }}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="tracking-product-price">
+
+                        ₹{% widthratio item.price 1 item.quantity %}
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <p>
+                    No products were found for this order.
+                </p>
+
+            {% endfor %}
+
+        </div>
+
+
+        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 22px 0;">
+
+        <div style="
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 18px;
+            font-weight: 800;
+        ">
+
+            <span>Order Total</span>
+
+            <span>
+                ₹{{ order.total_amount|floatformat:2 }}
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- Delivery address -->
+
+    <section class="tracking-card">
+
+        <h2>📦 Delivery Address</h2>
+
+        {% if shipping_address %}
+
+            <div class="delivery-address">
+
+                <strong>
+                    {{ shipping_address.full_name }}
+                </strong>
+
+                <br>
+
+                {{ shipping_address.address_line }}
+
+                <br>
+
+                {{ shipping_address.city }},
+                {{ shipping_address.state }}
+                - {{ shipping_address.pincode }}
+
+                <br>
+
+                Phone: {{ shipping_address.phone }}
+
+            </div>
+
+        {% else %}
+
+            <p>
+                Delivery address information is not available.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- Actions -->
+
+    <div class="tracking-actions">
+
+        <a
+            href="{% url 'order_detail' order.id %}"
+            class="tracking-button tracking-button-primary"
+        >
+            📋 View Order Details
+        </a>
+
+        <a
+            href="{% url 'download_order_invoice' order.id %}"
+            class="tracking-button tracking-button-secondary"
+        >
+            📄 Download Invoice PDF
+        </a>
+
+        <a
+            href="{% url 'my_orders' %}"
+            class="tracking-button tracking-button-secondary"
+        >
+            ← Back to My Orders
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}My Returns - ShopSphere{% endblock %}
+
+{% block content %}
+
+<div style="max-width:1100px;margin:40px auto;padding:20px;">
+
+    <h1>My Return Requests</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding:12px;margin:12px 0;background:#f3f4f6;border-radius:6px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if return_requests %}
+
+        <div style="overflow-x:auto;">
+
+            <table style="width:100%;border-collapse:collapse;">
+
+                <thead>
+                    <tr style="background:#eff6ff;text-align:left;">
+
+                        <th style="padding:14px;">Request ID</th>
+                        <th style="padding:14px;">Order</th>
+                        <th style="padding:14px;">Reason</th>
+                        <th style="padding:14px;">Refund Amount</th>
+                        <th style="padding:14px;">Status</th>
+                        <th style="padding:14px;">Requested On</th>
+
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in return_requests %}
+
+                        <tr style="border-bottom:1px solid #e5e7eb;">
+
+                            <td style="padding:14px;">
+                                #{{ item.id }}
+                            </td>
+
+                            <td style="padding:14px;">
+                                <a href="{% url 'order_detail' item.order.id %}">
+                                    Order #{{ item.order.id }}
+                                </a>
+                            </td>
+
+                            <td style="padding:14px;">
+                                {{ item.get_reason_display }}
+                            </td>
+
+                            <td style="padding:14px;">
+                                ₹{{ item.refund_amount|floatformat:2 }}
+                            </td>
+
+                            <td style="padding:14px;">
+                                <strong>{{ item.get_status_display }}</strong>
+                            </td>
+
+                            <td style="padding:14px;">
+                                {{ item.created_at|date:"d M Y, h:i A" }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div style="padding:30px;text-align:center;background:#f9fafb;border-radius:10px;">
+
+            <h3>No return requests yet</h3>
+
+            <p>Your return requests will appear here.</p>
+
+            <a href="{% url 'my_orders' %}">
+                View My Orders
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
