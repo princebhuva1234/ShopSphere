@@ -19,3 +19,41 @@ media/
 .idea/
 
 .DS_Store
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python virtual environments
+venv/
+.venv/
+env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django generated files
+staticfiles/
+*.log
+
+# Local databases
+db.sqlite3
+db.sqlite3-journal
+
+# Uploaded media files
+media/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE settings
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db

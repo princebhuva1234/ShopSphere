@@ -4,52 +4,115 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from dashboard import views as dashboard_views
+
 
 urlpatterns = [
 
+    # =====================================================
+    # SHOPSPHERE SALES DASHBOARD INSIDE DJANGO ADMIN
+    # IMPORTANT: Keep this ABOVE admin.site.urls
+    # =====================================================
+
+    path(
+        'admin/sales-dashboard/',
+        admin.site.admin_view(
+            dashboard_views.admin_dashboard
+        ),
+        name='admin_sales_dashboard',
+    ),
+
+    # =====================================================
+    # DJANGO ADMIN PANEL
+    # =====================================================
+
     path(
         'admin/',
-        admin.site.urls
+        admin.site.urls,
     ),
+
+    # =====================================================
+    # PRODUCTS
+    # =====================================================
 
     path(
         '',
-        include('products.urls')
+        include('products.urls'),
     ),
+
+    # =====================================================
+    # SHOPPING CART
+    # =====================================================
 
     path(
         'cart/',
-        include('cart.urls')
+        include('cart.urls'),
     ),
+
+    # =====================================================
+    # ORDERS, PAYMENTS, COUPONS, AND INVOICES
+    # =====================================================
 
     path(
         'orders/',
-        include('orders.urls')
+        include('orders.urls'),
     ),
+
+    # =====================================================
+    # ACCOUNTS
+    # =====================================================
 
     path(
         'accounts/',
-        include('accounts.urls')
+        include('accounts.urls'),
     ),
 
-   
-    # Razorpay webhook
+    # =====================================================
+    # RAZORPAY WEBHOOKS
+    # =====================================================
+
     path(
         'payments/',
-        include('payments.urls')
+        include('payments.urls'),
     ),
 
-    path('wishlist/', include('wishlist.urls')),
+    # =====================================================
+    # WISHLIST
+    # =====================================================
 
-    path('reviews/', include('reviews.urls')),
+    path(
+        'wishlist/',
+        include('wishlist.urls'),
+    ),
 
-    path('returns/', include('returns.urls')),
+    # =====================================================
+    # PRODUCT REVIEWS
+    # =====================================================
+
+    path(
+        'reviews/',
+        include('reviews.urls'),
+    ),
+
+    # =====================================================
+    # PRODUCT RETURNS
+    # =====================================================
+
+    path(
+        'returns/',
+        include('returns.urls'),
+    ),
+
 ]
 
+
+# =========================================================
+# MEDIA FILES DURING DEVELOPMENT
+# =========================================================
 
 if settings.DEBUG:
 
     urlpatterns += static(
         settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT
+        document_root=settings.MEDIA_ROOT,
     )
