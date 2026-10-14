@@ -1,573 +1,1131 @@
 {% extends 'base.html' %}
 
-{% block title %}
-
-    {% if is_edit %}
-        Edit Product - ShopSphere
-    {% else %}
-        Add Product - ShopSphere
-    {% endif %}
-
-{% endblock %}
-
+{% block title %}{% if is_edit %}Edit Product{% else %}Add Product{% endif %} | ShopSphere{% endblock %}
 
 {% block content %}
-
-<div class="seller-form-page">
-
-    <!-- HEADER -->
-
-    <div class="page-header">
-
-        <a
-            href="{% url 'seller_dashboard' %}"
-            class="back-link"
-        >
-            ← Back to Seller Dashboard
-        </a>
-
-        {% if is_edit %}
-
-            <h1>Edit Product</h1>
-
-            <p>
-                Update your product information.
-            </p>
-
-        {% else %}
-
-            <h1>Add New Product</h1>
-
-            <p>
-                Add a new product to your ShopSphere store.
-            </p>
-
-        {% endif %}
-
-    </div>
-
-
-    <!-- FORM CARD -->
-
-    <div class="form-card">
-
-        {% if form.non_field_errors %}
-
-            <div class="form-errors">
-
-                {{ form.non_field_errors }}
-
-            </div>
-
-        {% endif %}
-
-
-        <form
-            method="POST"
-            enctype="multipart/form-data"
-        >
-
-            {% csrf_token %}
-
-
-            <!-- CATEGORY -->
-
-            <div class="form-group">
-
-                <label for="{{ form.category.id_for_label }}">
-                    Category <span>*</span>
-                </label>
-
-                {{ form.category }}
-
-                {% for error in form.category.errors %}
-
-                    <p class="field-error">
-                        {{ error }}
-                    </p>
-
-                {% endfor %}
-
-            </div>
-
-
-            <!-- PRODUCT NAME -->
-
-            <div class="form-group">
-
-                <label for="{{ form.name.id_for_label }}">
-                    Product Name <span>*</span>
-                </label>
-
-                {{ form.name }}
-
-                {% for error in form.name.errors %}
-
-                    <p class="field-error">
-                        {{ error }}
-                    </p>
-
-                {% endfor %}
-
-            </div>
-
-
-            <!-- DESCRIPTION -->
-
-            <div class="form-group">
-
-                <label for="{{ form.description.id_for_label }}">
-                    Description <span>*</span>
-                </label>
-
-                {{ form.description }}
-
-                {% for error in form.description.errors %}
-
-                    <p class="field-error">
-                        {{ error }}
-                    </p>
-
-                {% endfor %}
-
-            </div>
-
-
-            <!-- BRAND -->
-
-            <div class="form-group">
-
-                <label for="{{ form.brand.id_for_label }}">
-                    Brand
-                </label>
-
-                {{ form.brand }}
-
-                {% for error in form.brand.errors %}
-
-                    <p class="field-error">
-                        {{ error }}
-                    </p>
-
-                {% endfor %}
-
-            </div>
-
-
-            <!-- PRICES -->
-
-            <div class="form-row">
-
-                <div class="form-group">
-
-                    <label for="{{ form.price.id_for_label }}">
-                        Regular Price (₹) <span>*</span>
-                    </label>
-
-                    {{ form.price }}
-
-                    {% for error in form.price.errors %}
-
-                        <p class="field-error">
-                            {{ error }}
-                        </p>
-
-                    {% endfor %}
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="{{ form.discount_price.id_for_label }}">
-                        Discounted Price (₹)
-                    </label>
-
-                    {{ form.discount_price }}
-
-                    <small>
-                        Leave blank if there is no discount.
-                    </small>
-
-                    {% for error in form.discount_price.errors %}
-
-                        <p class="field-error">
-                            {{ error }}
-                        </p>
-
-                    {% endfor %}
-
-                </div>
-
-            </div>
-
-
-            <!-- STOCK -->
-
-            <div class="form-group">
-
-                <label for="{{ form.stock_quantity.id_for_label }}">
-                    Stock Quantity <span>*</span>
-                </label>
-
-                {{ form.stock_quantity }}
-
-                {% for error in form.stock_quantity.errors %}
-
-                    <p class="field-error">
-                        {{ error }}
-                    </p>
-
-                {% endfor %}
-
-            </div>
-
-
-            <!-- PRODUCT IMAGES -->
-
-            <div class="form-group">
-
-                <label for="images">
-                    Product Images
-                </label>
-
-                <input
-                    type="file"
-                    id="images"
-                    name="images"
-                    accept="image/*"
-                    multiple
-                >
-
-                <small>
-                    Select one or more image files.
-                </small>
-
-            </div>
-
-
-            {% if is_edit and product.images.all %}
-
-                <div class="existing-images">
-
-                    <h3>Current Images</h3>
-
-                    <div class="image-grid">
-
-                        {% for image in product.images.all %}
-
-                            <div class="existing-image">
-
-                                <img
-                                    src="{{ image.image.url }}"
-                                    alt="{{ product.name }}"
-                                >
-
-                            </div>
-
-                        {% endfor %}
-
-                    </div>
-
-                    <p>
-                        Newly uploaded images will be added to the
-                        existing images.
-                    </p>
-
-                </div>
-
-            {% endif %}
-
-
-            <!-- ACTIVE STATUS -->
-
-            <div class="active-option">
-
-                {{ form.is_active }}
-
-                <label for="{{ form.is_active.id_for_label }}">
-                    Product is active and visible in the store
-                </label>
-
-                {% for error in form.is_active.errors %}
-
-                    <p class="field-error">
-                        {{ error }}
-                    </p>
-
-                {% endfor %}
-
-            </div>
-
-
-            <!-- BUTTONS -->
-
-            <div class="form-actions">
-
-                <a
-                    href="{% url 'seller_dashboard' %}"
-                    class="cancel-button"
-                >
-                    Cancel
-                </a>
-
-
-                <button
-                    type="submit"
-                    class="save-button"
-                >
-
-                    {% if is_edit %}
-
-                        Save Changes
-
-                    {% else %}
-
-                        Create Product
-
-                    {% endif %}
-
-                </button>
-
-            </div>
-
-
-        </form>
-
-    </div>
-
-</div>
-
-
 <style>
-
-    .seller-form-page {
-        max-width: 850px;
+    .seller-product-form-page {
+        --spf-primary: #4f46e5;
+        --spf-primary-dark: #3730a3;
+        --spf-primary-soft: #eef2ff;
+        --spf-ink: #172033;
+        --spf-muted: #64748b;
+        --spf-border: #e2e8f0;
+        --spf-surface: #ffffff;
+        --spf-canvas: #f8fafc;
+        --spf-green: #15803d;
+        --spf-red: #b91c1c;
+        max-width: 1050px;
         margin: 0 auto;
-        padding: 20px 0 60px;
+        padding: 18px 0 56px;
+        color: var(--spf-ink);
+        animation: spf-enter 480ms cubic-bezier(.2,.7,.2,1) both;
     }
 
-    .page-header {
-        margin-bottom: 25px;
+    .seller-product-form-page *,
+    .seller-product-form-page *::before,
+    .seller-product-form-page *::after {
+        box-sizing: border-box;
     }
 
-    .back-link {
-        display: inline-block;
-        margin-bottom: 18px;
-        color: #0056b3;
+    .spf-back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        margin: 0 0 19px;
+        color: var(--spf-muted);
+        font-size: 13px;
+        font-weight: 700;
         text-decoration: none;
-        font-weight: bold;
+        transition: color 180ms ease, transform 180ms ease;
     }
 
-    .page-header h1 {
-        margin: 0 0 8px;
-        font-size: 30px;
-        color: #111827;
+    .spf-back-link:hover {
+        color: var(--spf-primary);
+        transform: translateX(-2px);
     }
 
-    .page-header p {
+    .spf-hero {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        min-height: 180px;
+        margin-bottom: 24px;
+        padding: clamp(25px, 4vw, 40px);
+        overflow: hidden;
+        isolation: isolate;
+        color: #ffffff;
+        background:
+            radial-gradient(circle at 88% 10%, rgba(129, 140, 248, .42), transparent 27%),
+            radial-gradient(circle at 75% 115%, rgba(45, 212, 191, .18), transparent 34%),
+            linear-gradient(120deg, #111827 0%, #29275f 56%, #4338ca 100%);
+        border: 1px solid rgba(79, 70, 229, .16);
+        border-radius: 23px;
+        box-shadow: 0 18px 40px rgba(35, 35, 95, .12);
+    }
+
+    .spf-hero::before,
+    .spf-hero::after {
+        position: absolute;
+        z-index: -1;
+        content: "";
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, .14);
+        border-radius: 50%;
+    }
+
+    .spf-hero::before {
+        top: -90px;
+        right: 36px;
+        width: 220px;
+        height: 220px;
+    }
+
+    .spf-hero::after {
+        right: -65px;
+        bottom: -160px;
+        width: 310px;
+        height: 310px;
+    }
+
+    .spf-hero-copy {
+        position: relative;
+        z-index: 1;
+        max-width: 700px;
+    }
+
+    .spf-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        color: #c7d2fe;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.7px;
+        text-transform: uppercase;
+    }
+
+    .spf-eyebrow::before {
+        width: 22px;
+        height: 2px;
+        content: "";
+        background: #a5b4fc;
+        border-radius: 3px;
+    }
+
+    .spf-hero h1 {
         margin: 0;
-        color: #6b7280;
+        color: #ffffff;
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: clamp(28px, 4vw, 39px);
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: -1.2px;
     }
 
-    .form-card {
-        background: white;
-        padding: 30px;
-        border-radius: 14px;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
+    .spf-hero p {
+        max-width: 590px;
+        margin: 11px 0 0;
+        color: #dbe3f5;
+        font-size: 13px;
+        line-height: 1.8;
     }
 
-    .form-group {
-        margin-bottom: 22px;
+    .spf-hero-icon {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        flex: 0 0 105px;
+        width: 105px;
+        height: 105px;
+        place-items: center;
+        color: #ffffff;
+        background: linear-gradient(145deg, rgba(255,255,255,.17), rgba(255,255,255,.06));
+        border: 1px solid rgba(255,255,255,.23);
+        border-radius: 28px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 18px 35px rgba(8,10,42,.13);
+        font-size: 43px;
+        animation: spf-float 4.5s ease-in-out infinite;
+    }
+
+    .spf-form-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 285px;
+        align-items: start;
+        gap: 22px;
+    }
+
+    .spf-main-column,
+    .spf-side-column {
         min-width: 0;
     }
 
-    .form-group label {
+    .spf-card {
+        margin-bottom: 20px;
+        padding: 25px;
+        background: var(--spf-surface);
+        border: 1px solid var(--spf-border);
+        border-radius: 18px;
+        box-shadow: 0 7px 24px rgba(15, 23, 42, .035);
+        transition: border-color 220ms ease, box-shadow 220ms ease;
+    }
+
+    .spf-card:hover {
+        border-color: #dce1f8;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, .05);
+    }
+
+    .spf-card-heading {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 23px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #edf0f6;
+    }
+
+    .spf-card-icon {
+        display: grid;
+        flex: 0 0 41px;
+        width: 41px;
+        height: 41px;
+        place-items: center;
+        color: var(--spf-primary);
+        background: var(--spf-primary-soft);
+        border: 1px solid #e0e7ff;
+        border-radius: 12px;
+        font-size: 18px;
+    }
+
+    .spf-card-heading h2 {
+        margin: 0;
+        color: var(--spf-ink);
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: -.25px;
+        line-height: 1.4;
+    }
+
+    .spf-card-heading p {
+        margin: 4px 0 0;
+        color: var(--spf-muted);
+        font-size: 12px;
+        line-height: 1.65;
+    }
+
+    .spf-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 17px;
+    }
+
+    .spf-form-group {
+        min-width: 0;
+        margin-bottom: 19px;
+    }
+
+    .spf-form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .seller-product-form-page .spf-form-group > label {
         display: block;
-        margin-bottom: 9px;
-        font-size: 14px;
-        font-weight: bold;
-        color: #374151;
+        margin: 0 0 8px;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .1px;
     }
 
-    .form-group label span {
-        color: #dc3545;
+    .spf-required {
+        color: #dc2626;
     }
 
-    .form-control {
+    .spf-help {
+        display: block;
+        margin-top: 7px;
+        color: #8490a3;
+        font-size: 11px;
+        line-height: 1.65;
+    }
+
+    .seller-product-form-page input:not([type="checkbox"]):not([type="file"]),
+    .seller-product-form-page select,
+    .seller-product-form-page textarea {
         display: block;
         width: 100%;
+        min-width: 0;
         max-width: 100%;
-        padding: 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 7px;
-        background: white;
-        color: #111827;
-        font-size: 15px;
+        min-height: 45px;
+        padding: 11px 13px;
+        color: var(--spf-ink);
+        background: #fbfcff;
+        border: 1px solid #dfe5ef;
+        border-radius: 10px;
+        font: inherit;
+        font-size: 13px;
+        line-height: 1.5;
+        transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
     }
 
-    .form-control:focus {
-        outline: none;
-        border-color: #007bff;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-    }
-
-    .form-control textarea {
+    .seller-product-form-page textarea {
+        min-height: 145px;
         resize: vertical;
     }
 
-    .form-group small {
-        display: block;
-        margin-top: 7px;
-        color: #6b7280;
-        font-size: 12px;
-        line-height: 1.5;
+    .seller-product-form-page input:not([type="checkbox"]):not([type="file"]):hover,
+    .seller-product-form-page select:hover,
+    .seller-product-form-page textarea:hover {
+        background: #ffffff;
+        border-color: #c7d2fe;
     }
 
-    .form-row {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 20px;
+    .seller-product-form-page input:not([type="checkbox"]):not([type="file"]):focus,
+    .seller-product-form-page select:focus,
+    .seller-product-form-page textarea:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: var(--spf-primary);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, .09);
     }
 
-    .form-checkbox {
+    .seller-product-form-page input[type="checkbox"] {
         width: 18px;
         height: 18px;
-        accent-color: #007bff;
+        margin: 0;
+        accent-color: var(--spf-primary);
         cursor: pointer;
     }
 
-    .active-option {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-        padding: 15px;
-        background: #f8fafc;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        margin: 15px 0 25px;
+    .spf-price-symbol {
+        position: relative;
     }
 
-    .active-option label {
-        color: #374151;
-        font-size: 14px;
-        cursor: pointer;
-    }
-
-    .field-error,
-    .form-errors {
-        color: #b02a37;
+    .spf-price-symbol::before {
+        position: absolute;
+        z-index: 1;
+        top: 50%;
+        left: 13px;
+        color: #64748b;
+        content: "₹";
         font-size: 13px;
-        margin-top: 7px;
+        font-weight: 700;
+        transform: translateY(-50%);
+        pointer-events: none;
     }
 
-    .form-errors {
-        padding: 12px 15px;
-        margin-bottom: 22px;
-        background: #f8d7da;
-        border-radius: 7px;
+    .spf-price-symbol input {
+        padding-left: 30px !important;
     }
 
-    .existing-images {
-        padding: 18px;
-        margin-bottom: 25px;
-        border: 1px solid #e5e7eb;
-        border-radius: 9px;
+    .spf-field-error {
+        display: block;
+        margin: 7px 0 0;
+        color: #b91c1c;
+        font-size: 12px;
+        line-height: 1.6;
     }
 
-    .existing-images h3 {
-        margin: 0 0 15px;
-        font-size: 16px;
+    .spf-field-error ul,
+    .spf-form-errors ul {
+        margin: 4px 0 0;
+        padding-left: 19px;
     }
 
-    .image-grid {
+    .spf-form-errors {
+        margin-bottom: 20px;
+        padding: 14px 16px;
+        color: #991b1b;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-left: 4px solid #dc2626;
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .spf-upload-box {
+        position: relative;
         display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-    }
-
-    .existing-image {
-        width: 100px;
-        height: 100px;
+        min-height: 165px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 9px;
+        padding: 22px;
         overflow: hidden;
-        border-radius: 7px;
-        background: #f5f5f5;
+        color: var(--spf-muted);
+        background: linear-gradient(145deg, #fbfcff, #f6f7ff);
+        border: 1.5px dashed #c7d2fe;
+        border-radius: 14px;
+        text-align: center;
+        transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
     }
 
-    .existing-image img {
+    .spf-upload-box:focus-within,
+    .spf-upload-box.is-dragover {
+        background: #eef2ff;
+        border-color: var(--spf-primary);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, .08);
+    }
+
+    .spf-upload-icon {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        color: var(--spf-primary);
+        background: #eef2ff;
+        border: 1px solid #e0e7ff;
+        border-radius: 13px;
+        font-size: 21px;
+    }
+
+    .spf-upload-title {
+        margin: 0;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .spf-upload-help {
+        max-width: 360px;
+        margin: 0;
+        color: #8490a3;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .seller-product-form-page input[type="file"].spf-file-input {
+        display: block;
         width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-
-    .existing-images > p {
-        margin: 12px 0 0;
-        color: #6b7280;
+        max-width: 360px;
+        min-height: unset;
+        margin-top: 4px;
+        padding: 7px;
+        color: #475569;
+        background: #ffffff;
+        border: 1px solid #dfe5ef;
+        border-radius: 9px;
         font-size: 12px;
     }
 
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        padding-top: 22px;
-        border-top: 1px solid #e5e7eb;
+    .seller-product-form-page input[type="file"].spf-file-input::file-selector-button {
+        margin-right: 10px;
+        padding: 8px 11px;
+        color: #ffffff;
+        background: var(--spf-primary);
+        border: 0;
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background 180ms ease;
     }
 
-    .cancel-button,
-    .save-button {
-        display: inline-block;
-        padding: 12px 20px;
-        border: none;
+    .seller-product-form-page input[type="file"].spf-file-input::file-selector-button:hover {
+        background: var(--spf-primary-dark);
+    }
+
+    .spf-preview-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin: 17px 0 10px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .spf-image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 11px;
+    }
+
+    .spf-image-tile {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        background: #f8fafc;
+        border: 1px solid var(--spf-border);
+        border-radius: 11px;
+    }
+
+    .spf-image-tile img {
+        display: block;
+        width: 100%;
+        height: 100px;
+        padding: 5px;
+        object-fit: contain;
+        background: #ffffff;
+    }
+
+    .spf-image-caption {
+        display: block;
+        padding: 7px 8px;
+        overflow: hidden;
+        color: #64748b;
+        background: #f8fafc;
+        font-size: 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .spf-image-tile.is-new {
+        border-color: #c7d2fe;
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, .06);
+    }
+
+    .spf-existing-images {
+        margin-top: 18px;
+        padding: 16px;
+        background: #fbfcff;
+        border: 1px solid var(--spf-border);
+        border-radius: 12px;
+    }
+
+    .spf-existing-images h3 {
+        margin: 0;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .spf-existing-images > p {
+        margin: 10px 0 0;
+        color: var(--spf-muted);
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .spf-active-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        background: #f8fafc;
+        border: 1px solid var(--spf-border);
+        border-radius: 12px;
+    }
+
+    .spf-active-option label {
+        display: block;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .spf-active-option p {
+        margin: 4px 0 0;
+        color: var(--spf-muted);
+        font-size: 11px;
+        line-height: 1.65;
+    }
+
+    .spf-side-card {
+        position: sticky;
+        top: 100px;
+        margin-bottom: 18px;
+        padding: 20px;
+        background: #ffffff;
+        border: 1px solid var(--spf-border);
+        border-radius: 16px;
+        box-shadow: 0 7px 24px rgba(15, 23, 42, .035);
+    }
+
+    .spf-side-card h2 {
+        margin: 0 0 14px;
+        color: var(--spf-ink);
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .spf-checklist {
+        display: grid;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .spf-checklist li {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.65;
+    }
+
+    .spf-check {
+        display: grid;
+        flex: 0 0 20px;
+        width: 20px;
+        height: 20px;
+        place-items: center;
+        color: var(--spf-green);
+        background: #dcfce7;
         border-radius: 7px;
-        font-size: 14px;
-        font-weight: bold;
+        font-size: 11px;
+        font-weight: 900;
+    }
+
+    .spf-side-note {
+        margin-top: 16px;
+        padding: 12px;
+        color: #475569;
+        background: #f8fafc;
+        border: 1px solid #edf0f6;
+        border-radius: 10px;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .spf-side-note strong {
+        color: #334155;
+    }
+
+    .spf-actions-card {
+        padding: 20px;
+        background: linear-gradient(145deg, #ffffff, #f8faff);
+        border: 1px solid var(--spf-border);
+        border-radius: 16px;
+        box-shadow: 0 7px 24px rgba(15, 23, 42, .035);
+    }
+
+    .spf-actions-card p {
+        margin: 0 0 15px;
+        color: var(--spf-muted);
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .spf-form-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .seller-product-form-page .spf-button {
+        display: inline-flex;
+        width: 100%;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 15px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.4;
         text-align: center;
         text-decoration: none;
         cursor: pointer;
+        transition: color 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
     }
 
-    .cancel-button {
-        background: #e5e7eb;
-        color: #374151;
+    .seller-product-form-page .spf-button:hover {
+        transform: translateY(-1px);
     }
 
-    .save-button {
-        background: #007bff;
-        color: white;
+    .seller-product-form-page .spf-button-primary {
+        color: #ffffff;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        box-shadow: 0 7px 16px rgba(79, 70, 229, .17);
     }
 
-    .save-button:hover {
-        background: #0056b3;
+    .seller-product-form-page .spf-button-primary:hover {
+        color: #ffffff;
+        background: linear-gradient(135deg, #4f46e5, #3730a3);
+        box-shadow: 0 10px 20px rgba(79, 70, 229, .22);
     }
 
-    @media (max-width: 600px) {
+    .seller-product-form-page .spf-button-secondary {
+        color: #475569;
+        background: #ffffff;
+        border-color: #dfe5ef;
+    }
 
-        .form-card {
-            padding: 20px;
+    .seller-product-form-page .spf-button-secondary:hover {
+        color: var(--spf-primary);
+        background: #eef2ff;
+        border-color: #c7d2fe;
+    }
+
+    .spf-privacy-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-top: 14px;
+        color: #8791a4;
+        font-size: 10px;
+        line-height: 1.7;
+    }
+
+    .spf-privacy-note span {
+        color: #0f766e;
+        font-size: 14px;
+    }
+
+    .seller-product-form-page :focus-visible {
+        outline: 3px solid rgba(79, 70, 229, .32);
+        outline-offset: 3px;
+    }
+
+    @keyframes spf-enter {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spf-float {
+        0%, 100% { transform: translateY(0) rotate(2deg); }
+        50% { transform: translateY(-5px) rotate(-1deg); }
+    }
+
+    @media (max-width: 900px) {
+        .spf-form-layout {
+            grid-template-columns: minmax(0, 1fr);
         }
 
-        .page-header h1 {
-            font-size: 26px;
+        .spf-side-column {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+            gap: 16px;
         }
 
-        .form-row {
-            grid-template-columns: 1fr;
+        .spf-side-card {
+            position: static;
+            margin-bottom: 0;
+        }
+
+        .spf-actions-card {
+            margin: 0;
+        }
+    }
+
+    @media (max-width: 620px) {
+        .seller-product-form-page {
+            padding: 12px 0 35px;
+        }
+
+        .spf-hero {
+            min-height: 0;
+            padding: 26px 21px;
+            border-radius: 18px;
+        }
+
+        .spf-hero h1 {
+            font-size: 29px;
+            letter-spacing: -.8px;
+        }
+
+        .spf-hero p {
+            font-size: 12px;
+        }
+
+        .spf-hero-icon {
+            display: none;
+        }
+
+        .spf-card {
+            padding: 18px;
+            border-radius: 15px;
+        }
+
+        .spf-form-grid {
+            grid-template-columns: minmax(0, 1fr);
             gap: 0;
         }
 
-        .form-actions {
-            flex-direction: column-reverse;
+        .spf-form-group.full-width {
+            grid-column: auto;
         }
 
-        .cancel-button,
-        .save-button {
-            width: 100%;
+        .spf-side-column {
+            grid-template-columns: minmax(0, 1fr);
         }
 
+        .spf-upload-box {
+            padding: 17px;
+        }
+
+        .seller-product-form-page input[type="file"].spf-file-input {
+            max-width: 100%;
+        }
+
+        .spf-image-grid {
+            grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+            gap: 8px;
+        }
+
+        .spf-image-tile img {
+            height: 84px;
+        }
+
+        .spf-card-heading {
+            margin-bottom: 18px;
+        }
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        .seller-product-form-page *,
+        .seller-product-form-page *::before,
+        .seller-product-form-page *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
 </style>
 
+<div class="seller-product-form-page">
+    <a href="{% url 'seller_dashboard' %}" class="spf-back-link">
+        <span aria-hidden="true">←</span> Back to Seller Dashboard
+    </a>
+
+    <header class="spf-hero">
+        <div class="spf-hero-copy">
+            <div class="spf-eyebrow">SELLER WORKSPACE</div>
+            <h1>{% if is_edit %}Edit your product{% else %}Add a new product{% endif %}</h1>
+            <p>
+                {% if is_edit %}
+                    Update your product details, pricing, images, and store visibility. Your changes will be saved to your ShopSphere catalogue.
+                {% else %}
+                    Create a clear, helpful product listing so customers can discover your product and shop with confidence.
+                {% endif %}
+            </p>
+        </div>
+        <div class="spf-hero-icon" aria-hidden="true">{% if is_edit %}✎{% else %}＋{% endif %}</div>
+    </header>
+
+    <form method="POST" enctype="multipart/form-data" id="seller-product-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="spf-form-errors" role="alert">
+                <strong>Please review the following:</strong>
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="spf-form-layout">
+            <div class="spf-main-column">
+                <section class="spf-card" aria-labelledby="spf-basic-heading">
+                    <div class="spf-card-heading">
+                        <div class="spf-card-icon" aria-hidden="true">✦</div>
+                        <div>
+                            <h2 id="spf-basic-heading">Product information</h2>
+                            <p>Start with the details customers need to identify your product.</p>
+                        </div>
+                    </div>
+
+                    <div class="spf-form-grid">
+                        <div class="spf-form-group">
+                            <label for="{{ form.category.id_for_label }}">Category <span class="spf-required">*</span></label>
+                            {{ form.category }}
+                            {% for error in form.category.errors %}
+                                <p class="spf-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="spf-form-group">
+                            <label for="{{ form.brand.id_for_label }}">Brand <span style="color:#94a3b8;font-weight:500;">(optional)</span></label>
+                            {{ form.brand }}
+                            {% for error in form.brand.errors %}
+                                <p class="spf-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="spf-form-group full-width">
+                            <label for="{{ form.name.id_for_label }}">Product name <span class="spf-required">*</span></label>
+                            {{ form.name }}
+                            <small class="spf-help">Use a clear, specific name that customers can recognise easily.</small>
+                            {% for error in form.name.errors %}
+                                <p class="spf-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="spf-form-group full-width">
+                            <label for="{{ form.description.id_for_label }}">Product description <span class="spf-required">*</span></label>
+                            {{ form.description }}
+                            <small class="spf-help">Describe the important features and details of the product.</small>
+                            {% for error in form.description.errors %}
+                                <p class="spf-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="spf-card" aria-labelledby="spf-pricing-heading">
+                    <div class="spf-card-heading">
+                        <div class="spf-card-icon" aria-hidden="true">₹</div>
+                        <div>
+                            <h2 id="spf-pricing-heading">Pricing & inventory</h2>
+                            <p>Set the regular price, optional discounted price, and available quantity.</p>
+                        </div>
+                    </div>
+
+                    <div class="spf-form-grid">
+                        <div class="spf-form-group">
+                            <label for="{{ form.price.id_for_label }}">Regular price <span class="spf-required">*</span></label>
+                            <div class="spf-price-symbol">{{ form.price }}</div>
+                            {% for error in form.price.errors %}
+                                <p class="spf-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="spf-form-group">
+                            <label for="{{ form.discount_price.id_for_label }}">Discounted price <span style="color:#94a3b8;font-weight:500;">(optional)</span></label>
+                            <div class="spf-price-symbol">{{ form.discount_price }}</div>
+                            <small class="spf-help">Leave blank if you are not offering a discount.</small>
+                            {% for error in form.discount_price.errors %}
+                                <p class="spf-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="spf-form-group full-width">
+                            <label for="{{ form.stock_quantity.id_for_label }}">Stock quantity <span class="spf-required">*</span></label>
+                            {{ form.stock_quantity }}
+                            <small class="spf-help">Enter the number of units currently available to sell. Use 0 for out of stock.</small>
+                            {% for error in form.stock_quantity.errors %}
+                                <p class="spf-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="spf-card" aria-labelledby="spf-media-heading">
+                    <div class="spf-card-heading">
+                        <div class="spf-card-icon" aria-hidden="true">▧</div>
+                        <div>
+                            <h2 id="spf-media-heading">Product images</h2>
+                            <p>Add clear product photos. You can select more than one image.</p>
+                        </div>
+                    </div>
+
+                    <div class="spf-upload-box" id="spf-upload-box">
+                        <div class="spf-upload-icon" aria-hidden="true">↑</div>
+                        <p class="spf-upload-title">Choose product images</p>
+                        <p class="spf-upload-help">Use clear, well-lit images. Supported formats depend on the server's image handling configuration.</p>
+                        <input
+                            type="file"
+                            id="images"
+                            name="images"
+                            class="spf-file-input"
+                            accept="image/*"
+                            multiple
+                            aria-describedby="spf-upload-help"
+                        >
+                        <p class="spf-upload-help" id="spf-upload-help">Newly selected images are added to the existing images when editing a product.</p>
+                    </div>
+
+                    <div id="spf-new-preview-section" hidden>
+                        <div class="spf-preview-heading">
+                            <span>Selected image preview</span>
+                            <span id="spf-selected-count"></span>
+                        </div>
+                        <div class="spf-image-grid" id="spf-new-preview"></div>
+                    </div>
+
+                    {% if is_edit and product.images.all %}
+                        <div class="spf-existing-images">
+                            <h3>Currently saved images</h3>
+                            <div class="spf-preview-heading">
+                                <span>Images already attached to this product</span>
+                                <span>{{ product.images.all|length }} image{{ product.images.all|length|pluralize }}</span>
+                            </div>
+                            <div class="spf-image-grid">
+                                {% for image in product.images.all %}
+                                    <div class="spf-image-tile">
+                                        <img src="{{ image.image.url }}" alt="{{ product.name }} image {{ forloop.counter }}" loading="lazy">
+                                        <span class="spf-image-caption">Saved image {{ forloop.counter }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <p>Uploading additional files will add them to the existing images. This form does not remove saved images.</p>
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section class="spf-card" aria-labelledby="spf-visibility-heading">
+                    <div class="spf-card-heading">
+                        <div class="spf-card-icon" aria-hidden="true">◉</div>
+                        <div>
+                            <h2 id="spf-visibility-heading">Store visibility</h2>
+                            <p>Choose whether customers can currently see this product in the store.</p>
+                        </div>
+                    </div>
+
+                    <div class="spf-active-option">
+                        {{ form.is_active }}
+                        <div>
+                            <label for="{{ form.is_active.id_for_label }}">Product is active and visible in the store</label>
+                            <p>Turn this off to hide the product from customers without deleting the listing.</p>
+                            {% for error in form.is_active.errors %}
+                                <p class="spf-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="spf-side-column">
+                <section class="spf-side-card">
+                    <h2>Listing checklist</h2>
+                    <ul class="spf-checklist">
+                        <li><span class="spf-check" aria-hidden="true">✓</span><span>Add an accurate product name and category.</span></li>
+                        <li><span class="spf-check" aria-hidden="true">✓</span><span>Write a useful, easy-to-understand description.</span></li>
+                        <li><span class="spf-check" aria-hidden="true">✓</span><span>Double-check the regular and discounted prices.</span></li>
+                        <li><span class="spf-check" aria-hidden="true">✓</span><span>Keep the stock quantity up to date.</span></li>
+                        <li><span class="spf-check" aria-hidden="true">✓</span><span>Use clear photos that accurately represent the item.</span></li>
+                    </ul>
+                    <div class="spf-side-note">
+                        <strong>Tip:</strong> Accurate details and clear images help customers understand what they are buying.
+                    </div>
+                </section>
+
+                <section class="spf-actions-card">
+                    <h2 style="margin:0 0 8px;color:#172033;font-family:'Manrope','DM Sans',sans-serif;font-size:15px;font-weight:800;">
+                        {% if is_edit %}Save your updates{% else %}Ready to publish?{% endif %}
+                    </h2>
+                    <p>
+                        {% if is_edit %}
+                            Review the information before saving your changes.
+                        {% else %}
+                            Review your listing before creating the product.
+                        {% endif %}
+                    </p>
+                    <div class="spf-form-actions">
+                        <button type="submit" class="spf-button spf-button-primary" id="spf-save-button">
+                            {% if is_edit %}✓ Save changes{% else %}＋ Create product{% endif %}
+                        </button>
+                        <a href="{% url 'seller_dashboard' %}" class="spf-button spf-button-secondary">Cancel</a>
+                    </div>
+                    <div class="spf-privacy-note">
+                        <span aria-hidden="true">▣</span>
+                        <span>Your changes are submitted securely through the existing ShopSphere form.</span>
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function () {
+        "use strict";
+
+        const fileInput = document.getElementById("images");
+        const uploadBox = document.getElementById("spf-upload-box");
+        const previewSection = document.getElementById("spf-new-preview-section");
+        const previewGrid = document.getElementById("spf-new-preview");
+        const selectedCount = document.getElementById("spf-selected-count");
+        const form = document.getElementById("seller-product-form");
+        const submitButton = document.getElementById("spf-save-button");
+
+        if (!fileInput || !uploadBox || !previewSection || !previewGrid) {
+            return;
+        }
+
+        let previewUrls = [];
+
+        function clearPreviews() {
+            previewUrls.forEach(function (url) {
+                URL.revokeObjectURL(url);
+            });
+            previewUrls = [];
+            previewGrid.replaceChildren();
+        }
+
+        function renderPreviews() {
+            clearPreviews();
+
+            const files = Array.from(fileInput.files || []).filter(function (file) {
+                return file.type && file.type.startsWith("image/");
+            });
+
+            if (files.length === 0) {
+                previewSection.hidden = true;
+                selectedCount.textContent = "";
+                return;
+            }
+
+            previewSection.hidden = false;
+            selectedCount.textContent = files.length + " selected";
+
+            files.forEach(function (file) {
+                const url = URL.createObjectURL(file);
+                previewUrls.push(url);
+
+                const tile = document.createElement("div");
+                tile.className = "spf-image-tile is-new";
+
+                const image = document.createElement("img");
+                image.src = url;
+                image.alt = file.name;
+                image.loading = "lazy";
+
+                const caption = document.createElement("span");
+                caption.className = "spf-image-caption";
+                caption.textContent = file.name;
+
+                tile.appendChild(image);
+                tile.appendChild(caption);
+                previewGrid.appendChild(tile);
+            });
+        }
+
+        fileInput.addEventListener("change", renderPreviews);
+
+        ["dragenter", "dragover"].forEach(function (eventName) {
+            uploadBox.addEventListener(eventName, function (event) {
+                event.preventDefault();
+                uploadBox.classList.add("is-dragover");
+            });
+        });
+
+        ["dragleave", "drop"].forEach(function (eventName) {
+            uploadBox.addEventListener(eventName, function (event) {
+                event.preventDefault();
+                uploadBox.classList.remove("is-dragover");
+            });
+        });
+
+        uploadBox.addEventListener("drop", function (event) {
+            if (!event.dataTransfer || !event.dataTransfer.files.length) {
+                return;
+            }
+
+            try {
+                fileInput.files = event.dataTransfer.files;
+                renderPreviews();
+            } catch (error) {
+                // The normal file picker remains available if the browser
+                // disallows assigning dropped files to the input.
+            }
+        });
+
+        if (form && submitButton) {
+            form.addEventListener("submit", function () {
+                if (form.checkValidity()) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = "{% if is_edit %}Saving changes…{% else %}Creating product…{% endif %}";
+                }
+            });
+        }
+
+        window.addEventListener("beforeunload", clearPreviews);
+    })();
+</script>
 {% endblock %}

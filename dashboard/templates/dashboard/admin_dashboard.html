@@ -1,1208 +1,1245 @@
 {% extends "admin/base_site.html" %}
 
-{% block title %}
-ShopSphere Sales Dashboard
-{% endblock %}
+{% block title %}ShopSphere Sales Dashboard{% endblock %}
 
 {% block content %}
 
 <style>
-    /* ========================================
-       DASHBOARD LAYOUT
-    ======================================== */
+.ss-dashboard {
+    --ss-primary: #2563eb;
+    --ss-primary-dark: #1d4ed8;
+    --ss-text: #172033;
+    --ss-muted: #64748b;
+    --ss-border: #e2e8f0;
+    --ss-surface: #ffffff;
 
-    .ss-dashboard {
-        padding: 10px 0 25px;
-        color: #1f2937;
+    padding: 12px 0 35px;
+    color: var(--ss-text);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.ss-dashboard,
+.ss-dashboard *,
+.ss-dashboard *::before,
+.ss-dashboard *::after {
+    box-sizing: border-box;
+}
+
+.ss-dashboard a {
+    transition: background-color .2s ease, border-color .2s ease,
+                color .2s ease, box-shadow .2s ease;
+}
+
+.ss-muted {
+    color: var(--ss-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.ss-section {
+    margin-bottom: 30px;
+}
+
+.ss-section-heading {
+    margin-bottom: 17px;
+}
+
+.ss-section-heading h2 {
+    margin: 0 0 7px;
+    color: var(--ss-text);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.ss-section-heading p {
+    margin: 0;
+}
+
+/* Header */
+
+.ss-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 25px;
+    border: 1px solid #dbeafe;
+    border-radius: 15px;
+    background: linear-gradient(120deg, #eff6ff 0%, #ffffff 75%);
+}
+
+.ss-header-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.ss-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 58px;
+    height: 58px;
+    border-radius: 15px;
+    background: var(--ss-primary);
+    color: white;
+    font-size: 26px;
+    box-shadow: 0 6px 15px rgba(37, 99, 235, .2);
+}
+
+.ss-header h1 {
+    margin: 0 0 8px;
+    color: #172554;
+    font-size: clamp(23px, 3vw, 30px);
+    font-weight: 800;
+}
+
+.ss-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.ss-header .ss-report-date {
+    margin-top: 5px;
+    color: #475569;
+    font-size: 12px;
+}
+
+.ss-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ss-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 10px 15px;
+    border: 1px solid #dbe2ec;
+    border-radius: 8px;
+    background: white;
+    color: #334155 !important;
+    text-decoration: none !important;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ss-button:hover {
+    border-color: #93c5fd;
+    background: #f8fbff;
+}
+
+.ss-button-primary {
+    border-color: var(--ss-primary);
+    background: var(--ss-primary);
+    color: white !important;
+}
+
+.ss-button-primary:hover {
+    border-color: var(--ss-primary-dark);
+    background: var(--ss-primary-dark);
+}
+
+/* Statistics */
+
+.ss-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.ss-stat {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    padding: 21px;
+    border: 1px solid var(--ss-border);
+    border-radius: 12px;
+    background: var(--ss-surface);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .025);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.ss-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+}
+
+.ss-stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.ss-stat-label {
+    color: var(--ss-muted);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.ss-stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-size: 19px;
+}
+
+.ss-stat-value {
+    margin-bottom: 9px;
+    color: #111827;
+    font-size: clamp(21px, 2.2vw, 27px);
+    font-weight: 800;
+    letter-spacing: -.6px;
+    overflow-wrap: anywhere;
+}
+
+.ss-stat-description {
+    color: var(--ss-muted);
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.ss-blue {
+    border-top: 3px solid #2563eb;
+}
+
+.ss-blue .ss-stat-icon {
+    background: #eff6ff;
+}
+
+.ss-green {
+    border-top: 3px solid #16a34a;
+}
+
+.ss-green .ss-stat-icon {
+    background: #f0fdf4;
+}
+
+.ss-purple {
+    border-top: 3px solid #7c3aed;
+}
+
+.ss-purple .ss-stat-icon {
+    background: #f5f3ff;
+}
+
+.ss-orange {
+    border-top: 3px solid #ea580c;
+}
+
+.ss-orange .ss-stat-icon {
+    background: #fff7ed;
+}
+
+.ss-red {
+    border-top: 3px solid #dc2626;
+}
+
+.ss-red .ss-stat-icon {
+    background: #fef2f2;
+}
+
+.ss-cyan {
+    border-top: 3px solid #0891b2;
+}
+
+.ss-cyan .ss-stat-icon {
+    background: #ecfeff;
+}
+
+/* Panels */
+
+.ss-panel {
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid var(--ss-border);
+    border-radius: 13px;
+    background: var(--ss-surface);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .025);
+}
+
+.ss-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.ss-panel h2 {
+    margin: 0 0 8px;
+    color: var(--ss-text);
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.ss-panel-header p {
+    margin: 0;
+}
+
+.ss-panel-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 10px;
+    border: 1px solid #dbeafe;
+    border-radius: 20px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.ss-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 20px;
+}
+
+/* Sales chart */
+
+.ss-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 21px;
+    margin-top: 25px;
+}
+
+.ss-chart-row {
+    display: grid;
+    grid-template-columns: 75px minmax(0, 1fr) 105px;
+    align-items: center;
+    gap: 12px;
+}
+
+.ss-chart-date {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.ss-chart-track {
+    width: 100%;
+    height: 14px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #f1f5f9;
+}
+
+.ss-chart-bar {
+    display: block;
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #60a5fa, #2563eb);
+}
+
+.ss-chart-value {
+    color: #1e293b;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.ss-chart-empty {
+    padding: 25px 15px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #64748b;
+    text-align: center;
+    font-size: 13px;
+}
+
+.ss-chart-empty p {
+    margin: 8px 0 0;
+}
+
+.ss-chart-footer {
+    margin-top: 23px;
+    padding-top: 15px;
+    border-top: 1px solid #edf0f5;
+}
+
+/* Order status */
+
+.ss-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 19px;
+    margin-top: 24px;
+}
+
+.ss-status-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ss-status-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ss-status-dot {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    border-radius: 50%;
+}
+
+.ss-dot-pending {
+    background: #f59e0b;
+}
+
+.ss-dot-confirmed {
+    background: #2563eb;
+}
+
+.ss-dot-processing {
+    background: #8b5cf6;
+}
+
+.ss-dot-shipped {
+    background: #06b6d4;
+}
+
+.ss-dot-delivered {
+    background: #16a34a;
+}
+
+.ss-dot-cancelled {
+    background: #dc2626;
+}
+
+.ss-status-count {
+    min-width: 33px;
+    padding: 6px 9px;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    background: #f8fafc;
+    color: #334155;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.ss-summary-divider {
+    height: 1px;
+    margin: 23px 0;
+    border: 0;
+    background: #e2e8f0;
+}
+
+.ss-summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 15px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.ss-summary-row strong {
+    color: #172033;
+    font-size: 13px;
+}
+
+/* Tables */
+
+.ss-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #edf0f5;
+    border-radius: 9px;
+}
+
+.ss-table {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.ss-table th {
+    padding: 14px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #64748b;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.ss-table td {
+    padding: 15px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.ss-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.ss-table tbody tr {
+    transition: background-color .15s ease;
+}
+
+.ss-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+.ss-table-strong {
+    color: #172033 !important;
+    font-weight: 800;
+}
+
+.ss-table-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #2563eb !important;
+    font-weight: 800;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+
+.ss-table-link:hover {
+    color: #1d4ed8 !important;
+    text-decoration: underline !important;
+}
+
+.ss-customer-email {
+    display: inline-block;
+    margin-top: 5px;
+    color: #94a3b8;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.ss-order-id {
+    display: inline-block;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* Status badges */
+
+.ss-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.ss-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.ss-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.ss-confirmed {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ss-processing {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.ss-shipped {
+    background: #cffafe;
+    color: #0e7490;
+}
+
+.ss-delivered {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.ss-cancelled {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Product ranking */
+
+.ss-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.ss-rank-first {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #92400e;
+}
+
+/* Quick links */
+
+.ss-quick-links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.ss-quick-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    min-width: 0;
+    padding: 19px;
+    border: 1px solid var(--ss-border);
+    border-radius: 11px;
+    background: white;
+    color: var(--ss-text) !important;
+    text-decoration: none !important;
+}
+
+.ss-quick-link:hover {
+    border-color: #93c5fd;
+    background: #f8fbff;
+    box-shadow: 0 5px 15px rgba(37, 99, 235, .06);
+}
+
+.ss-quick-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: #eff6ff;
+    font-size: 19px;
+}
+
+.ss-quick-link h3 {
+    margin: 1px 0 7px;
+    color: #172033;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.ss-quick-link p {
+    margin: 0;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+/* Footer */
+
+.ss-footer {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 18px 3px 0;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Responsive layout */
+
+@media (max-width: 1200px) {
+    .ss-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .ss-dashboard *,
-    .ss-dashboard *::before,
-    .ss-dashboard *::after {
-        box-sizing: border-box;
+    .ss-grid {
+        grid-template-columns: 1fr;
     }
+}
 
+@media (max-width: 700px) {
     .ss-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 18px;
-        margin-bottom: 28px;
+        align-items: flex-start;
+        padding: 19px;
+    }
+
+    .ss-header-main {
+        align-items: flex-start;
+    }
+
+    .ss-header-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        font-size: 21px;
     }
 
     .ss-header h1 {
-        margin: 0 0 8px;
-        font-size: 28px;
-        font-weight: 800;
-    }
-
-    .ss-header p {
-        margin: 0;
-        color: #6b7280;
-        line-height: 1.7;
+        font-size: 23px;
     }
 
     .ss-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
+        width: 100%;
     }
 
-    .ss-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 10px 14px;
-        border: 1px solid #d1d5db;
-        border-radius: 7px;
-        background: #ffffff;
-        color: #374151 !important;
-        text-decoration: none !important;
-        font-weight: 700;
-        font-size: 13px;
+    .ss-actions .ss-button {
+        flex: 1;
     }
-
-    .ss-button-primary {
-        border-color: #2563eb;
-        background: #2563eb;
-        color: #ffffff !important;
-    }
-
-    .ss-button:hover {
-        opacity: 0.9;
-    }
-
-    .ss-section {
-        margin-bottom: 30px;
-    }
-
-    .ss-section-heading {
-        margin-bottom: 17px;
-    }
-
-    .ss-section-heading h2 {
-        margin: 0 0 7px;
-        font-size: 21px;
-        font-weight: 800;
-    }
-
-    .ss-muted {
-        color: #6b7280;
-        font-size: 12px;
-        line-height: 1.7;
-    }
-
-    /* ========================================
-       STATISTICS CARDS
-    ======================================== */
 
     .ss-stats {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 17px;
-    }
-
-    .ss-stat {
-        min-width: 0;
-        padding: 20px;
-        border: 1px solid #e5e7eb;
-        border-radius: 11px;
-        background: #ffffff;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
-    }
-
-    .ss-stat-label {
-        margin-bottom: 12px;
-        color: #6b7280;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .ss-stat-value {
-        margin-bottom: 8px;
-        color: #111827;
-        font-size: 25px;
-        font-weight: 850;
-        overflow-wrap: anywhere;
-    }
-
-    .ss-stat-description {
-        color: #6b7280;
-        font-size: 11px;
-        line-height: 1.6;
-    }
-
-    .ss-blue {
-        border-top: 4px solid #2563eb;
-    }
-
-    .ss-green {
-        border-top: 4px solid #16a34a;
-    }
-
-    .ss-purple {
-        border-top: 4px solid #7c3aed;
-    }
-
-    .ss-orange {
-        border-top: 4px solid #ea580c;
-    }
-
-    .ss-red {
-        border-top: 4px solid #dc2626;
-    }
-
-    .ss-cyan {
-        border-top: 4px solid #0891b2;
-    }
-
-    /* ========================================
-       ANALYTICS PANELS
-    ======================================== */
-
-    .ss-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-        gap: 20px;
-    }
-
-    .ss-panel {
-        min-width: 0;
-        padding: 22px;
-        border: 1px solid #e5e7eb;
-        border-radius: 11px;
-        background: #ffffff;
-    }
-
-    .ss-panel h2 {
-        margin: 0 0 8px;
-        font-size: 19px;
-        font-weight: 800;
-    }
-
-    /* ========================================
-       SALES CHART
-
-       Use the HTML progress element instead of
-       inserting Django expressions into CSS.
-    ======================================== */
-
-    .ss-chart {
-        display: flex;
-        flex-direction: column;
-        gap: 19px;
-        margin-top: 24px;
-    }
-
-    .ss-chart-row {
-        display: grid;
-        grid-template-columns: 65px minmax(0, 1fr) 95px;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .ss-chart-date {
-        color: #6b7280;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .ss-chart-progress {
-        display: block;
-        width: 100%;
-        height: 13px;
-        appearance: none;
-        -webkit-appearance: none;
-        border: none;
-        border-radius: 20px;
-        overflow: hidden;
-        background: #f3f4f6;
-    }
-
-    .ss-chart-progress::-webkit-progress-bar {
-        border-radius: 20px;
-        background: #f3f4f6;
-    }
-
-    .ss-chart-progress::-webkit-progress-value {
-        border-radius: 20px;
-        background: #2563eb;
-    }
-
-    .ss-chart-progress::-moz-progress-bar {
-        border-radius: 20px;
-        background: #2563eb;
-    }
-
-    .ss-chart-value {
-        color: #111827;
-        text-align: right;
-        font-size: 11px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .ss-chart-empty {
-        padding: 25px 15px;
-        border-radius: 8px;
-        background: #f9fafb;
-        color: #6b7280;
-        text-align: center;
-    }
-
-    /* ========================================
-       ORDER STATUS SUMMARY
-    ======================================== */
-
-    .ss-status-list {
-        display: flex;
-        flex-direction: column;
-        gap: 17px;
-        margin-top: 23px;
-    }
-
-    .ss-status-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
         gap: 12px;
     }
 
-    .ss-status-name {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        color: #4b5563;
-        font-size: 13px;
-        font-weight: 600;
+    .ss-stat {
+        padding: 15px;
     }
 
-    .ss-status-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        flex-shrink: 0;
+    .ss-stat-value {
+        font-size: 22px;
     }
 
-    /* Static CSS classes replace dynamic inline colors. */
-
-    .ss-dot-pending {
-        background: #f59e0b;
+    .ss-panel {
+        padding: 17px;
     }
 
-    .ss-dot-processing {
-        background: #8b5cf6;
+    .ss-chart-row {
+        grid-template-columns: 55px minmax(0, 1fr);
+        gap: 10px;
     }
 
-    .ss-dot-shipped {
-        background: #06b6d4;
-    }
-
-    .ss-dot-delivered {
-        background: #16a34a;
-    }
-
-    .ss-dot-cancelled {
-        background: #dc2626;
-    }
-
-    .ss-status-count {
-        padding: 5px 9px;
-        border-radius: 6px;
-        background: #f3f4f6;
-        font-size: 12px;
-        font-weight: 800;
-    }
-
-    /* ========================================
-       TABLES
-    ======================================== */
-
-    .ss-table-wrapper {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .ss-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .ss-table th {
-        padding: 13px;
-        background: #f8fafc;
-        color: #6b7280;
+    .ss-chart-value {
+        grid-column: 2;
         text-align: left;
-        font-size: 11px;
-        text-transform: uppercase;
-        white-space: nowrap;
     }
-
-    .ss-table td {
-        padding: 14px 13px;
-        border-bottom: 1px solid #f0f1f4;
-        color: #374151;
-        font-size: 12px;
-        vertical-align: middle;
-    }
-
-    .ss-table tbody tr:hover {
-        background: #f9fbff;
-    }
-
-    .ss-table-strong {
-        color: #111827;
-        font-weight: 800;
-    }
-
-    .ss-table-link {
-        color: #2563eb !important;
-        font-weight: 800;
-        text-decoration: none !important;
-        white-space: nowrap;
-    }
-
-    .ss-table-link:hover {
-        text-decoration: underline !important;
-    }
-
-    .ss-badge {
-        display: inline-block;
-        padding: 6px 8px;
-        border-radius: 20px;
-        font-size: 10px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .ss-pending {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .ss-confirmed {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-    .ss-processing {
-        background: #ede9fe;
-        color: #6d28d9;
-    }
-
-    .ss-shipped {
-        background: #cffafe;
-        color: #0e7490;
-    }
-
-    .ss-delivered {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .ss-cancelled {
-        background: #fee2e2;
-        color: #b91c1c;
-    }
-
-    /* ========================================
-       QUICK LINKS
-    ======================================== */
 
     .ss-quick-links {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 15px;
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .ss-dashboard {
+        padding-top: 5px;
     }
 
-    .ss-quick-link {
-        display: block;
-        padding: 19px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        background: #ffffff;
-        color: #1f2937 !important;
-        text-decoration: none !important;
+    .ss-stats {
+        grid-template-columns: 1fr;
     }
 
-    .ss-quick-link:hover {
-        border-color: #93c5fd;
-        background: #f8fbff;
+    .ss-header-main {
+        gap: 11px;
     }
 
-    .ss-quick-link h3 {
-        margin: 0 0 8px;
-        font-size: 14px;
+    .ss-header h1 {
+        font-size: 21px;
     }
 
-    .ss-quick-link p {
-        margin: 0;
-        color: #6b7280;
-        font-size: 11px;
-        line-height: 1.7;
+    .ss-actions {
+        flex-direction: column;
     }
 
-    /* ========================================
-       RESPONSIVE DESIGN
-    ======================================== */
-
-    @media (max-width: 1100px) {
-        .ss-stats {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .ss-grid {
-            grid-template-columns: 1fr;
-        }
+    .ss-actions .ss-button {
+        width: 100%;
     }
 
-    @media (max-width: 650px) {
-        .ss-header h1 {
-            font-size: 23px;
-        }
-
-        .ss-stats,
-        .ss-quick-links {
-            grid-template-columns: 1fr;
-        }
-
-        .ss-panel {
-            padding: 15px;
-        }
-
-        .ss-chart-row {
-            grid-template-columns: 50px minmax(0, 1fr);
-        }
-
-        .ss-chart-value {
-            grid-column: 2;
-            text-align: left;
-        }
+    .ss-panel {
+        padding: 14px;
     }
+
+    .ss-footer {
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ss-dashboard *,
+    .ss-dashboard *::before,
+    .ss-dashboard *::after {
+        transition: none !important;
+    }
+}
 </style>
-
 
 <div class="ss-dashboard">
 
-    <!-- DASHBOARD HEADER -->
-
-    <header class="ss-header">
+```
+<!-- Header -->
+<header class="ss-header">
+    <div class="ss-header-main">
+        <div class="ss-header-icon" aria-hidden="true">📊</div>
 
         <div>
-
-            <h1>📊 ShopSphere Sales Dashboard</h1>
-
-            <p>
-                Sales, orders, customers, and inventory in one place.
-            </p>
-
-            <p class="ss-muted">
+            <h1>ShopSphere Dashboard</h1>
+            <p>Your business performance, sales, orders and inventory.</p>
+            <p class="ss-report-date">
                 Report date: {{ today|date:"d F Y" }}
             </p>
+        </div>
+    </div>
 
+    <div class="ss-actions">
+        <a href="{% url 'admin:index' %}" class="ss-button">
+            ⚙️ Admin Home
+        </a>
+
+        <a href="{% url 'product_list' %}" class="ss-button ss-button-primary">
+            🛍️ View Store
+        </a>
+    </div>
+</header>
+
+<!-- Business overview -->
+<section class="ss-section">
+    <div class="ss-section-heading">
+        <h2>Business Overview</h2>
+        <p class="ss-muted">Revenue and order performance at a glance.</p>
+    </div>
+
+    <div class="ss-stats">
+        <div class="ss-stat ss-green">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Total Revenue</div>
+                <div class="ss-stat-icon" aria-hidden="true">💰</div>
+            </div>
+            <div class="ss-stat-value">₹{{ total_revenue|floatformat:2 }}</div>
+            <div class="ss-stat-description">Recorded successful payments</div>
         </div>
 
-        <div class="ss-actions">
-
-            <a
-                href="{% url 'admin:index' %}"
-                class="ss-button"
-            >
-                ⚙️ Admin Home
-            </a>
-
-            <a
-                href="{% url 'product_list' %}"
-                class="ss-button ss-button-primary"
-            >
-                🛍️ View Store
-            </a>
-
+        <div class="ss-stat ss-blue">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Monthly Revenue</div>
+                <div class="ss-stat-icon" aria-hidden="true">📈</div>
+            </div>
+            <div class="ss-stat-value">₹{{ monthly_revenue|floatformat:2 }}</div>
+            <div class="ss-stat-description">Current calendar month</div>
         </div>
 
-    </header>
-
-
-    <!-- BUSINESS OVERVIEW -->
-
-    <section class="ss-section">
-
-        <div class="ss-section-heading">
-
-            <h2>Business Overview</h2>
-
-            <p class="ss-muted">
-                Revenue is calculated using recorded payments marked PAID.
-            </p>
-
+        <div class="ss-stat ss-purple">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Today's Revenue</div>
+                <div class="ss-stat-icon" aria-hidden="true">📅</div>
+            </div>
+            <div class="ss-stat-value">₹{{ today_revenue|floatformat:2 }}</div>
+            <div class="ss-stat-description">Recorded revenue for today</div>
         </div>
 
-
-        <div class="ss-stats">
-
-            <div class="ss-stat ss-green">
-
-                <div class="ss-stat-label">
-                    Total Revenue
-                </div>
-
-                <div class="ss-stat-value">
-                    ₹{{ total_revenue|floatformat:2 }}
-                </div>
-
-                <div class="ss-stat-description">
-                    Recorded successful payments
-                </div>
-
+        <div class="ss-stat ss-orange">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Total Orders</div>
+                <div class="ss-stat-icon" aria-hidden="true">🛒</div>
             </div>
-
-
-            <div class="ss-stat ss-blue">
-
-                <div class="ss-stat-label">
-                    Monthly Revenue
-                </div>
-
-                <div class="ss-stat-value">
-                    ₹{{ monthly_revenue|floatformat:2 }}
-                </div>
-
-                <div class="ss-stat-description">
-                    Current calendar month
-                </div>
-
-            </div>
-
-
-            <div class="ss-stat ss-purple">
-
-                <div class="ss-stat-label">
-                    Today's Revenue
-                </div>
-
-                <div class="ss-stat-value">
-                    ₹{{ today_revenue|floatformat:2 }}
-                </div>
-
-                <div class="ss-stat-description">
-                    Revenue from today's orders
-                </div>
-
-            </div>
-
-
-            <div class="ss-stat ss-orange">
-
-                <div class="ss-stat-label">
-                    Total Orders
-                </div>
-
-                <div class="ss-stat-value">
-                    {{ total_orders }}
-                </div>
-
-                <div class="ss-stat-description">
-                    {{ orders_today }} orders placed today
-                </div>
-
-            </div>
-
-
-            <div class="ss-stat ss-green">
-
-                <div class="ss-stat-label">
-                    Paid Orders
-                </div>
-
-                <div class="ss-stat-value">
-                    {{ paid_orders }}
-                </div>
-
-                <div class="ss-stat-description">
-                    Orders with successful payments
-                </div>
-
-            </div>
-
-
-            <div class="ss-stat ss-cyan">
-
-                <div class="ss-stat-label">
-                    Average Order Value
-                </div>
-
-                <div class="ss-stat-value">
-                    ₹{{ average_order_value|floatformat:2 }}
-                </div>
-
-                <div class="ss-stat-description">
-                    Revenue per paid order
-                </div>
-
-            </div>
-
-
-            <div class="ss-stat ss-purple">
-
-                <div class="ss-stat-label">
-                    Customers
-                </div>
-
-                <div class="ss-stat-value">
-                    {{ total_customers }}
-                </div>
-
-                <div class="ss-stat-description">
-                    Registered customer accounts
-                </div>
-
-            </div>
-
-
-            <div class="ss-stat ss-blue">
-
-                <div class="ss-stat-label">
-                    Sellers
-                </div>
-
-                <div class="ss-stat-value">
-                    {{ total_sellers }}
-                </div>
-
-                <div class="ss-stat-description">
-                    Registered seller accounts
-                </div>
-
-            </div>
-
+            <div class="ss-stat-value">{{ total_orders|default:0 }}</div>
+            <div class="ss-stat-description">{{ orders_today|default:0 }} orders placed today</div>
         </div>
 
-    </section>
-
-
-    <!-- INVENTORY STATISTICS -->
-
-    <section class="ss-section">
-
-        <div class="ss-section-heading">
-
-            <h2>Product & Inventory</h2>
-
-            <p class="ss-muted">
-                Monitor product availability and stock levels.
-            </p>
-
+        <div class="ss-stat ss-green">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Paid Orders</div>
+                <div class="ss-stat-icon" aria-hidden="true">✅</div>
+            </div>
+            <div class="ss-stat-value">{{ paid_orders|default:0 }}</div>
+            <div class="ss-stat-description">Orders with successful payments</div>
         </div>
 
-
-        <div class="ss-stats">
-
-            <div class="ss-stat ss-blue">
-
-                <div class="ss-stat-label">
-                    Total Products
-                </div>
-
-                <div class="ss-stat-value">
-                    {{ total_products }}
-                </div>
-
-                <div class="ss-stat-description">
-                    All catalogue products
-                </div>
-
+        <div class="ss-stat ss-cyan">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Average Order Value</div>
+                <div class="ss-stat-icon" aria-hidden="true">🧾</div>
             </div>
-
-
-            <div class="ss-stat ss-green">
-
-                <div class="ss-stat-label">
-                    Active Products
-                </div>
-
-                <div class="ss-stat-value">
-                    {{ active_products }}
-                </div>
-
-                <div class="ss-stat-description">
-                    Visible in the storefront
-                </div>
-
-            </div>
-
-
-            <div class="ss-stat ss-orange">
-
-                <div class="ss-stat-label">
-                    Low Stock
-                </div>
-
-                <div class="ss-stat-value">
-                    {{ low_stock_products }}
-                </div>
-
-                <div class="ss-stat-description">
-                    One to five units remaining
-                </div>
-
-            </div>
-
-
-            <div class="ss-stat ss-red">
-
-                <div class="ss-stat-label">
-                    Out of Stock
-                </div>
-
-                <div class="ss-stat-value">
-                    {{ out_of_stock_products }}
-                </div>
-
-                <div class="ss-stat-description">
-                    Active products with zero stock
-                </div>
-
-            </div>
-
+            <div class="ss-stat-value">₹{{ average_order_value|floatformat:2 }}</div>
+            <div class="ss-stat-description">Revenue per paid order</div>
         </div>
 
-    </section>
-
-
-    <!-- SALES ANALYTICS AND ORDER STATUS -->
-
-    <section class="ss-section">
-
-        <div class="ss-grid">
-
-
-            <!-- SEVEN-DAY SALES CHART -->
-
-            <div class="ss-panel">
-
-                <h2>📈 Seven-Day Sales</h2>
-
-                <p class="ss-muted">
-                    Daily revenue from recorded successful payments.
-                </p>
-
-                <div class="ss-chart">
-
-                    {% for item in sales_chart %}
-
-                        <div class="ss-chart-row">
-
-                            <div class="ss-chart-date">
-                                {{ item.label }}
-                            </div>
-
-                            <progress
-                                class="ss-chart-progress"
-                                max="100"
-                                value="{{ item.bar_width }}"
-                                aria-label="{{ item.label }} sales"
-                            ></progress>
-
-                            <div class="ss-chart-value">
-                                ₹{{ item.amount|floatformat:2 }}
-                            </div>
-
-                        </div>
-
-                    {% empty %}
-
-                        <div class="ss-chart-empty">
-                            No sales data is available yet.
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-                <p class="ss-muted">
-                    Figures are grouped by order creation date.
-                </p>
-
+        <div class="ss-stat ss-purple">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Customers</div>
+                <div class="ss-stat-icon" aria-hidden="true">👥</div>
             </div>
-
-
-            <!-- ORDER STATUS -->
-
-            <div class="ss-panel">
-
-                <h2>📦 Order Status</h2>
-
-                <p class="ss-muted">
-                    Distribution of orders by their current status.
-                </p>
-
-                <div class="ss-status-list">
-
-                    {% for item in order_status_summary %}
-
-                        <div class="ss-status-item">
-
-                            <div class="ss-status-name">
-
-                                <span
-                                    class="ss-status-dot
-                                    {% if item.label == 'Pending' %}ss-dot-pending
-                                    {% elif item.label == 'Processing' %}ss-dot-processing
-                                    {% elif item.label == 'Shipped' %}ss-dot-shipped
-                                    {% elif item.label == 'Delivered' %}ss-dot-delivered
-                                    {% elif item.label == 'Cancelled' %}ss-dot-cancelled
-                                    {% endif %}"
-                                ></span>
-
-                                {{ item.label }}
-
-                            </div>
-
-                            <span class="ss-status-count">
-                                {{ item.count }}
-                            </span>
-
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-                <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 22px 0;">
-
-                <div class="ss-status-item">
-
-                    <div class="ss-status-name">
-                        Average Order Value
-                    </div>
-
-                    <strong>
-                        ₹{{ average_order_value|floatformat:2 }}
-                    </strong>
-
-                </div>
-
-                <div class="ss-status-item" style="margin-top: 15px;">
-
-                    <div class="ss-status-name">
-                        Orders Today
-                    </div>
-
-                    <strong>
-                        {{ orders_today }}
-                    </strong>
-
-                </div>
-
-            </div>
-
+            <div class="ss-stat-value">{{ total_customers|default:0 }}</div>
+            <div class="ss-stat-description">Registered customer accounts</div>
         </div>
 
-    </section>
+        <div class="ss-stat ss-blue">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Sellers</div>
+                <div class="ss-stat-icon" aria-hidden="true">🏪</div>
+            </div>
+            <div class="ss-stat-value">{{ total_sellers|default:0 }}</div>
+            <div class="ss-stat-description">Registered seller accounts</div>
+        </div>
+    </div>
+</section>
 
+<!-- Inventory -->
+<section class="ss-section">
+    <div class="ss-section-heading">
+        <h2>Product &amp; Inventory</h2>
+        <p class="ss-muted">Monitor catalogue size and stock availability.</p>
+    </div>
 
-    <!-- RECENT ORDERS -->
+    <div class="ss-stats">
+        <div class="ss-stat ss-blue">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Total Products</div>
+                <div class="ss-stat-icon" aria-hidden="true">📦</div>
+            </div>
+            <div class="ss-stat-value">{{ total_products|default:0 }}</div>
+            <div class="ss-stat-description">All catalogue products</div>
+        </div>
 
-    <section class="ss-section">
+        <div class="ss-stat ss-green">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Active Products</div>
+                <div class="ss-stat-icon" aria-hidden="true">🟢</div>
+            </div>
+            <div class="ss-stat-value">{{ active_products|default:0 }}</div>
+            <div class="ss-stat-description">Products available in the storefront</div>
+        </div>
 
+        <div class="ss-stat ss-orange">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Low Stock</div>
+                <div class="ss-stat-icon" aria-hidden="true">⚠️</div>
+            </div>
+            <div class="ss-stat-value">{{ low_stock_products|default:0 }}</div>
+            <div class="ss-stat-description">Products with one to five units remaining</div>
+        </div>
+
+        <div class="ss-stat ss-red">
+            <div class="ss-stat-top">
+                <div class="ss-stat-label">Out of Stock</div>
+                <div class="ss-stat-icon" aria-hidden="true">🚫</div>
+            </div>
+            <div class="ss-stat-value">{{ out_of_stock_products|default:0 }}</div>
+            <div class="ss-stat-description">Active products with zero stock</div>
+        </div>
+    </div>
+</section>
+
+<!-- Sales analytics -->
+<section class="ss-section">
+    <div class="ss-grid">
+
+        <!-- Seven-day sales -->
         <div class="ss-panel">
+            <div class="ss-panel-header">
+                <div>
+                    <h2>📈 Seven-Day Sales</h2>
+                    <p class="ss-muted">Daily revenue across the reporting period.</p>
+                </div>
+                <span class="ss-panel-tag">Last 7 Days</span>
+            </div>
 
-            <div class="ss-section-heading">
+            <div class="ss-chart">
+                {% for item in sales_chart %}
+                    <div class="ss-chart-row">
+                        <div class="ss-chart-date">{{ item.label }}</div>
 
+                        <div
+                            class="ss-chart-track"
+                            role="img"
+                            aria-label="{{ item.label }} revenue: ₹{{ item.amount|floatformat:2 }}"
+                        >
+                 <span
+    class="ss-chart-bar"
+    style="width: 0%;"
+></span>
+                        </div>
+
+                        <div class="ss-chart-value">
+                            ₹{{ item.amount|floatformat:2 }}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="ss-chart-empty">
+                        <div style="font-size: 28px; margin-bottom: 10px;" aria-hidden="true">📊</div>
+                        <strong>No sales data available</strong>
+                        <p class="ss-muted">Sales will appear here when data becomes available.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="ss-chart-footer ss-muted">
+                Revenue figures depend on the dashboard's sales calculation.
+            </div>
+        </div>
+
+        <!-- Order status -->
+        <div class="ss-panel">
+            <div class="ss-panel-header">
+                <div>
+                    <h2>📦 Order Status</h2>
+                    <p class="ss-muted">Current distribution of orders.</p>
+                </div>
+            </div>
+
+            <div class="ss-status-list">
+                {% for item in order_status_summary %}
+                    <div class="ss-status-item">
+                        <div class="ss-status-name">
+                            <span class="ss-status-dot
+                                {% if item.label == 'Pending' %}ss-dot-pending
+                                {% elif item.label == 'Confirmed' %}ss-dot-confirmed
+                                {% elif item.label == 'Processing' %}ss-dot-processing
+                                {% elif item.label == 'Shipped' %}ss-dot-shipped
+                                {% elif item.label == 'Delivered' %}ss-dot-delivered
+                                {% elif item.label == 'Cancelled' %}ss-dot-cancelled
+                                {% endif %}"
+                            ></span>
+                            {{ item.label }}
+                        </div>
+
+                        <span class="ss-status-count">{{ item.count|default:0 }}</span>
+                    </div>
+                {% empty %}
+                    <div class="ss-chart-empty">No order status data available.</div>
+                {% endfor %}
+            </div>
+
+            <hr class="ss-summary-divider">
+
+            <div class="ss-summary-row">
+                <span>Average Order Value</span>
+                <strong>₹{{ average_order_value|floatformat:2 }}</strong>
+            </div>
+
+            <div class="ss-summary-row">
+                <span>Orders Today</span>
+                <strong>{{ orders_today|default:0 }}</strong>
+            </div>
+
+            <div class="ss-summary-row">
+                <span>Paid Orders</span>
+                <strong>{{ paid_orders|default:0 }}</strong>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent orders -->
+<section class="ss-section">
+    <div class="ss-panel">
+        <div class="ss-panel-header">
+            <div>
                 <h2>🛒 Recent Orders</h2>
-
-                <p class="ss-muted">
-                    The latest ten orders placed in ShopSphere.
-                </p>
-
+                <p class="ss-muted">The latest orders placed in ShopSphere.</p>
             </div>
-
-
-            <div class="ss-table-wrapper">
-
-                <table class="ss-table">
-
-                    <thead>
-
-                        <tr>
-                            <th>Order</th>
-                            <th>Customer</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Details</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {% for order in recent_orders %}
-
-                            <tr>
-
-                                <td class="ss-table-strong">
-                                    #{{ order.id }}
-                                </td>
-
-                                <td>
-
-                                    <span class="ss-table-strong">
-                                        {{ order.user.username }}
-                                    </span>
-
-                                    {% if order.user.email %}
-
-                                        <br>
-
-                                        <span class="ss-muted">
-                                            {{ order.user.email }}
-                                        </span>
-
-                                    {% endif %}
-
-                                </td>
-
-                                <td>
-                                    {{ order.created_at|date:"d M Y" }}
-                                </td>
-
-                                <td class="ss-table-strong">
-                                    ₹{{ order.total_amount|floatformat:2 }}
-                                </td>
-
-                                <td>
-
-                                    {% if order.status == "PENDING" %}
-
-                                        <span class="ss-badge ss-pending">
-                                            {{ order.get_status_display }}
-                                        </span>
-
-                                    {% elif order.status == "CONFIRMED" %}
-
-                                        <span class="ss-badge ss-confirmed">
-                                            {{ order.get_status_display }}
-                                        </span>
-
-                                    {% elif order.status == "PROCESSING" %}
-
-                                        <span class="ss-badge ss-processing">
-                                            {{ order.get_status_display }}
-                                        </span>
-
-                                    {% elif order.status == "SHIPPED" %}
-
-                                        <span class="ss-badge ss-shipped">
-                                            {{ order.get_status_display }}
-                                        </span>
-
-                                    {% elif order.status == "DELIVERED" %}
-
-                                        <span class="ss-badge ss-delivered">
-                                            {{ order.get_status_display }}
-                                        </span>
-
-                                    {% elif order.status == "CANCELLED" %}
-
-                                        <span class="ss-badge ss-cancelled">
-                                            {{ order.get_status_display }}
-                                        </span>
-
-                                    {% else %}
-
-                                        {{ order.get_status_display }}
-
-                                    {% endif %}
-
-                                </td>
-
-                                <td>
-
-                                    <a
-                                        href="{% url 'order_detail' order.id %}"
-                                        class="ss-table-link"
-                                    >
-                                        View Details
-                                    </a>
-
-                                </td>
-
-                            </tr>
-
-                        {% empty %}
-
-                            <tr>
-
-                                <td colspan="6">
-                                    No orders have been placed yet.
-                                </td>
-
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
+            <span class="ss-panel-tag">Latest 10</span>
         </div>
 
-    </section>
+        <div class="ss-table-wrapper">
+            <table class="ss-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
 
+                <tbody>
+                    {% for order in recent_orders %}
+                        <tr>
+                            <td>
+                                <span class="ss-order-id">#{{ order.id }}</span>
+                            </td>
 
-    <!-- TOP-SELLING PRODUCTS -->
+                            <td>
+                                <span class="ss-table-strong">{{ order.user.username }}</span>
+                                {% if order.user.email %}
+                                    <br>
+                                    <span class="ss-customer-email">{{ order.user.email }}</span>
+                                {% endif %}
+                            </td>
 
-    <section class="ss-section">
+                            <td>{{ order.created_at|date:"d M Y" }}</td>
 
-        <div class="ss-panel">
+                            <td class="ss-table-strong">
+                                ₹{{ order.total_amount|floatformat:2 }}
+                            </td>
 
-            <div class="ss-section-heading">
+                            <td>
+                                {% if order.status == "PENDING" %}
+                                    <span class="ss-badge ss-pending">{{ order.get_status_display }}</span>
+                                {% elif order.status == "CONFIRMED" %}
+                                    <span class="ss-badge ss-confirmed">{{ order.get_status_display }}</span>
+                                {% elif order.status == "PROCESSING" %}
+                                    <span class="ss-badge ss-processing">{{ order.get_status_display }}</span>
+                                {% elif order.status == "SHIPPED" %}
+                                    <span class="ss-badge ss-shipped">{{ order.get_status_display }}</span>
+                                {% elif order.status == "DELIVERED" %}
+                                    <span class="ss-badge ss-delivered">{{ order.get_status_display }}</span>
+                                {% elif order.status == "CANCELLED" %}
+                                    <span class="ss-badge ss-cancelled">{{ order.get_status_display }}</span>
+                                {% else %}
+                                    <span>{{ order.get_status_display|default:order.status }}</span>
+                                {% endif %}
+                            </td>
 
+                            <td>
+                                <a href="{% url 'order_detail' order.id %}" class="ss-table-link">
+                                    View Details →
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                <div class="ss-chart-empty">No orders have been placed yet.</div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Top-selling products -->
+<section class="ss-section">
+    <div class="ss-panel">
+        <div class="ss-panel-header">
+            <div>
                 <h2>🏆 Top-Selling Products</h2>
-
-                <p class="ss-muted">
-                    Products ranked by units sold in successfully paid orders.
-                </p>
-
+                <p class="ss-muted">Products ranked by units sold.</p>
             </div>
+            <span class="ss-panel-tag">Best Sellers</span>
+        </div>
 
+        <div class="ss-table-wrapper">
+            <table class="ss-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Product</th>
+                        <th>Units Sold</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
 
-            <div class="ss-table-wrapper">
-
-                <table class="ss-table">
-
-                    <thead>
-
+                <tbody>
+                    {% for item in top_products %}
                         <tr>
-                            <th>Rank</th>
-                            <th>Product</th>
-                            <th>Units Sold</th>
-                            <th>Revenue</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {% for item in top_products %}
-
-                            <tr>
-
-                                <td>
+                            <td>
+                                <span class="ss-rank {% if forloop.first %}ss-rank-first{% endif %}">
                                     {{ forloop.counter }}
-                                </td>
+                                </span>
+                            </td>
 
-                                <td class="ss-table-strong">
-                                    {{ item.product__name|default:"Unavailable product" }}
-                                </td>
+                            <td class="ss-table-strong">
+                                {{ item.product__name|default:"Unavailable product" }}
+                            </td>
 
-                                <td>
-                                    {{ item.units_sold|default:0 }}
-                                </td>
+                            <td>{{ item.units_sold|default:0 }}</td>
 
-                                <td class="ss-table-strong">
-                                    ₹{{ item.revenue|default:0|floatformat:2 }}
-                                </td>
+                            <td class="ss-table-strong">
+                                ₹{{ item.revenue|default:0|floatformat:2 }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="ss-chart-empty">No product sales are available yet.</div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
 
-                            </tr>
+<!-- Quick administration -->
+<section class="ss-section">
+    <div class="ss-section-heading">
+        <h2>Quick Administration</h2>
+        <p class="ss-muted">Quickly access your ShopSphere management areas.</p>
+    </div>
 
-                        {% empty %}
-
-                            <tr>
-
-                                <td colspan="4">
-                                    No paid-product sales are available yet.
-                                </td>
-
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
+    <div class="ss-quick-links">
+        <a href="{% url 'admin:index' %}" class="ss-quick-link">
+            <div class="ss-quick-icon" aria-hidden="true">⚙️</div>
+            <div>
+                <h3>Django Administration</h3>
+                <p>Manage registered records and administrative settings.</p>
             </div>
+        </a>
 
-        </div>
+        <a href="{% url 'product_list' %}" class="ss-quick-link">
+            <div class="ss-quick-icon" aria-hidden="true">🛍️</div>
+            <div>
+                <h3>Storefront</h3>
+                <p>Visit the public product catalogue and shopping pages.</p>
+            </div>
+        </a>
 
-    </section>
+        <a href="{% url 'admin_sales_dashboard' %}" class="ss-quick-link">
+            <div class="ss-quick-icon" aria-hidden="true">📊</div>
+            <div>
+                <h3>Refresh Dashboard</h3>
+                <p>Reload the dashboard to retrieve the latest statistics.</p>
+            </div>
+        </a>
+    </div>
+</section>
 
-
-    <!-- QUICK ADMIN LINKS -->
-
-    <section class="ss-section">
-
-        <div class="ss-section-heading">
-
-            <h2>Quick Administration</h2>
-
-            <p class="ss-muted">
-                Access other ShopSphere management areas.
-            </p>
-
-        </div>
-
-
-        <div class="ss-quick-links">
-
-            <a
-                href="{% url 'admin:index' %}"
-                class="ss-quick-link"
-            >
-
-                <h3>⚙️ Django Admin</h3>
-
-                <p>
-                    Manage database records and admin settings.
-                </p>
-
-            </a>
-
-
-            <a
-                href="{% url 'product_list' %}"
-                class="ss-quick-link"
-            >
-
-                <h3>🛍️ Storefront</h3>
-
-                <p>
-                    View the public ShopSphere product catalogue.
-                </p>
-
-            </a>
-
-
-            <a
-                href="{% url 'admin_sales_dashboard' %}"
-                class="ss-quick-link"
-            >
-
-                <h3>📊 Refresh Dashboard</h3>
-
-                <p>
-                    Reload your latest business statistics.
-                </p>
-
-            </a>
-
-        </div>
-
-    </section>
-
-
-    <!-- FOOTER -->
-
-    <p class="ss-muted">
-        ShopSphere Administration ·
-        Report date: {{ today|date:"d F Y" }}
-    </p>
+<!-- Footer -->
+<footer class="ss-footer">
+    <span class="ss-muted">ShopSphere Administration</span>
+    <span class="ss-muted">Report date: {{ today|date:"d F Y" }}</span>
+</footer>
+```
 
 </div>
-
 {% endblock %}

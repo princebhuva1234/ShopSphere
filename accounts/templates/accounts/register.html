@@ -1,156 +1,610 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}Create Account - ShopSphere{% endblock %}
 
-    <title>Register - ShopSphere</title>
+{% block content %}
+<style>
+    .ss-register-page {
+        --ss-primary: #4f46e5;
+        --ss-primary-dark: #3730a3;
+        --ss-ink: #172033;
+        --ss-muted: #667085;
+        --ss-border: #e4e7ec;
+        width: min(1120px, calc(100% - 36px));
+        margin: 42px auto 64px;
+        color: var(--ss-ink);
+        font-family: inherit;
+    }
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 40px;
+    .ss-register-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+        min-height: 650px;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #eaecf0;
+        border-radius: 28px;
+        box-shadow: 0 24px 70px rgba(25, 35, 75, .11);
+    }
+
+    .ss-register-intro {
+        position: relative;
+        isolation: isolate;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        padding: 48px 42px;
+        color: #fff;
+        background: linear-gradient(145deg, #4338ca 0%, #4f46e5 48%, #0f766e 125%);
+    }
+
+    .ss-register-intro::before,
+    .ss-register-intro::after {
+        position: absolute;
+        z-index: -1;
+        display: block;
+        content: "";
+        border: 1px solid rgba(255, 255, 255, .17);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .ss-register-intro::before {
+        width: 420px;
+        height: 420px;
+        top: -160px;
+        right: -190px;
+        box-shadow: 0 0 0 36px rgba(255,255,255,.035), 0 0 0 72px rgba(255,255,255,.025);
+    }
+
+    .ss-register-intro::after {
+        width: 300px;
+        height: 300px;
+        bottom: -170px;
+        left: -110px;
+        box-shadow: 0 0 0 32px rgba(255,255,255,.035);
+    }
+
+    .ss-brand-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+        padding: 9px 13px;
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 999px;
+        background: rgba(255,255,255,.1);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        backdrop-filter: blur(8px);
+    }
+
+    .ss-brand-mark {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border-radius: 9px;
+        background: #fff;
+        color: #4338ca;
+        font-size: 17px;
+    }
+
+    .ss-intro-copy {
+        max-width: 390px;
+        margin: 46px 0;
+    }
+
+    .ss-intro-eyebrow {
+        margin: 0 0 14px;
+        color: #dbeafe;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+
+    .ss-intro-copy h2 {
+        margin: 0 0 18px;
+        color: #fff;
+        font-size: clamp(30px, 3.2vw, 44px);
+        font-weight: 800;
+        line-height: 1.13;
+        letter-spacing: -.04em;
+    }
+
+    .ss-intro-copy p {
+        margin: 0;
+        color: #e0e7ff;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .ss-benefit-list {
+        display: grid;
+        gap: 14px;
+        margin: 30px 0 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .ss-benefit-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #f8fafc;
+        font-size: 14px;
+    }
+
+    .ss-benefit-check {
+        display: grid;
+        flex: 0 0 25px;
+        width: 25px;
+        height: 25px;
+        place-items: center;
+        border: 1px solid rgba(255,255,255,.27);
+        border-radius: 50%;
+        background: rgba(255,255,255,.12);
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .ss-intro-foot {
+        margin: 18px 0 0;
+        color: #dbeafe;
+        font-size: 12px;
+    }
+
+    .ss-register-main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 54px clamp(28px, 5vw, 66px);
+    }
+
+    .ss-register-heading {
+        margin-bottom: 28px;
+    }
+
+    .ss-register-step {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        color: var(--ss-primary);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .ss-register-step::before {
+        width: 22px;
+        height: 2px;
+        border-radius: 2px;
+        background: currentColor;
+        content: "";
+    }
+
+    .ss-register-heading h1 {
+        margin: 0 0 10px;
+        color: var(--ss-ink);
+        font-size: clamp(28px, 3vw, 36px);
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: -.035em;
+    }
+
+    .ss-register-heading p {
+        margin: 0;
+        color: var(--ss-muted);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .ss-register-error {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 0 0 20px;
+        padding: 13px 15px;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        background: #fff1f2;
+        color: #b42318;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .ss-register-error-icon {
+        display: grid;
+        flex: 0 0 21px;
+        width: 21px;
+        height: 21px;
+        place-items: center;
+        border-radius: 50%;
+        background: #ffe4e6;
+        font-weight: 800;
+    }
+
+    .ss-register-form {
+        display: grid;
+        gap: 18px;
+        width: 100%;
+    }
+
+    .ss-field {
+        min-width: 0;
+    }
+
+    .ss-field label {
+        display: block;
+        margin: 0 0 8px;
+        color: #344054;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .ss-input-wrap {
+        position: relative;
+    }
+
+    .ss-input-wrap input {
+        display: block;
+        width: 100%;
+        min-height: 49px;
+        box-sizing: border-box;
+        padding: 13px 14px;
+        border: 1px solid #d0d5dd;
+        border-radius: 11px;
+        outline: none;
+        background: #fff;
+        color: #172033;
+        font: inherit;
+        font-size: 14px;
+        transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .ss-input-wrap input::placeholder {
+        color: #98a2b3;
+    }
+
+    .ss-input-wrap input:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, .12);
+    }
+
+    .ss-input-wrap input:focus-visible {
+        outline: none;
+    }
+
+    .ss-input-wrap.has-toggle input {
+        padding-right: 76px;
+    }
+
+    .ss-password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        padding: 6px 7px;
+        transform: translateY(-50%);
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #4f46e5;
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .ss-password-toggle:hover {
+        background: #eef2ff;
+    }
+
+    .ss-register-submit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 51px;
+        margin-top: 5px;
+        padding: 14px 18px;
+        border: 0;
+        border-radius: 11px;
+        background: linear-gradient(115deg, #4f46e5, #4338ca);
+        box-shadow: 0 9px 20px rgba(79, 70, 229, .2);
+        color: #fff;
+        cursor: pointer;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 800;
+        transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    .ss-register-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 13px 26px rgba(79, 70, 229, .27);
+        filter: brightness(1.03);
+    }
+
+    .ss-register-submit:active {
+        transform: translateY(0);
+    }
+
+    .ss-register-submit:focus-visible,
+    .ss-password-toggle:focus-visible,
+    .ss-register-links a:focus-visible {
+        outline: 3px solid rgba(79, 70, 229, .35);
+        outline-offset: 3px;
+    }
+
+    .ss-register-links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 13px;
+        margin-top: 25px;
+        text-align: center;
+        color: var(--ss-muted);
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .ss-register-links p {
+        margin: 0;
+    }
+
+    .ss-register-links a {
+        color: var(--ss-primary);
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .ss-register-links a:hover {
+        color: var(--ss-primary-dark);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    .ss-register-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    @media (max-width: 820px) {
+        .ss-register-page {
+            width: min(560px, calc(100% - 28px));
+            margin: 26px auto 42px;
         }
 
-        .container {
-            width: 400px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        .ss-register-layout {
+            grid-template-columns: 1fr;
+            min-height: auto;
+            border-radius: 23px;
         }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 25px;
+        .ss-register-intro {
+            padding: 28px;
         }
 
-        label {
-            display: block;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            font-weight: bold;
+        .ss-intro-copy {
+            margin: 30px 0 10px;
         }
 
-        input {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        .ss-intro-copy h2 {
+            max-width: 430px;
+            font-size: 32px;
         }
 
-        button {
-            width: 100%;
-            margin-top: 25px;
-            padding: 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
+        .ss-intro-copy p {
+            max-width: 460px;
         }
 
-        button:hover {
-            background-color: #0056b3;
+        .ss-benefit-list {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 22px;
         }
 
-        .error {
-            background-color: #f8d7da;
-            color: #842029;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
+        .ss-intro-foot {
+            margin-top: 26px;
         }
 
-        .login-link {
-            text-align: center;
-            margin-top: 20px;
+        .ss-register-main {
+            padding: 34px 28px 32px;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .ss-register-page {
+            width: calc(100% - 20px);
+            margin: 16px auto 28px;
         }
 
-        .login-link a {
-            color: #007bff;
-            text-decoration: none;
+        .ss-register-intro {
+            padding: 24px 20px;
         }
-    </style>
 
-</head>
+        .ss-intro-copy h2 {
+            font-size: 29px;
+        }
 
-<body>
+        .ss-register-main {
+            padding: 29px 20px 27px;
+        }
 
-<div class="container">
+        .ss-register-heading h1 {
+            font-size: 28px;
+        }
+    }
 
-    <h1>Create Account</h1>
+    @media (prefers-reduced-motion: reduce) {
+        .ss-input-wrap input,
+        .ss-register-submit {
+            transition: none;
+        }
+    }
+</style>
 
-    {% if error %}
-        <div class="error">
-            {{ error }}
-        </div>
-    {% endif %}
+<div class="ss-register-page">
+    <div class="ss-register-layout">
+        <aside class="ss-register-intro" aria-label="ShopSphere benefits">
+            <div class="ss-brand-chip">
+                <span class="ss-brand-mark" aria-hidden="true">🛍</span>
+                <span>ShopSphere</span>
+            </div>
 
-    <form method="POST">
+            <div class="ss-intro-copy">
+                <p class="ss-intro-eyebrow">Your shopping journey starts here</p>
+                <h2>A little closer to everything you love.</h2>
+                <p>Create your account and make your next shopping experience simpler, smoother, and more personal.</p>
 
-        {% csrf_token %}
+                <ul class="ss-benefit-list">
+                    <li><span class="ss-benefit-check" aria-hidden="true">✓</span><span>Keep your orders in one place</span></li>
+                    <li><span class="ss-benefit-check" aria-hidden="true">✓</span><span>Save products to your wishlist</span></li>
+                    <li><span class="ss-benefit-check" aria-hidden="true">✓</span><span>Enjoy a faster checkout experience</span></li>
+                </ul>
+            </div>
 
-        <label>Username</label>
+            <p class="ss-intro-foot">A better way to shop, all in one place.</p>
+        </aside>
 
-        <input
-            type="text"
-            name="username"
-            required
-        >
+        <main class="ss-register-main">
+            <header class="ss-register-heading">
+                <div class="ss-register-step">Create your account</div>
+                <h1>Join ShopSphere</h1>
+                <p>Enter your details below to get started.</p>
+            </header>
 
+            {% if error %}
+                <div class="ss-register-error" role="alert" aria-live="polite">
+                    <span class="ss-register-error-icon" aria-hidden="true">!</span>
+                    <span>{{ error }}</span>
+                </div>
+            {% endif %}
 
-        <label>Email</label>
+            <form method="POST" class="ss-register-form" id="ssRegisterForm">
+                {% csrf_token %}
 
-        <input
-            type="email"
-            name="email"
-            required
-        >
+                <div class="ss-field">
+                    <label for="ss-username">Username</label>
+                    <div class="ss-input-wrap">
+                        <input
+                            type="text"
+                            id="ss-username"
+                            name="username"
+                            placeholder="Choose a username"
+                            autocomplete="username"
+                            required
+                            autofocus
+                        >
+                    </div>
+                </div>
 
+                <div class="ss-field">
+                    <label for="ss-email">Email address</label>
+                    <div class="ss-input-wrap">
+                        <input
+                            type="email"
+                            id="ss-email"
+                            name="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+                </div>
 
-        <label>Password</label>
+                <div class="ss-field">
+                    <label for="ss-password">Password</label>
+                    <div class="ss-input-wrap has-toggle">
+                        <input
+                            type="password"
+                            id="ss-password"
+                            name="password"
+                            placeholder="Create a password"
+                            autocomplete="new-password"
+                            required
+                        >
+                        <button class="ss-password-toggle" type="button" data-password-target="ss-password" aria-controls="ss-password" aria-label="Show password" aria-pressed="false">Show</button>
+                    </div>
+                </div>
 
-        <input
-            type="password"
-            name="password"
-            required
-        >
+                <div class="ss-field">
+                    <label for="ss-confirm-password">Confirm password</label>
+                    <div class="ss-input-wrap has-toggle">
+                        <input
+                            type="password"
+                            id="ss-confirm-password"
+                            name="confirm_password"
+                            placeholder="Enter your password again"
+                            autocomplete="new-password"
+                            required
+                        >
+                        <button class="ss-password-toggle" type="button" data-password-target="ss-confirm-password" aria-controls="ss-confirm-password" aria-label="Show confirm password" aria-pressed="false">Show</button>
+                    </div>
+                </div>
 
+                <button type="submit" class="ss-register-submit">
+                    <span>Create Account</span>
+                    <span aria-hidden="true">→</span>
+                </button>
+            </form>
 
-        <label>Confirm Password</label>
-
-        <input
-            type="password"
-            name="confirm_password"
-            required
-        >
-
-
-        <button type="submit">
-            Register
-        </button>
-
-    </form>
-
-
-    <div class="login-link">
-
-        Already have an account?
-
-        <a href="#">
-            Login
-        </a>
-
+            <div class="ss-register-links">
+                <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+                <a href="{% url 'product_list' %}" class="ss-register-back">← Back to shopping</a>
+            </div>
+        </main>
     </div>
-
 </div>
 
-</body>
-</html>
+<script>
+    (function () {
+        const toggleButtons = document.querySelectorAll('.ss-password-toggle');
+
+        toggleButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const targetId = button.getAttribute('data-password-target');
+                const input = document.getElementById(targetId);
+
+                if (!input) return;
+
+                const showPassword = input.type === 'password';
+                input.type = showPassword ? 'text' : 'password';
+                button.textContent = showPassword ? 'Hide' : 'Show';
+                button.setAttribute('aria-pressed', String(showPassword));
+                button.setAttribute(
+                    'aria-label',
+                    (showPassword ? 'Hide ' : 'Show ') +
+                    (targetId === 'ss-password' ? 'password' : 'confirm password')
+                );
+            });
+        });
+
+        const form = document.getElementById('ssRegisterForm');
+        const password = document.getElementById('ss-password');
+        const confirmPassword = document.getElementById('ss-confirm-password');
+
+        if (form && password && confirmPassword) {
+            function validatePasswords() {
+                if (confirmPassword.value && password.value !== confirmPassword.value) {
+                    confirmPassword.setCustomValidity('Passwords do not match.');
+                } else {
+                    confirmPassword.setCustomValidity('');
+                }
+            }
+
+            password.addEventListener('input', validatePasswords);
+            confirmPassword.addEventListener('input', validatePasswords);
+            form.addEventListener('submit', validatePasswords);
+        }
+    })();
+</script>
+{% endblock %}

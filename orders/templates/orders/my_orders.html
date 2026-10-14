@@ -1,151 +1,528 @@
 {% extends 'base.html' %}
 
-{% block title %}
-My Orders - ShopSphere
-{% endblock %}
+{% block title %}My Orders - ShopSphere{% endblock %}
 
 {% block content %}
-
-<div class="orders-container">
-
-    <h1>My Orders</h1>
-
-    {% if orders %}
-
-        {% for order in orders %}
-
-            <div class="order-card">
-
-                <div class="order-header">
-
-                    <div>
-                       <h2>
-    <a href="{% url 'order_detail' order.id %}" class="order-link">
-        Order #{{ order.id }}
-    </a>
-</h2>
-                        <p>
-                            Date:
-                            {{ order.created_at|date:"d M Y, h:i A" }}
-                        </p>
-                    </div>
-
-                    <div class="order-status">
-                        {{ order.get_status_display }}
-                    </div>
-
-                </div>
-
-                <div class="order-details">
-
-                    <p>
-                        <strong>Total Amount:</strong>
-                        ₹{{ order.total_amount }}
-                    </p>
-
-                    <p>
-                        <strong>Items:</strong>
-                        {{ order.items.count }}
-                    </p>
-
-                </div>
-
-            </div>
-
-        {% endfor %}
-
-    {% else %}
-
-        <div class="empty-orders">
-
-            <h2>No Orders Yet</h2>
-
-            <p>You haven't placed any orders yet.</p>
-
-            <a href="{% url 'product_list' %}">
-                Start Shopping
-            </a>
-
-        </div>
-
-    {% endif %}
-
-</div>
-
 <style>
-
-    .orders-container {
-        max-width: 1000px;
-        margin: auto;
+    /* =====================================================
+       SHOPSPHERE ORDER HISTORY
+    ===================================================== */
+    .orders-page {
+        --orders-primary: #4f46e5;
+        --orders-primary-dark: #4338ca;
+        --orders-ink: #172033;
+        --orders-muted: #64748b;
+        --orders-border: #e6eaf0;
+        --orders-surface: #ffffff;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px 0 48px;
+        color: var(--orders-ink);
     }
 
-    .orders-container h1 {
-        margin-bottom: 25px;
+    .orders-hero {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        overflow: hidden;
+        margin-bottom: 28px;
+        padding: 30px 32px;
+        border: 1px solid #e0e7ff;
+        border-radius: 22px;
+        background:
+            radial-gradient(circle at 92% 15%, rgba(129, 140, 248, .22), transparent 28%),
+            linear-gradient(120deg, #ffffff 0%, #f5f6ff 100%);
+        animation: ordersEnter .45s ease both;
+    }
+
+    .orders-hero-copy { position: relative; z-index: 1; }
+
+    .orders-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 9px;
+        color: var(--orders-primary);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+    }
+
+    .orders-eyebrow::before {
+        content: "";
+        width: 22px;
+        height: 2px;
+        border-radius: 5px;
+        background: var(--orders-primary);
+    }
+
+    .orders-hero h1 {
+        margin: 0;
+        color: #111827;
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: clamp(27px, 4vw, 36px);
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: -1.2px;
+    }
+
+    .orders-hero p {
+        max-width: 560px;
+        margin: 11px 0 0;
+        color: var(--orders-muted);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .orders-hero-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 76px;
+        width: 76px;
+        height: 76px;
+        border: 1px solid rgba(99, 102, 241, .16);
+        border-radius: 23px;
+        color: var(--orders-primary);
+        background: rgba(255, 255, 255, .85);
+        box-shadow: 0 12px 30px rgba(79, 70, 229, .09);
+        font-size: 34px;
+        animation: ordersFloat 4s ease-in-out infinite;
+    }
+
+    .orders-list {
+        display: grid;
+        gap: 17px;
     }
 
     .order-card {
-        background: white;
-        padding: 25px;
-        margin-bottom: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid var(--orders-border);
+        border-radius: 17px;
+        background: var(--orders-surface);
+        box-shadow: 0 3px 12px rgba(15, 23, 42, .035);
+        transition: border-color .22s ease, box-shadow .22s ease, transform .22s ease;
+        animation: ordersEnter .45s ease both;
     }
 
-    .order-header {
+    .order-card:nth-child(2) { animation-delay: 60ms; }
+    .order-card:nth-child(3) { animation-delay: 120ms; }
+    .order-card:nth-child(4) { animation-delay: 180ms; }
+    .order-card:nth-child(5) { animation-delay: 240ms; }
+
+    .order-card:hover {
+        border-color: #c7d2fe;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, .075);
+        transform: translateY(-2px);
+    }
+
+    .order-card-top {
         display: flex;
+        align-items: flex-start;
         justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 15px;
+        gap: 18px;
+        padding: 22px 24px 19px;
+        border-bottom: 1px solid #edf0f5;
+        background: linear-gradient(180deg, #ffffff 0%, #fcfcff 100%);
     }
 
-    .order-header h2 {
-        margin: 0 0 8px;
+    .order-reference-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #94a3b8;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
     }
 
-    .order-header p {
+    .order-number {
         margin: 0;
-        color: #666;
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: 19px;
+        font-weight: 800;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
     }
+
+    .order-number a {
+        color: #172033;
+        text-decoration: none;
+        transition: color .18s ease;
+    }
+
+    .order-number a:hover { color: var(--orders-primary); }
+
+    .order-date {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin: 7px 0 0;
+        color: var(--orders-muted);
+        font-size: 13px;
+    }
+
+    .order-date-icon { color: #94a3b8; }
 
     .order-status {
-        padding: 8px 15px;
-        background: #fff3cd;
-        color: #856404;
-        border-radius: 20px;
-        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        flex-shrink: 0;
+        padding: 8px 12px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .25px;
+        line-height: 1.2;
+        white-space: nowrap;
     }
 
-    .order-details {
-        padding-top: 15px;
+    .order-status::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
     }
 
-    .order-details p {
-        margin: 8px 0;
+    .status-pending {
+        color: #a16207;
+        background: #fffbeb;
+        border-color: #fde68a;
+    }
+
+    .status-confirmed {
+        color: #1d4ed8;
+        background: #eff6ff;
+        border-color: #bfdbfe;
+    }
+
+    .status-processing {
+        color: #6d28d9;
+        background: #f5f3ff;
+        border-color: #ddd6fe;
+    }
+
+    .status-shipped {
+        color: #0369a1;
+        background: #f0f9ff;
+        border-color: #bae6fd;
+    }
+
+    .status-delivered {
+        color: #15803d;
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .status-cancelled {
+        color: #b91c1c;
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+
+    .status-default {
+        color: #475569;
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+
+    .order-card-body {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 20px 24px;
+    }
+
+    .order-facts {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+
+    .order-fact { min-width: 105px; }
+
+    .order-fact-label {
+        display: block;
+        margin-bottom: 4px;
+        color: #94a3b8;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .65px;
+        text-transform: uppercase;
+    }
+
+    .order-fact-value {
+        display: block;
+        color: var(--orders-ink);
+        font-size: 16px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .order-fact-value.order-total {
+        color: var(--orders-primary-dark);
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: 19px;
+        letter-spacing: -.35px;
+    }
+
+    .order-card-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 9px;
+        padding: 15px 24px;
+        border-top: 1px solid #edf0f5;
+        background: #fbfcff;
+    }
+
+    .order-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 38px;
+        padding: 9px 13px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        color: #475569;
+        background: #ffffff;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+
+    .order-action:hover {
+        color: var(--orders-primary);
+        background: #eef2ff;
+        border-color: #c7d2fe;
+        box-shadow: 0 4px 11px rgba(79, 70, 229, .08);
+        transform: translateY(-1px);
+    }
+
+    .order-action-primary {
+        color: #ffffff;
+        background: var(--orders-primary);
+        border-color: var(--orders-primary);
+    }
+
+    .order-action-primary:hover {
+        color: #ffffff;
+        background: var(--orders-primary-dark);
+        border-color: var(--orders-primary-dark);
     }
 
     .empty-orders {
-        background: white;
-        padding: 50px;
+        padding: 58px 22px;
+        border: 1px solid var(--orders-border);
+        border-radius: 20px;
+        background: #ffffff;
         text-align: center;
-        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(15, 23, 42, .035);
+        animation: ordersEnter .45s ease both;
+    }
+
+    .empty-orders-icon {
+        display: grid;
+        place-items: center;
+        width: 84px;
+        height: 84px;
+        margin: 0 auto 20px;
+        border: 1px solid #e0e7ff;
+        border-radius: 26px;
+        color: var(--orders-primary);
+        background: linear-gradient(145deg, #eef2ff, #f8faff);
+        font-size: 37px;
+    }
+
+    .empty-orders h2 {
+        margin: 0 0 9px;
+        color: #111827;
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -.5px;
     }
 
     .empty-orders p {
-        color: #666;
+        max-width: 430px;
+        margin: 0 auto 23px;
+        color: var(--orders-muted);
+        font-size: 14px;
+        line-height: 1.8;
     }
 
-    .empty-orders a {
-        display: inline-block;
-        margin-top: 15px;
-        padding: 12px 22px;
-        background: #007bff;
-        color: white;
+    .start-shopping-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 45px;
+        padding: 12px 20px;
+        border: 1px solid var(--orders-primary);
+        border-radius: 10px;
+        color: #ffffff;
+        background: var(--orders-primary);
+        font-size: 13px;
+        font-weight: 800;
         text-decoration: none;
-        border-radius: 7px;
-        font-weight: bold;
+        transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
     }
 
+    .start-shopping-button:hover {
+        color: #ffffff;
+        background: var(--orders-primary-dark);
+        box-shadow: 0 8px 18px rgba(79, 70, 229, .19);
+        transform: translateY(-2px);
+    }
+
+    .orders-footer-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 22px;
+        padding: 14px 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        color: var(--orders-muted);
+        background: #f8fafc;
+        font-size: 12px;
+        line-height: 1.65;
+    }
+
+    .orders-footer-note strong { color: #334155; }
+
+    @keyframes ordersEnter {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes ordersFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+    }
+
+    @media (max-width: 760px) {
+        .orders-page { padding-top: 4px; }
+        .orders-hero { padding: 24px 22px; border-radius: 18px; }
+        .orders-hero-icon { flex-basis: 62px; width: 62px; height: 62px; border-radius: 19px; font-size: 28px; }
+        .order-card-top { padding: 19px 18px 16px; }
+        .order-card-body { align-items: flex-start; flex-direction: column; padding: 18px; gap: 17px; }
+        .order-facts { width: 100%; gap: 18px 25px; }
+        .order-card-actions { justify-content: flex-start; padding: 14px 18px; }
+        .order-action { flex: 1 1 auto; }
+    }
+
+    @media (max-width: 480px) {
+        .orders-hero { padding: 22px 17px; gap: 10px; }
+        .orders-hero h1 { font-size: 27px; letter-spacing: -.8px; }
+        .orders-hero p { font-size: 13px; }
+        .orders-hero-icon { flex-basis: 48px; width: 48px; height: 48px; border-radius: 15px; font-size: 23px; }
+        .order-card-top { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .order-status { align-self: flex-start; }
+        .order-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px 12px; }
+        .order-fact { min-width: 0; }
+        .order-card-actions { display: grid; grid-template-columns: 1fr 1fr; }
+        .order-action { width: 100%; padding-inline: 8px; }
+        .empty-orders { padding: 42px 17px; }
+        .empty-orders h2 { font-size: 21px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .orders-page *,
+        .orders-page *::before,
+        .orders-page *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
 </style>
 
+<div class="orders-page">
+    <header class="orders-hero">
+        <div class="orders-hero-copy">
+            <p class="orders-eyebrow">Your shopping, all in one place</p>
+            <h1>My Orders</h1>
+            <p>Review your purchases, check their status, and quickly open order details or invoices.</p>
+        </div>
+        <div class="orders-hero-icon" aria-hidden="true">📦</div>
+    </header>
+
+    {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+                <article class="order-card">
+                    <div class="order-card-top">
+                        <div>
+                            <span class="order-reference-label">Order reference</span>
+                            <h2 class="order-number">
+                                <a href="{% url 'order_detail' order.id %}">Order #{{ order.id }}</a>
+                            </h2>
+                            <p class="order-date"><span class="order-date-icon" aria-hidden="true">◷</span> Placed {{ order.created_at|date:"d M Y, h:i A" }}</p>
+                        </div>
+
+                        {% with order_status=order.status|lower %}
+                            <span class="order-status {% if order_status == 'pending' %}status-pending{% elif order_status == 'confirmed' %}status-confirmed{% elif order_status == 'processing' %}status-processing{% elif order_status == 'shipped' %}status-shipped{% elif order_status == 'delivered' %}status-delivered{% elif order_status == 'cancelled' %}status-cancelled{% else %}status-default{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        {% endwith %}
+                    </div>
+
+                    <div class="order-card-body">
+                        <div class="order-facts">
+                            <div class="order-fact">
+                                <span class="order-fact-label">Order total</span>
+                                <strong class="order-fact-value order-total">₹{{ order.total_amount|floatformat:2 }}</strong>
+                            </div>
+                            <div class="order-fact">
+                                <span class="order-fact-label">Order items</span>
+                                <strong class="order-fact-value">{{ order.items.count }}</strong>
+                            </div>
+                            <div class="order-fact">
+                                <span class="order-fact-label">Order number</span>
+                                <strong class="order-fact-value">#{{ order.id }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-card-actions">
+                        <a href="{% url 'order_detail' order.id %}" class="order-action order-action-primary">
+                            View Details <span aria-hidden="true">→</span>
+                        </a>
+                        <a href="{% url 'track_order' order.id %}" class="order-action">
+                            Track Order
+                        </a>
+                        <a href="{% url 'download_order_invoice' order.id %}" class="order-action">
+                            Download Invoice <span aria-hidden="true">↓</span>
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        <div class="orders-footer-note">
+            <span aria-hidden="true">ℹ️</span>
+            <div><strong>Need order information?</strong> Open an order to review its details, payment information, delivery address, and available actions.</div>
+        </div>
+    {% else %}
+        <section class="empty-orders">
+            <div class="empty-orders-icon" aria-hidden="true">🛍️</div>
+            <h2>No orders yet</h2>
+            <p>Your purchases will appear here after you place an order. Explore the store to find something you love.</p>
+            <a href="{% url 'product_list' %}" class="start-shopping-button">Explore Products <span aria-hidden="true">→</span></a>
+        </section>
+    {% endif %}
+</div>
 {% endblock %}

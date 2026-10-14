@@ -1,209 +1,520 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Write a Review - ShopSphere
-{% endblock %}
+{% block title %}Write a Review - ShopSphere{% endblock %}
 
 {% block content %}
-
 <style>
-    .review-page {
-        max-width: 700px;
-        margin: 40px auto;
-        padding: 20px;
+    .ss-review-page {
+        --ss-review-primary: #4f46e5;
+        --ss-review-primary-dark: #3730a3;
+        --ss-review-ink: #172033;
+        --ss-review-muted: #657089;
+        --ss-review-border: #e3e8f2;
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 36px 20px 64px;
+        color: var(--ss-review-ink);
     }
 
-    .review-container {
-        background: #fff;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    .ss-review-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 34px 38px;
+        margin-bottom: 26px;
+        border-radius: 24px;
+        color: #fff;
+        background: linear-gradient(125deg, #312e81 0%, #4f46e5 58%, #7c3aed 100%);
+        box-shadow: 0 18px 42px rgba(79, 70, 229, .19);
+        isolation: isolate;
     }
 
-    .review-container h1 {
-        margin-top: 0;
-        margin-bottom: 10px;
-        color: #222;
-        font-size: 28px;
+    .ss-review-hero::before,
+    .ss-review-hero::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        border: 1px solid rgba(255,255,255,.16);
+        border-radius: 50%;
+        pointer-events: none;
     }
 
-    .review-product-name {
-        color: #2874f0;
-        font-weight: 600;
-        margin-bottom: 25px;
+    .ss-review-hero::before {
+        width: 270px;
+        height: 270px;
+        right: -70px;
+        top: -150px;
     }
 
-    .review-form-group {
-        margin-bottom: 20px;
+    .ss-review-hero::after {
+        width: 190px;
+        height: 190px;
+        right: 70px;
+        bottom: -145px;
     }
 
-    .review-form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #333;
+    .ss-review-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 12px;
+        color: #e0e7ff;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .13em;
+        text-transform: uppercase;
     }
 
-    .review-form-group input,
-    .review-form-group select,
-    .review-form-group textarea {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 7px;
-        box-sizing: border-box;
+    .ss-review-hero h1 {
+        margin: 0 0 10px;
+        color: #fff;
+        font-size: clamp(28px, 4vw, 40px);
+        line-height: 1.15;
+        letter-spacing: -.035em;
+    }
+
+    .ss-review-hero p {
+        max-width: 640px;
+        margin: 0;
+        color: #e7eaff;
         font-size: 15px;
-        font-family: inherit;
+        line-height: 1.75;
     }
 
-    .review-form-group input:focus,
-    .review-form-group select:focus,
-    .review-form-group textarea:focus {
-        outline: none;
-        border-color: #2874f0;
+    .ss-review-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.65fr) minmax(250px, .85fr);
+        gap: 24px;
+        align-items: start;
     }
 
-    .review-error {
-        margin-top: 6px;
-        color: #d32f2f;
-        font-size: 13px;
+    .ss-review-card,
+    .ss-review-side-card {
+        background: #fff;
+        border: 1px solid var(--ss-review-border);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(22, 34, 60, .055);
     }
 
-    .review-submit {
-        width: 100%;
-        padding: 13px;
-        background: #2874f0;
-        color: white;
-        border: none;
-        border-radius: 7px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
+    .ss-review-card {
+        padding: clamp(22px, 4vw, 34px);
+        animation: ssReviewRise .45s ease both;
     }
 
-    .review-submit:hover {
-        background: #1558c0;
+    .ss-review-card-heading {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding-bottom: 22px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #edf0f6;
     }
 
-    .review-back {
+    .ss-review-heading-icon {
+        display: grid;
+        flex: 0 0 48px;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        border-radius: 15px;
+        background: #eef2ff;
+        font-size: 23px;
+    }
+
+    .ss-review-card-heading h2 {
+        margin: 1px 0 6px;
+        color: var(--ss-review-ink);
+        font-size: 21px;
+        letter-spacing: -.02em;
+    }
+
+    .ss-review-product-name {
+        margin: 0;
+        color: var(--ss-review-primary);
+        font-size: 14px;
+        font-weight: 750;
+        overflow-wrap: anywhere;
+    }
+
+    .ss-review-intro {
+        margin: 0 0 26px;
+        color: var(--ss-review-muted);
+        font-size: 14px;
+        line-height: 1.75;
+    }
+
+    .ss-review-form-group {
+        margin-bottom: 23px;
+    }
+
+    .ss-review-form-group label {
         display: block;
-        text-align: center;
-        margin-top: 20px;
-        color: #2874f0;
-        text-decoration: none;
-    }
-
-    .review-back:hover {
-        text-decoration: underline;
-    }
-
-    .review-help {
-        color: #777;
+        margin-bottom: 9px;
+        color: #263249;
         font-size: 13px;
-        margin-top: 6px;
+        font-weight: 800;
+    }
+
+    .ss-review-required {
+        color: #e11d48;
+        margin-left: 3px;
+    }
+
+    .ss-review-form-group input,
+    .ss-review-form-group select,
+    .ss-review-form-group textarea {
+        display: block;
+        width: 100%;
+        min-height: 48px;
+        padding: 12px 14px;
+        border: 1px solid #d9e0ed;
+        border-radius: 12px;
+        box-sizing: border-box;
+        background: #fbfcff;
+        color: #172033;
+        font: inherit;
+        font-size: 14px;
+        transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .ss-review-form-group textarea {
+        min-height: 155px;
+        resize: vertical;
+        line-height: 1.65;
+    }
+
+    .ss-review-form-group input:focus,
+    .ss-review-form-group select:focus,
+    .ss-review-form-group textarea:focus {
+        outline: none;
+        border-color: var(--ss-review-primary);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, .12);
+    }
+
+    .ss-review-form-group input::placeholder,
+    .ss-review-form-group textarea::placeholder {
+        color: #9aa4b7;
+    }
+
+    .ss-review-field-help {
+        margin: 8px 0 0;
+        color: #7b8498;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .ss-review-errors {
+        padding: 12px 14px;
+        margin: 0 0 20px;
+        border: 1px solid #fecaca;
+        border-radius: 11px;
+        background: #fff1f2;
+        color: #b91c1c;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .ss-review-errors ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .ss-review-field-error {
+        margin-top: 7px;
+        color: #b91c1c;
+        font-size: 12px;
+        line-height: 1.55;
+    }
+
+    .ss-review-field-error ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .ss-review-rating-preview {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+        color: #7b8498;
+        font-size: 12px;
+    }
+
+    .ss-review-stars {
+        display: inline-flex;
+        gap: 3px;
+        color: #d6dbe6;
+        font-size: 22px;
+        letter-spacing: 1px;
+        line-height: 1;
+    }
+
+    .ss-review-stars span.is-active {
+        color: #f5a524;
+    }
+
+    .ss-review-form-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 28px;
+    }
+
+    .ss-review-submit,
+    .ss-review-back {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 9px;
+        min-height: 49px;
+        padding: 12px 19px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .ss-review-submit {
+        flex: 1;
+        border: 0;
+        color: #fff;
+        background: linear-gradient(120deg, #4f46e5, #6d28d9);
+        box-shadow: 0 8px 18px rgba(79, 70, 229, .2);
+    }
+
+    .ss-review-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 22px rgba(79, 70, 229, .26);
+    }
+
+    .ss-review-back {
+        border: 1px solid #dfe4ef;
+        background: #fff;
+        color: #47516a;
+    }
+
+    .ss-review-back:hover {
+        background: #f7f8fc;
+        transform: translateY(-1px);
+    }
+
+    .ss-review-side {
+        display: grid;
+        gap: 18px;
+        animation: ssReviewRise .55s ease both;
+    }
+
+    .ss-review-side-card {
+        padding: 24px;
+    }
+
+    .ss-review-side-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 17px;
+        color: var(--ss-review-ink);
+        font-size: 16px;
+        font-weight: 850;
+    }
+
+    .ss-review-tip-list {
+        display: grid;
+        gap: 16px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .ss-review-tip-list li {
+        display: grid;
+        grid-template-columns: 32px minmax(0, 1fr);
+        gap: 11px;
+        align-items: start;
+        color: var(--ss-review-muted);
+        font-size: 12px;
+        line-height: 1.65;
+    }
+
+    .ss-review-tip-icon {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 10px;
+        background: #f0f2ff;
+        font-size: 15px;
+    }
+
+    .ss-review-tip-list strong {
+        display: block;
+        margin-bottom: 2px;
+        color: #263249;
+        font-size: 13px;
+    }
+
+    .ss-review-trust {
+        background: linear-gradient(145deg, #f5f3ff, #eef2ff);
+        border-color: #e1e4ff;
+    }
+
+    .ss-review-trust p {
+        margin: 0;
+        color: #555f7b;
+        font-size: 13px;
+        line-height: 1.75;
+    }
+
+    .ss-review-trust strong {
+        color: #3730a3;
+    }
+
+    @keyframes ssReviewRise {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 850px) {
+        .ss-review-layout { grid-template-columns: minmax(0, 1fr); }
+        .ss-review-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+        .ss-review-page { padding: 22px 14px 42px; }
+        .ss-review-hero { padding: 27px 23px; border-radius: 19px; }
+        .ss-review-side { grid-template-columns: minmax(0, 1fr); }
+        .ss-review-form-actions { flex-direction: column; }
+        .ss-review-submit, .ss-review-back { width: 100%; box-sizing: border-box; }
+        .ss-review-card, .ss-review-side-card { border-radius: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ss-review-card, .ss-review-side { animation: none; }
+        .ss-review-submit, .ss-review-back,
+        .ss-review-form-group input, .ss-review-form-group select,
+        .ss-review-form-group textarea { transition: none; }
     }
 </style>
 
+<div class="ss-review-page">
+    <header class="ss-review-hero">
+        <div class="ss-review-eyebrow"><span aria-hidden="true">✦</span> Your feedback matters</div>
+        <h1>Write a Review</h1>
+        <p>Share your honest experience with this product. Your feedback helps other shoppers make more confident decisions.</p>
+    </header>
 
-<div class="review-page">
-
-    <div class="review-container">
-
-        <h1>⭐ Write a Review</h1>
-
-        <p class="review-product-name">
-            Product: {{ product.name }}
-        </p>
-
-        <p>
-            Share your experience and help other customers make
-            better purchasing decisions.
-        </p>
-
-        <form method="POST">
-
-            {% csrf_token %}
-
-            {% if form.non_field_errors %}
-                <div class="review-error">
-                    {{ form.non_field_errors }}
+    <div class="ss-review-layout">
+        <section class="ss-review-card" aria-labelledby="ss-review-form-title">
+            <div class="ss-review-card-heading">
+                <div class="ss-review-heading-icon" aria-hidden="true">⭐</div>
+                <div>
+                    <h2 id="ss-review-form-title">Your product review</h2>
+                    <p class="ss-review-product-name">{{ product.name }}</p>
                 </div>
-            {% endif %}
-
-
-            <!-- Rating -->
-            <div class="review-form-group">
-
-                <label for="{{ form.rating.id_for_label }}">
-                    {{ form.rating.label }}
-                </label>
-
-                {{ form.rating }}
-
-                {% for error in form.rating.errors %}
-                    <div class="review-error">
-                        {{ error }}
-                    </div>
-                {% endfor %}
-
             </div>
 
+            <p class="ss-review-intro">Tell us what stood out to you. Be specific, helpful, and fair so future customers know what to expect.</p>
 
-            <!-- Review Title -->
-            <div class="review-form-group">
+            <form method="POST">
+                {% csrf_token %}
 
-                <label for="{{ form.title.id_for_label }}">
-                    {{ form.title.label }}
-                </label>
-
-                {{ form.title }}
-
-                {% for error in form.title.errors %}
-                    <div class="review-error">
-                        {{ error }}
+                {% if form.non_field_errors %}
+                    <div class="ss-review-errors" role="alert">
+                        {{ form.non_field_errors }}
                     </div>
-                {% endfor %}
+                {% endif %}
 
-            </div>
-
-
-            <!-- Review Comment -->
-            <div class="review-form-group">
-
-                <label for="{{ form.comment.id_for_label }}">
-                    {{ form.comment.label }}
-                </label>
-
-                {{ form.comment }}
-
-                <div class="review-help">
-                    Tell us what you liked or disliked about the product.
+                <div class="ss-review-form-group">
+                    <label for="{{ form.rating.id_for_label }}">{{ form.rating.label }}<span class="ss-review-required" aria-hidden="true">*</span></label>
+                    {{ form.rating }}
+                    <div class="ss-review-rating-preview" aria-live="polite">
+                        <span class="ss-review-stars" id="ss-review-stars" aria-label="Rating preview">
+                            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                        </span>
+                        <span id="ss-review-rating-caption">Choose a rating that reflects your experience.</span>
+                    </div>
+                    {% for error in form.rating.errors %}
+                        <div class="ss-review-field-error">{{ error }}</div>
+                    {% endfor %}
                 </div>
 
-                {% for error in form.comment.errors %}
-                    <div class="review-error">
-                        {{ error }}
-                    </div>
-                {% endfor %}
+                <div class="ss-review-form-group">
+                    <label for="{{ form.title.id_for_label }}">{{ form.title.label }}<span class="ss-review-required" aria-hidden="true">*</span></label>
+                    {{ form.title }}
+                    {% if form.title.help_text %}<p class="ss-review-field-help">{{ form.title.help_text }}</p>{% endif %}
+                    {% for error in form.title.errors %}
+                        <div class="ss-review-field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
 
-            </div>
+                <div class="ss-review-form-group">
+                    <label for="{{ form.comment.id_for_label }}">{{ form.comment.label }}<span class="ss-review-required" aria-hidden="true">*</span></label>
+                    {{ form.comment }}
+                    <p class="ss-review-field-help">Describe what you liked, what could be better, and how the product met your expectations.</p>
+                    {% if form.comment.help_text %}<p class="ss-review-field-help">{{ form.comment.help_text }}</p>{% endif %}
+                    {% for error in form.comment.errors %}
+                        <div class="ss-review-field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
 
+                <div class="ss-review-form-actions">
+                    <button type="submit" class="ss-review-submit"><span aria-hidden="true">✓</span> Submit Review</button>
+                    <a href="{% url 'product_detail' product.slug %}" class="ss-review-back">← Back to Product</a>
+                </div>
+            </form>
+        </section>
 
-            <button type="submit" class="review-submit">
-                Submit Review
-            </button>
+        <aside class="ss-review-side" aria-label="Review writing tips">
+            <section class="ss-review-side-card">
+                <h2 class="ss-review-side-title"><span aria-hidden="true">💡</span> Tips for a helpful review</h2>
+                <ul class="ss-review-tip-list">
+                    <li><span class="ss-review-tip-icon" aria-hidden="true">🎯</span><span><strong>Be specific</strong>Share details about quality, fit, features, or day-to-day use.</span></li>
+                    <li><span class="ss-review-tip-icon" aria-hidden="true">⚖️</span><span><strong>Be honest</strong>Describe your real experience, both positive and negative.</span></li>
+                    <li><span class="ss-review-tip-icon" aria-hidden="true">🤝</span><span><strong>Be respectful</strong>Keep feedback constructive and focused on the product.</span></li>
+                    <li><span class="ss-review-tip-icon" aria-hidden="true">🔒</span><span><strong>Protect your privacy</strong>Avoid adding personal contact or payment information.</span></li>
+                </ul>
+            </section>
 
-        </form>
-
-        <a
-            href="{% url 'product_detail' product.slug %}"
-            class="review-back"
-        >
-            ← Back to Product
-        </a>
-
+            <section class="ss-review-side-card ss-review-trust">
+                <h2 class="ss-review-side-title"><span aria-hidden="true">💜</span> Thanks for sharing</h2>
+                <p>Your feedback helps the ShopSphere community shop with more confidence. <strong>Every thoughtful review makes a difference.</strong></p>
+            </section>
+        </aside>
     </div>
-
 </div>
 
+<script>
+(function () {
+    const ratingField = document.getElementById('{{ form.rating.id_for_label|escapejs }}');
+    const stars = document.querySelectorAll('#ss-review-stars span');
+    const caption = document.getElementById('ss-review-rating-caption');
+    const labels = {
+        1: 'Poor — not what you expected.',
+        2: 'Fair — there is room for improvement.',
+        3: 'Good — an average experience.',
+        4: 'Very good — a positive experience.',
+        5: 'Excellent — you loved it!'
+    };
+
+    function updateRatingPreview() {
+        if (!ratingField) return;
+        const value = Number(ratingField.value);
+        stars.forEach(function (star, index) {
+            star.classList.toggle('is-active', value >= index + 1);
+        });
+        if (caption) {
+            caption.textContent = labels[value] || 'Choose a rating that reflects your experience.';
+        }
+    }
+
+    if (ratingField) {
+        ratingField.addEventListener('change', updateRatingPreview);
+        ratingField.addEventListener('input', updateRatingPreview);
+        updateRatingPreview();
+    }
+})();
+</script>
 {% endblock %}

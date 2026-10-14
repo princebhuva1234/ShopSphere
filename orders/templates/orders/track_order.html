@@ -1,707 +1,704 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Track Order - ShopSphere
-{% endblock %}
+{% block title %}Track Order #{{ order.id }} - ShopSphere{% endblock %}
 
 {% block content %}
-
 <style>
     .tracking-page {
-        max-width: 1100px;
+        --track-primary: #4f46e5;
+        --track-primary-dark: #4338ca;
+        --track-teal: #0f9f8f;
+        --track-text: #172033;
+        --track-muted: #64748b;
+        --track-border: #e2e8f0;
+        --track-surface: #ffffff;
+        --track-soft: #f8fafc;
+        max-width: 1120px;
         margin: 0 auto;
-        padding: 35px 20px;
-        color: #1f2937;
+        padding: 18px 0 44px;
+        color: var(--track-text);
+        animation: trackPageEnter 520ms ease both;
     }
 
-    .tracking-header {
-        margin-bottom: 30px;
+    .tracking-page * { box-sizing: border-box; }
+
+    .tracking-page .tracking-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 7px 11px;
+        border: 1px solid #e0e7ff;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
     }
 
-    .tracking-header h1 {
+    .tracking-page .tracking-header {
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 24px;
+        padding: 32px;
+        border: 1px solid #e0e7ff;
+        border-radius: 22px;
+        background: linear-gradient(120deg, #ffffff 0%, #f5f7ff 58%, #eef2ff 100%);
+    }
+
+    .tracking-page .tracking-header::after {
+        content: "";
+        position: absolute;
+        right: -44px;
+        top: -75px;
+        width: 230px;
+        height: 230px;
+        border: 32px solid rgba(99, 102, 241, .08);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .tracking-page .tracking-header h1 {
+        position: relative;
+        z-index: 1;
         margin: 0 0 10px;
-        font-size: 32px;
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: clamp(26px, 3vw, 36px);
+        line-height: 1.2;
+        letter-spacing: -.035em;
+        color: #172033;
     }
 
-    .tracking-header p {
-        color: #6b7280;
-        line-height: 1.7;
+    .tracking-page .tracking-header p {
+        position: relative;
+        z-index: 1;
+        max-width: 650px;
+        margin: 0;
+        color: var(--track-muted);
+        line-height: 1.8;
     }
 
-    .tracking-card {
-        padding: 25px;
-        margin-bottom: 25px;
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        background: #fff;
-        box-shadow: 0 5px 18px rgba(15, 23, 42, 0.05);
-    }
-
-    .tracking-card h2 {
-        margin: 0 0 22px;
-        font-size: 22px;
-    }
-
-    .tracking-summary {
+    .tracking-page .tracking-summary {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 18px;
-        margin-bottom: 25px;
+        gap: 16px;
+        margin-bottom: 22px;
     }
 
-    .summary-box {
+    .tracking-page .summary-box {
+        min-width: 0;
         padding: 20px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        background: #f9fafb;
+        border: 1px solid var(--track-border);
+        border-radius: 16px;
+        background: var(--track-surface);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, .035);
+        transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+        animation: trackCardEnter 520ms ease both;
     }
 
-    .summary-label {
+    .tracking-page .summary-box:hover {
+        transform: translateY(-3px);
+        border-color: #c7d2fe;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, .07);
+    }
+
+    .tracking-page .summary-label {
         display: block;
-        margin-bottom: 9px;
-        color: #6b7280;
-        font-size: 13px;
+        margin-bottom: 8px;
+        color: var(--track-muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
     }
 
-    .summary-value {
-        font-size: 19px;
-        font-weight: 700;
+    .tracking-page .summary-value {
+        color: var(--track-text);
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: clamp(17px, 2vw, 21px);
+        font-weight: 800;
+        line-height: 1.45;
         overflow-wrap: anywhere;
     }
 
-    .tracking-status {
-        display: inline-block;
-        padding: 8px 13px;
-        border-radius: 20px;
+    .tracking-page .tracking-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border-radius: 999px;
         font-size: 12px;
-        font-weight: 700;
+        font-weight: 800;
+        line-height: 1.4;
     }
 
-    .status-pending {
-        background: #fff4d6;
-        color: #8a5200;
+    .tracking-page .tracking-status::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        flex: 0 0 7px;
+        border-radius: 50%;
+        background: currentColor;
     }
 
-    .status-confirmed {
-        background: #dbeafe;
-        color: #1d4ed8;
+    .tracking-page .status-pending { background: #fff7d6; color: #925b00; }
+    .tracking-page .status-confirmed { background: #dbeafe; color: #1d4ed8; }
+    .tracking-page .status-processing { background: #ede9fe; color: #6d28d9; }
+    .tracking-page .status-shipped { background: #cffafe; color: #0e7490; }
+    .tracking-page .status-delivered { background: #dcfce7; color: #166534; }
+    .tracking-page .status-cancelled { background: #fee2e2; color: #b91c1c; }
+
+    .tracking-page .tracking-card {
+        margin-bottom: 22px;
+        padding: 26px;
+        border: 1px solid var(--track-border);
+        border-radius: 18px;
+        background: var(--track-surface);
+        box-shadow: 0 6px 20px rgba(15, 23, 42, .04);
+        animation: trackCardEnter 600ms ease both;
     }
 
-    .status-processing {
-        background: #ede9fe;
-        color: #6d28d9;
+    .tracking-page .tracking-card-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 24px;
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -.02em;
     }
 
-    .status-shipped {
-        background: #cffafe;
-        color: #0e7490;
+    .tracking-page .heading-icon {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        border-radius: 12px;
+        background: #eef2ff;
+        font-size: 19px;
     }
 
-    .status-delivered {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-cancelled {
-        background: #fee2e2;
-        color: #b91c1c;
-    }
-
-    /* Tracking timeline */
-
-    .tracking-timeline {
+    /* Delivery timeline */
+    .tracking-page .tracking-timeline {
         margin: 0;
         padding: 0;
         list-style: none;
     }
 
-    .tracking-step {
+    .tracking-page .tracking-step {
         display: flex;
-        gap: 18px;
-        min-height: 105px;
+        gap: 16px;
+        min-height: 104px;
     }
 
-    .tracking-marker-column {
+    .tracking-page .tracking-marker-column {
         position: relative;
         display: flex;
         flex: 0 0 44px;
         justify-content: center;
     }
 
-    .tracking-marker {
+    .tracking-page .tracking-marker {
         position: relative;
         z-index: 2;
-        display: flex;
+        display: grid;
+        place-items: center;
         width: 40px;
         height: 40px;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-        border: 2px solid #d1d5db;
+        border: 2px solid #cbd5e1;
         border-radius: 50%;
         background: #fff;
-        color: #9ca3af;
-        font-size: 16px;
-        font-weight: 700;
+        color: #94a3b8;
+        font-size: 15px;
+        font-weight: 800;
+        transition: background 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
     }
 
-    .tracking-line {
+    .tracking-page .tracking-line {
         position: absolute;
-        top: 39px;
+        top: 40px;
         bottom: -2px;
         left: 50%;
         width: 3px;
-        background: #e5e7eb;
+        border-radius: 99px;
+        background: #e2e8f0;
         transform: translateX(-50%);
     }
 
-    .tracking-step:last-child {
-        min-height: 60px;
-    }
+    .tracking-page .tracking-step:last-child { min-height: 58px; }
+    .tracking-page .tracking-step:last-child .tracking-line { display: none; }
 
-    .tracking-step:last-child .tracking-line {
-        display: none;
-    }
-
-    .tracking-step.completed .tracking-marker {
-        border-color: #0d9488;
-        background: #0d9488;
+    .tracking-page .tracking-step.completed .tracking-marker {
+        border-color: var(--track-teal);
+        background: var(--track-teal);
         color: #fff;
     }
 
-    .tracking-step.completed .tracking-line {
-        background: #0d9488;
-    }
+    .tracking-page .tracking-step.completed .tracking-line { background: var(--track-teal); }
 
-    .tracking-step.current .tracking-marker {
-        border-color: #0d9488;
+    .tracking-page .tracking-step.current .tracking-marker {
+        border-color: var(--track-teal);
         background: #fff;
-        color: #0d9488;
-        box-shadow: 0 0 0 5px rgba(13, 148, 136, 0.12);
+        color: var(--track-teal);
+        box-shadow: 0 0 0 6px rgba(15, 159, 143, .13);
+        animation: currentStepPulse 2.2s ease-in-out infinite;
     }
 
-    .tracking-step.current .tracking-title {
-        color: #0f766e;
-    }
+    .tracking-page .tracking-step.current .tracking-title { color: #0f766e; }
 
-    .tracking-step-content {
+    .tracking-page .tracking-step-content {
         flex: 1;
-        padding: 4px 0 30px;
+        min-width: 0;
+        padding: 4px 0 28px;
     }
 
-    .tracking-title {
-        margin: 0 0 7px;
-        color: #374151;
-        font-size: 16px;
-        font-weight: 700;
+    .tracking-page .tracking-title {
+        margin: 0 0 6px;
+        color: #334155;
+        font-size: 15px;
+        font-weight: 800;
     }
 
-    .tracking-description {
+    .tracking-page .tracking-description {
         margin: 0;
-        color: #6b7280;
-        font-size: 14px;
-        line-height: 1.7;
+        color: var(--track-muted);
+        font-size: 13px;
+        line-height: 1.75;
     }
 
-    .tracking-date {
-        display: inline-block;
-        margin-top: 8px;
-        color: #0d9488;
-        font-size: 12px;
-        font-weight: 700;
+    .tracking-page .tracking-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 9px;
+        color: #0f8a7e;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .02em;
+        text-transform: uppercase;
     }
 
-    .cancelled-notice {
+    .tracking-page .cancelled-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
         padding: 22px;
         border: 1px solid #fecaca;
-        border-radius: 10px;
-        background: #fff1f2;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #fff7f7, #fff1f2);
         color: #991b1b;
     }
 
-    .cancelled-notice h3 {
-        margin-top: 0;
+    .tracking-page .cancelled-icon {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        border-radius: 13px;
+        background: #fee2e2;
+        font-size: 20px;
     }
 
-    .cancelled-notice p {
-        margin-bottom: 0;
-        line-height: 1.7;
-    }
+    .tracking-page .cancelled-notice h3 { margin: 0 0 7px; font-size: 17px; }
+    .tracking-page .cancelled-notice p { margin: 0; font-size: 13px; line-height: 1.8; }
 
-    /* Products */
-
-    .tracking-product-list {
+    /* Ordered products */
+    .tracking-page .tracking-product-list {
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
     }
 
-    .tracking-product {
+    .tracking-page .tracking-product {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        gap: 18px;
-        padding: 16px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 15px;
+        border: 1px solid #e8edf5;
+        border-radius: 14px;
+        background: #fff;
+        transition: border-color 200ms ease, background 200ms ease, transform 200ms ease;
     }
 
-    .tracking-product-name {
-        color: #1f2937;
-        font-size: 15px;
-        font-weight: 700;
+    .tracking-page .tracking-product:hover {
+        border-color: #c7d2fe;
+        background: #fcfcff;
+        transform: translateY(-1px);
+    }
+
+    .tracking-page .tracking-product-main {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .tracking-page .tracking-product-image {
+        display: grid;
+        place-items: center;
+        width: 70px;
+        height: 70px;
+        flex: 0 0 70px;
+        overflow: hidden;
+        border: 1px solid #edf0f5;
+        border-radius: 11px;
+        background: #f8fafc;
+    }
+
+    .tracking-page .tracking-product-image img {
+        width: 100%;
+        height: 100%;
+        padding: 5px;
+        object-fit: contain;
+    }
+
+    .tracking-page .tracking-product-placeholder { font-size: 25px; }
+
+    .tracking-page .tracking-product-name {
+        display: inline-block;
+        color: #1e293b;
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1.5;
         text-decoration: none;
+        overflow-wrap: anywhere;
     }
 
-    .tracking-product-name:hover {
-        color: #2563eb;
-    }
+    .tracking-page .tracking-product-name:hover { color: var(--track-primary); }
 
-    .tracking-product-info {
-        margin-top: 8px;
-        color: #6b7280;
-        font-size: 13px;
+    .tracking-page .tracking-product-info {
+        margin-top: 5px;
+        color: var(--track-muted);
+        font-size: 12px;
         line-height: 1.7;
     }
 
-    .tracking-product-price {
-        font-size: 15px;
-        font-weight: 700;
+    .tracking-page .tracking-product-price {
+        flex: 0 0 auto;
+        color: #172033;
+        font-size: 14px;
+        font-weight: 800;
+        text-align: right;
         white-space: nowrap;
     }
 
-    /* Delivery address */
+    .tracking-page .tracking-total {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 22px;
+        padding-top: 20px;
+        border-top: 1px solid var(--track-border);
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: 16px;
+        font-weight: 800;
+    }
 
-    .delivery-address {
-        padding: 20px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        background: #f9fafb;
+    .tracking-page .tracking-total strong { color: var(--track-primary); font-size: 23px; }
+
+    /* Delivery address */
+    .tracking-page .delivery-address {
+        position: relative;
+        padding: 20px 20px 20px 66px;
+        border: 1px solid #e0e7ff;
+        border-radius: 14px;
+        background: linear-gradient(120deg, #f8faff, #f5f7ff);
+        color: #475569;
+        font-size: 14px;
         line-height: 1.9;
         overflow-wrap: anywhere;
     }
 
-    /* Action buttons */
+    .tracking-page .delivery-address::before {
+        content: "📍";
+        position: absolute;
+        top: 20px;
+        left: 19px;
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: #e0e7ff;
+        font-size: 17px;
+    }
 
-    .tracking-actions {
+    .tracking-page .delivery-address strong { color: #172033; font-size: 15px; }
+
+    .tracking-page .tracking-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
-        margin-top: 25px;
+        margin-top: 24px;
     }
 
-    .tracking-button {
+    .tracking-page .tracking-button {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        padding: 13px 18px;
+        min-height: 44px;
+        padding: 12px 17px;
         border: 1px solid transparent;
-        border-radius: 8px;
-        text-decoration: none;
+        border-radius: 11px;
+        font-size: 13px;
+        font-weight: 800;
         text-align: center;
-        font-size: 14px;
-        font-weight: 700;
-        transition: background 0.2s;
+        text-decoration: none;
+        transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
     }
 
-    .tracking-button-primary {
-        background: #0d9488;
+    .tracking-page .tracking-button:hover { transform: translateY(-2px); }
+
+    .tracking-page .tracking-button-primary {
         color: #fff;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        box-shadow: 0 5px 13px rgba(79, 70, 229, .18);
     }
 
-    .tracking-button-primary:hover {
-        background: #0f766e;
+    .tracking-page .tracking-button-primary:hover {
         color: #fff;
+        background: linear-gradient(135deg, #4f46e5, #3730a3);
+        box-shadow: 0 8px 18px rgba(79, 70, 229, .24);
     }
 
-    .tracking-button-secondary {
-        border-color: #d1d5db;
+    .tracking-page .tracking-button-secondary {
+        border-color: #dbe2ed;
+        color: #334155;
         background: #fff;
-        color: #374151;
     }
 
-    .tracking-button-secondary:hover {
-        background: #f3f4f6;
-        color: #111827;
+    .tracking-page .tracking-button-secondary:hover {
+        border-color: #c7d2fe;
+        color: #4338ca;
+        background: #f8faff;
     }
 
-    @media (max-width: 750px) {
-        .tracking-summary {
-            grid-template-columns: 1fr;
-        }
-
-        .tracking-header h1 {
-            font-size: 27px;
-        }
-
-        .tracking-card {
-            padding: 20px;
-        }
+    .tracking-page .tracking-empty {
+        padding: 20px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+        color: var(--track-muted);
+        background: #f8fafc;
     }
 
-    @media (max-width: 500px) {
-        .tracking-page {
-            padding: 22px 12px;
-        }
+    @keyframes trackPageEnter {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-        .tracking-card {
-            padding: 15px;
-        }
+    @keyframes trackCardEnter {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-        .tracking-product {
-            align-items: flex-start;
-            flex-direction: column;
-        }
+    @keyframes currentStepPulse {
+        0%, 100% { box-shadow: 0 0 0 5px rgba(15, 159, 143, .10); }
+        50% { box-shadow: 0 0 0 8px rgba(15, 159, 143, .05); }
+    }
 
-        .tracking-actions {
-            flex-direction: column;
-        }
+    @media (max-width: 780px) {
+        .tracking-page .tracking-summary { grid-template-columns: 1fr; gap: 11px; }
+        .tracking-page .summary-box { padding: 16px 18px; }
+        .tracking-page .tracking-header { padding: 25px 22px; }
+        .tracking-page .tracking-card { padding: 21px; }
+    }
 
-        .tracking-button {
-            width: 100%;
-            box-sizing: border-box;
+    @media (max-width: 520px) {
+        .tracking-page { padding: 8px 0 30px; }
+        .tracking-page .tracking-header { padding: 22px 18px; border-radius: 17px; }
+        .tracking-page .tracking-header::after { right: -110px; }
+        .tracking-page .tracking-card { padding: 17px; border-radius: 15px; }
+        .tracking-page .tracking-card-heading { font-size: 18px; gap: 10px; }
+        .tracking-page .tracking-step { gap: 11px; min-height: 112px; }
+        .tracking-page .tracking-marker-column { flex-basis: 36px; }
+        .tracking-page .tracking-marker { width: 34px; height: 34px; font-size: 13px; }
+        .tracking-page .tracking-line { top: 34px; }
+        .tracking-page .tracking-product { align-items: flex-start; flex-direction: column; }
+        .tracking-page .tracking-product-main { width: 100%; }
+        .tracking-page .tracking-product-price { align-self: flex-end; }
+        .tracking-page .delivery-address { padding: 62px 15px 16px; }
+        .tracking-page .delivery-address::before { top: 16px; left: 15px; }
+        .tracking-page .tracking-actions { flex-direction: column; }
+        .tracking-page .tracking-button { width: 100%; }
+        .tracking-page .cancelled-notice { padding: 17px; gap: 11px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tracking-page *,
+        .tracking-page *::before,
+        .tracking-page *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 </style>
 
-
 <div class="tracking-page">
 
-    <!-- Page header -->
-
     <header class="tracking-header">
-
-        <h1>🚚 Track Your Order</h1>
-
-        <p>
-            Follow your ShopSphere order from confirmation
-            through delivery.
-        </p>
-
+        <span class="tracking-eyebrow">ShopSphere delivery updates</span>
+        <h1>Track your order</h1>
+        <p>Follow the progress of your order from confirmation through delivery. Your latest order status is shown below.</p>
     </header>
 
-
-    <!-- Order summary -->
-
-    <div class="tracking-summary">
-
+    <section class="tracking-summary" aria-label="Order summary">
         <div class="summary-box">
-
-            <span class="summary-label">
-                Order Number
-            </span>
-
-            <div class="summary-value">
-                #{{ order.id }}
-            </div>
-
+            <span class="summary-label">Order number</span>
+            <div class="summary-value">#{{ order.id }}</div>
         </div>
 
-
         <div class="summary-box">
-
-            <span class="summary-label">
-                Order Date
-            </span>
-
-            <div class="summary-value">
-                {{ order.created_at|date:"d M Y" }}
-            </div>
-
+            <span class="summary-label">Order date</span>
+            <div class="summary-value">{{ order.created_at|date:"d M Y" }}</div>
         </div>
 
-
         <div class="summary-box">
-
-            <span class="summary-label">
-                Current Status
-            </span>
-
+            <span class="summary-label">Current status</span>
             {% if order.status == "PENDING" %}
-
-                <span class="tracking-status status-pending">
-                    {{ order.get_status_display }}
-                </span>
-
+                <span class="tracking-status status-pending">{{ order.get_status_display }}</span>
             {% elif order.status == "CONFIRMED" %}
-
-                <span class="tracking-status status-confirmed">
-                    {{ order.get_status_display }}
-                </span>
-
+                <span class="tracking-status status-confirmed">{{ order.get_status_display }}</span>
             {% elif order.status == "PROCESSING" %}
-
-                <span class="tracking-status status-processing">
-                    {{ order.get_status_display }}
-                </span>
-
+                <span class="tracking-status status-processing">{{ order.get_status_display }}</span>
             {% elif order.status == "SHIPPED" %}
-
-                <span class="tracking-status status-shipped">
-                    {{ order.get_status_display }}
-                </span>
-
+                <span class="tracking-status status-shipped">{{ order.get_status_display }}</span>
             {% elif order.status == "DELIVERED" %}
-
-                <span class="tracking-status status-delivered">
-                    {{ order.get_status_display }}
-                </span>
-
+                <span class="tracking-status status-delivered">{{ order.get_status_display }}</span>
             {% elif order.status == "CANCELLED" %}
-
-                <span class="tracking-status status-cancelled">
-                    {{ order.get_status_display }}
-                </span>
-
+                <span class="tracking-status status-cancelled">{{ order.get_status_display }}</span>
             {% else %}
-
-                <span class="tracking-status status-pending">
-                    {{ order.get_status_display }}
-                </span>
-
+                <span class="tracking-status status-pending">{{ order.get_status_display }}</span>
             {% endif %}
-
         </div>
+    </section>
 
-    </div>
-
-
-    <!-- Delivery timeline -->
-
-    <section class="tracking-card">
-
-        <h2>📍 Delivery Progress</h2>
+    <section class="tracking-card" aria-labelledby="delivery-progress-heading">
+        <h2 class="tracking-card-heading" id="delivery-progress-heading">
+            <span class="heading-icon" aria-hidden="true">🚚</span>
+            Delivery progress
+        </h2>
 
         {% if order.status == "CANCELLED" %}
-
-            <div class="cancelled-notice">
-
-                <h3>Order Cancelled</h3>
-
-                <p>
-                    Order #{{ order.id }} has been cancelled.
-                    Please visit your order details page for
-                    additional information.
-                </p>
-
+            <div class="cancelled-notice" role="status">
+                <span class="cancelled-icon" aria-hidden="true">×</span>
+                <div>
+                    <h3>Order cancelled</h3>
+                    <p>Order #{{ order.id }} has been cancelled. Visit the order details page for additional information about this order.</p>
+                </div>
             </div>
-
         {% else %}
-
             <ol class="tracking-timeline">
-
                 {% for step in tracking_steps %}
-
-                    <li class="tracking-step {% if current_step >= forloop.counter0 %}completed{% endif %} {% if current_step == forloop.counter0 %}current{% endif %}">
-
-                        <div class="tracking-marker-column">
-
+                    <li class="tracking-step{% if current_step >= forloop.counter0 %} completed{% endif %}{% if current_step == forloop.counter0 %} current{% endif %}">
+                        <div class="tracking-marker-column" aria-hidden="true">
                             <div class="tracking-marker">
-
-                                {% if current_step >= forloop.counter0 %}
-                                    ✓
-                                {% else %}
-                                    {{ forloop.counter }}
-                                {% endif %}
-
+                                {% if current_step >= forloop.counter0 %}✓{% else %}{{ forloop.counter }}{% endif %}
                             </div>
-
                             <div class="tracking-line"></div>
-
                         </div>
-
 
                         <div class="tracking-step-content">
-
-                            <h3 class="tracking-title">
-                                {{ step.title }}
-                            </h3>
-
-                            <p class="tracking-description">
-                                {{ step.description }}
-                            </p>
+                            <h3 class="tracking-title">{{ step.title }}</h3>
+                            <p class="tracking-description">{{ step.description }}</p>
 
                             {% if current_step == forloop.counter0 %}
-
-                                <span class="tracking-date">
-                                    ● Current Order Status
-                                </span>
-
+                                <span class="tracking-date">● Current order status</span>
                             {% elif current_step > forloop.counter0 %}
-
-                                <span class="tracking-date">
-                                    ✓ Completed
-                                </span>
-
+                                <span class="tracking-date">✓ Completed</span>
                             {% endif %}
-
                         </div>
-
                     </li>
-
                 {% endfor %}
-
             </ol>
-
         {% endif %}
-
     </section>
 
-
-    <!-- Products -->
-
-    <section class="tracking-card">
-
-        <h2>🛍️ Your Products</h2>
+    <section class="tracking-card" aria-labelledby="tracking-products-heading">
+        <h2 class="tracking-card-heading" id="tracking-products-heading">
+            <span class="heading-icon" aria-hidden="true">🛍️</span>
+            Items in this order
+        </h2>
 
         <div class="tracking-product-list">
-
             {% for item in order_items %}
-
                 <div class="tracking-product">
-
-                    <div>
-
-                        {% if item.product %}
-
-                            <a
-                                href="{% url 'product_detail' item.product.slug %}"
-                                class="tracking-product-name"
-                            >
-                                {{ item.product.name }}
-                            </a>
-
-                        {% else %}
-
-                            <span class="tracking-product-name">
-                                Product no longer available
-                            </span>
-
-                        {% endif %}
-
-                        <div class="tracking-product-info">
-
-                            Quantity: {{ item.quantity }}
-
-                            <br>
-
-                            Unit Price: ₹{{ item.price|floatformat:2 }}
-
+                    <div class="tracking-product-main">
+                        <div class="tracking-product-image">
+                            {% if item.product %}
+                                {% with image=item.product.images.first %}
+                                    {% if image %}
+                                        <img src="{{ image.image.url }}" alt="{{ item.product.name }}" loading="lazy">
+                                    {% else %}
+                                        <span class="tracking-product-placeholder" aria-hidden="true">📦</span>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <span class="tracking-product-placeholder" aria-hidden="true">📦</span>
+                            {% endif %}
                         </div>
 
+                        <div>
+                            {% if item.product %}
+                                <a href="{% url 'product_detail' item.product.slug %}" class="tracking-product-name">{{ item.product.name }}</a>
+                            {% else %}
+                                <span class="tracking-product-name">Product no longer available</span>
+                            {% endif %}
+                            <div class="tracking-product-info">
+                                Quantity: {{ item.quantity }}<br>
+                                Unit price: ₹{{ item.price|floatformat:2 }}
+                            </div>
+                        </div>
                     </div>
 
-
-                    <div class="tracking-product-price">
-
-                        ₹{% widthratio item.price 1 item.quantity %}
-
+                    <div class="tracking-product-price" aria-label="Item quantity and unit price shown at left">
+                        {{ item.quantity }} × ₹{{ item.price|floatformat:2 }}
                     </div>
-
                 </div>
-
             {% empty %}
-
-                <p>
-                    No products were found for this order.
-                </p>
-
+                <div class="tracking-empty">No products were found for this order.</div>
             {% endfor %}
-
         </div>
 
-
-        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 22px 0;">
-
-        <div style="
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-            flex-wrap: wrap;
-            font-size: 18px;
-            font-weight: 800;
-        ">
-
-            <span>Order Total</span>
-
-            <span>
-                ₹{{ order.total_amount|floatformat:2 }}
-            </span>
-
+        <div class="tracking-total">
+            <span>Order total</span>
+            <strong>₹{{ order.total_amount|floatformat:2 }}</strong>
         </div>
-
     </section>
 
-
-    <!-- Delivery address -->
-
-    <section class="tracking-card">
-
-        <h2>📦 Delivery Address</h2>
+    <section class="tracking-card" aria-labelledby="delivery-address-heading">
+        <h2 class="tracking-card-heading" id="delivery-address-heading">
+            <span class="heading-icon" aria-hidden="true">📦</span>
+            Delivery address
+        </h2>
 
         {% if shipping_address %}
-
             <div class="delivery-address">
-
-                <strong>
-                    {{ shipping_address.full_name }}
-                </strong>
-
-                <br>
-
-                {{ shipping_address.address_line }}
-
-                <br>
-
-                {{ shipping_address.city }},
-                {{ shipping_address.state }}
-                - {{ shipping_address.pincode }}
-
-                <br>
-
+                <strong>{{ shipping_address.full_name }}</strong><br>
+                {{ shipping_address.address_line }}<br>
+                {{ shipping_address.city }}, {{ shipping_address.state }} - {{ shipping_address.pincode }}<br>
                 Phone: {{ shipping_address.phone }}
-
             </div>
-
         {% else %}
-
-            <p>
-                Delivery address information is not available.
-            </p>
-
+            <div class="tracking-empty">Delivery address information is not available.</div>
         {% endif %}
-
     </section>
 
-
-    <!-- Actions -->
-
-    <div class="tracking-actions">
-
-        <a
-            href="{% url 'order_detail' order.id %}"
-            class="tracking-button tracking-button-primary"
-        >
-            📋 View Order Details
-        </a>
-
-        <a
-            href="{% url 'download_order_invoice' order.id %}"
-            class="tracking-button tracking-button-secondary"
-        >
-            📄 Download Invoice PDF
-        </a>
-
-        <a
-            href="{% url 'my_orders' %}"
-            class="tracking-button tracking-button-secondary"
-        >
-            ← Back to My Orders
-        </a>
-
-    </div>
+    <nav class="tracking-actions" aria-label="Order actions">
+        <a href="{% url 'order_detail' order.id %}" class="tracking-button tracking-button-primary">View order details <span aria-hidden="true">→</span></a>
+        <a href="{% url 'download_order_invoice' order.id %}" class="tracking-button tracking-button-secondary">Download invoice PDF</a>
+        <a href="{% url 'my_orders' %}" class="tracking-button tracking-button-secondary">← Back to my orders</a>
+    </nav>
 
 </div>
-
 {% endblock %}

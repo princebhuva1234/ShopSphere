@@ -1,59 +1,115 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Edit Profile - ShopSphere
+Edit Profile | ShopSphere
 {% endblock %}
 
 {% block content %}
 
-<div class="edit-profile-container">
+<div class="edit-profile-page">
 
-    <div class="page-heading">
+```
+<!-- Breadcrumb -->
+<nav class="profile-breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'profile' %}">My Profile</a>
+    <span class="breadcrumb-separator">/</span>
+    <span>Edit Profile</span>
+</nav>
 
-        <a href="{% url 'profile' %}" class="back-link">
-            ← Back to My Profile
-        </a>
+<!-- Page Header -->
+<div class="profile-page-header">
 
-        <h1>Edit Profile</h1>
-
-        <p>Update your personal information.</p>
-
+    <div class="profile-heading-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="8" r="4"
+                    stroke="currentColor" stroke-width="1.7"/>
+            <path d="M4 21v-2a8 8 0 0 1 16 0v2H4Z"
+                  stroke="currentColor" stroke-width="1.7"
+                  stroke-linejoin="round"/>
+            <path d="m16 5 1.5-1.5L20 6"
+                  stroke="currentColor" stroke-width="1.7"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
     </div>
 
+    <div class="profile-heading-content">
+        <h1>Edit Profile</h1>
+        <p>Manage your personal information and keep your account up to date.</p>
+    </div>
 
-    <div class="edit-profile-card">
+</div>
 
-        <div class="form-heading">
+<!-- Main Profile Card -->
+<div class="edit-profile-card">
 
-            <div class="form-icon">✏️</div>
+    <!-- Card Header -->
+    <div class="profile-card-header">
+
+        <div class="profile-card-heading">
+            <div class="section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 20h9"
+                          stroke="currentColor" stroke-width="1.8"
+                          stroke-linecap="round"/>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4L16.5 3.5Z"
+                          stroke="currentColor" stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"/>
+                </svg>
+            </div>
 
             <div>
                 <h2>Personal Information</h2>
-                <p>Keep your account information up to date.</p>
+                <p>Update the information associated with your account.</p>
             </div>
-
         </div>
 
+        <span class="edit-status-badge">
+            <span class="status-dot"></span>
+            Editable
+        </span>
 
-        {% if error %}
+    </div>
 
-            <div class="form-error">
-                {{ error }}
+    <!-- Error Message -->
+    {% if error %}
+        <div class="form-error" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"
+                        stroke="currentColor" stroke-width="1.8"/>
+                <path d="M12 7v6m0 4h.01"
+                      stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round"/>
+            </svg>
+
+            <div>
+                <strong>Unable to update profile</strong>
+                <p>{{ error }}</p>
             </div>
+        </div>
+    {% endif %}
 
-        {% endif %}
+    <!-- Profile Form -->
+    <form method="POST" class="profile-form" id="editProfileForm">
 
+        {% csrf_token %}
 
-        <form method="POST" class="profile-form">
+        <!-- Username -->
+        <div class="form-group">
 
-            {% csrf_token %}
+            <label for="username">
+                Username <span class="required-star">*</span>
+            </label>
 
-
-            <div class="form-group">
-
-                <label for="username">
-                    Username <span>*</span>
-                </label>
+            <div class="input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none"
+                     class="input-icon" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4"
+                            stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M4 21v-2a8 8 0 0 1 16 0v2"
+                          stroke="currentColor" stroke-width="1.7"
+                          stroke-linecap="round"/>
+                </svg>
 
                 <input
                     type="text"
@@ -61,20 +117,37 @@ Edit Profile - ShopSphere
                     name="username"
                     value="{{ profile_user.username }}"
                     maxlength="150"
-                    required
+                    placeholder="Enter your username"
                     autocomplete="username"
+                    aria-describedby="username-help"
+                    required
                 >
-
             </div>
 
+            <small class="field-help" id="username-help">
+                Your username identifies your ShopSphere account.
+            </small>
 
-            <div class="form-row">
+        </div>
 
-                <div class="form-group">
+        <!-- First Name and Last Name -->
+        <div class="form-row">
 
-                    <label for="first_name">
-                        First Name
-                    </label>
+            <div class="form-group">
+
+                <label for="first_name">
+                    First Name
+                </label>
+
+                <div class="input-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         class="input-icon" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"
+                                stroke="currentColor" stroke-width="1.7"/>
+                        <path d="M4 21v-2a8 8 0 0 1 16 0v2"
+                              stroke="currentColor" stroke-width="1.7"
+                              stroke-linecap="round"/>
+                    </svg>
 
                     <input
                         type="text"
@@ -82,17 +155,28 @@ Edit Profile - ShopSphere
                         name="first_name"
                         value="{{ profile_user.first_name }}"
                         maxlength="150"
+                        placeholder="First name"
                         autocomplete="given-name"
                     >
-
                 </div>
 
+            </div>
 
-                <div class="form-group">
+            <div class="form-group">
 
-                    <label for="last_name">
-                        Last Name
-                    </label>
+                <label for="last_name">
+                    Last Name
+                </label>
+
+                <div class="input-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         class="input-icon" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"
+                                stroke="currentColor" stroke-width="1.7"/>
+                        <path d="M4 21v-2a8 8 0 0 1 16 0v2"
+                              stroke="currentColor" stroke-width="1.7"
+                              stroke-linecap="round"/>
+                    </svg>
 
                     <input
                         type="text"
@@ -100,19 +184,32 @@ Edit Profile - ShopSphere
                         name="last_name"
                         value="{{ profile_user.last_name }}"
                         maxlength="150"
+                        placeholder="Last name"
                         autocomplete="family-name"
                     >
-
                 </div>
 
             </div>
 
+        </div>
 
-            <div class="form-group">
+        <!-- Email -->
+        <div class="form-group">
 
-                <label for="email">
-                    Email Address <span>*</span>
-                </label>
+            <label for="email">
+                Email Address <span class="required-star">*</span>
+            </label>
+
+            <div class="input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none"
+                     class="input-icon" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="2"
+                          stroke="currentColor" stroke-width="1.7"/>
+                    <path d="m4 7 8 6 8-6"
+                          stroke="currentColor" stroke-width="1.7"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"/>
+                </svg>
 
                 <input
                     type="email"
@@ -120,271 +217,720 @@ Edit Profile - ShopSphere
                     name="email"
                     value="{{ profile_user.email }}"
                     maxlength="254"
-                    required
+                    placeholder="you@example.com"
                     autocomplete="email"
+                    required
                 >
-
             </div>
 
+            <small class="field-help">
+                Use an email address you can access.
+            </small>
 
-            <div class="account-type">
+        </div>
 
-                <span class="account-type-label">
-                    Account Type
-                </span>
+        <!-- Account Type -->
+        <div class="account-type-card">
 
-                <strong>
+            <div class="account-type-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z"
+                          stroke="currentColor" stroke-width="1.7"
+                          stroke-linejoin="round"/>
+                    <path d="m9 12 2 2 4-4"
+                          stroke="currentColor" stroke-width="1.7"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <div class="account-type-content">
+                <span class="account-type-label">ACCOUNT TYPE</span>
+
+                <strong class="account-type-value">
                     {{ profile_user.get_role_display }}
                 </strong>
 
                 <p>
-                    Your account type cannot be changed from this page.
+                    Your account role is protected and cannot be changed
+                    from this page.
                 </p>
-
             </div>
 
+            <span class="account-locked" title="Account type is read-only"
+                  aria-label="Account type is read-only">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <rect x="5" y="10" width="14" height="11" rx="2"
+                          stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3"
+                          stroke="currentColor" stroke-width="1.7"
+                          stroke-linecap="round"/>
+                </svg>
+            </span>
 
-            <div class="form-actions">
+        </div>
 
-                <a
-                    href="{% url 'profile' %}"
-                    class="cancel-button"
-                >
-                    Cancel
-                </a>
+        <!-- Form Actions -->
+        <div class="form-actions">
 
-                <button
-                    type="submit"
-                    class="save-button"
-                >
-                    Save Changes
-                </button>
+            <a href="{% url 'profile' %}" class="cancel-button">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="m15 18-6-6 6-6"
+                          stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"/>
+                </svg>
 
-            </div>
+                <span>Cancel</span>
+            </a>
 
-        </form>
+            <button type="submit" class="save-button" id="saveProfileButton">
 
-    </div>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 3h12l4 4v14H3V3h2Z"
+                          stroke="currentColor" stroke-width="1.7"
+                          stroke-linejoin="round"/>
+                    <path d="M7 3v6h10V3M7 21v-7h10v7"
+                          stroke="currentColor" stroke-width="1.7"
+                          stroke-linejoin="round"/>
+                </svg>
+
+                <span>Save Changes</span>
+
+            </button>
+
+        </div>
+
+    </form>
 
 </div>
 
+<!-- Privacy Note -->
+<div class="profile-privacy-note">
+
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z"
+              stroke="currentColor" stroke-width="1.7"
+              stroke-linejoin="round"/>
+        <path d="m9 12 2 2 4-4"
+              stroke="currentColor" stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
+    </svg>
+
+    <p>
+        <strong>Your account, your information.</strong>
+        Keep your profile details accurate for a better ShopSphere experience.
+    </p>
+
+</div>
+```
+
+</div>
 
 <style>
 
-    .edit-profile-container {
-        max-width: 750px;
-        margin: 0 auto;
-        padding: 20px 0 50px;
+/* ==========================================
+   SHOPSPHERE EDIT PROFILE
+========================================== */
+
+.edit-profile-page {
+    --profile-primary: #2563eb;
+    --profile-primary-dark: #1d4ed8;
+    --profile-text: #172033;
+    --profile-muted: #64748b;
+    --profile-border: #e2e8f0;
+
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 24px 20px 45px;
+    box-sizing: border-box;
+    color: var(--profile-text);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.edit-profile-page * {
+    box-sizing: border-box;
+}
+
+/* Breadcrumb */
+
+.profile-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+    color: var(--profile-muted);
+    font-size: 13px;
+}
+
+.profile-breadcrumb a {
+    color: var(--profile-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.profile-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: #94a3b8;
+}
+
+/* Page Header */
+
+.profile-page-header {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    margin-bottom: 28px;
+}
+
+.profile-heading-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: var(--profile-primary);
+}
+
+.profile-heading-icon svg {
+    width: 29px;
+    height: 29px;
+}
+
+.profile-heading-content h1 {
+    margin: 0 0 8px;
+    font-size: clamp(25px, 4vw, 32px);
+    font-weight: 750;
+    letter-spacing: -0.7px;
+    line-height: 1.2;
+}
+
+.profile-heading-content p {
+    margin: 0;
+    color: var(--profile-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Main Card */
+
+.edit-profile-card {
+    overflow: hidden;
+    border: 1px solid var(--profile-border);
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.055);
+}
+
+/* Card Header */
+
+.profile-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 30px;
+    border-bottom: 1px solid #edf0f5;
+    background: #fcfdff;
+}
+
+.profile-card-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.section-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: var(--profile-primary);
+}
+
+.section-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.profile-card-heading h2 {
+    margin: 0 0 7px;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.profile-card-heading p {
+    margin: 0;
+    color: var(--profile-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.edit-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    padding: 7px 10px;
+    border: 1px solid #bbf7d0;
+    border-radius: 20px;
+    background: #f0fdf4;
+    color: #166534;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+}
+
+/* Error Message */
+
+.form-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 25px 30px 0;
+    padding: 15px;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.form-error > svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.form-error strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.form-error p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* Form */
+
+.profile-form {
+    width: 100%;
+    padding: 30px;
+}
+
+.form-group {
+    min-width: 0;
+    margin-bottom: 23px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 9px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.required-star {
+    color: #dc2626;
+}
+
+/* Input Fields */
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    width: 18px;
+    height: 18px;
+    color: #94a3b8;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.input-wrapper input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 47px;
+    padding: 12px 14px 12px 43px;
+    border: 1px solid #d8e0eb;
+    border-radius: 9px;
+    outline: none;
+    background: #ffffff;
+    color: var(--profile-text);
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-wrapper input::placeholder {
+    color: #94a3b8;
+}
+
+.input-wrapper:hover input {
+    border-color: #b8c5d8;
+}
+
+.input-wrapper:focus-within input {
+    border-color: var(--profile-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+.input-wrapper:focus-within .input-icon {
+    color: var(--profile-primary);
+}
+
+.field-help {
+    display: block;
+    margin-top: 8px;
+    color: var(--profile-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Name Fields */
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+/* Account Type */
+
+.account-type-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 4px;
+    margin-bottom: 30px;
+    padding: 18px;
+    border: 1px solid #dbeafe;
+    border-radius: 11px;
+    background: #f8fbff;
+}
+
+.account-type-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    background: #e0ecff;
+    color: var(--profile-primary);
+}
+
+.account-type-icon svg {
+    width: 23px;
+    height: 23px;
+}
+
+.account-type-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.account-type-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--profile-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.9px;
+}
+
+.account-type-value {
+    display: inline-block;
+    color: #1d4ed8;
+    font-size: 15px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.account-type-content p {
+    margin: 6px 0 0;
+    color: var(--profile-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.account-locked {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #dbeafe;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #64748b;
+}
+
+.account-locked svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* Action Buttons */
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding-top: 23px;
+    border-top: 1px solid #edf0f5;
+}
+
+.cancel-button,
+.save-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 46px;
+    padding: 12px 20px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease,
+                box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cancel-button svg,
+.save-button svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+}
+
+.cancel-button {
+    border-color: #dbe2ec;
+    background: #ffffff;
+    color: #475569;
+}
+
+.cancel-button:hover {
+    border-color: #b8c5d8;
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+.save-button {
+    border-color: var(--profile-primary);
+    background: var(--profile-primary);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.save-button:hover {
+    border-color: var(--profile-primary-dark);
+    background: var(--profile-primary-dark);
+    box-shadow: 0 5px 12px rgba(37, 99, 235, 0.18);
+    transform: translateY(-1px);
+}
+
+.cancel-button:focus-visible,
+.save-button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 3px;
+}
+
+/* Privacy Note */
+
+.profile-privacy-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin-top: 20px;
+    padding: 0 5px;
+    color: var(--profile-muted);
+}
+
+.profile-privacy-note > svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #64748b;
+}
+
+.profile-privacy-note p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.profile-privacy-note strong {
+    color: #475569;
+}
+
+/* Responsive Design */
+
+@media (max-width: 650px) {
+
+    .edit-profile-page {
+        padding: 18px 13px 30px;
     }
 
-    .page-heading {
-        margin-bottom: 25px;
+    .profile-page-header {
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 22px;
     }
 
-    .back-link {
-        display: inline-block;
-        color: #0056b3;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-
-    .page-heading h1 {
-        margin: 0 0 8px;
-        font-size: 32px;
-        color: #111827;
-    }
-
-    .page-heading p {
-        color: #6b7280;
-        margin: 0;
-    }
-
-    .edit-profile-card {
-        background: white;
-        border-radius: 14px;
-        padding: 30px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-    }
-
-    .form-heading {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding-bottom: 22px;
-        margin-bottom: 25px;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    .form-icon {
-        width: 55px;
-        height: 55px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 25px;
-        background: #e9f2ff;
+    .profile-heading-icon {
+        width: 46px;
+        height: 46px;
         border-radius: 12px;
     }
 
-    .form-heading h2 {
-        margin: 0 0 6px;
-        font-size: 21px;
+    .profile-heading-icon svg {
+        width: 24px;
+        height: 24px;
     }
 
-    .form-heading p {
-        margin: 0;
-        color: #6b7280;
-        font-size: 14px;
+    .profile-heading-content h1 {
+        font-size: 25px;
     }
 
-    .form-error {
-        background: #f8d7da;
-        color: #842029;
-        border: 1px solid #f1aeb5;
-        border-radius: 7px;
-        padding: 13px 15px;
-        margin-bottom: 20px;
-        font-size: 14px;
+    .profile-heading-content p {
+        font-size: 13px;
+    }
+
+    .profile-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 15px;
+        padding: 21px 19px;
+    }
+
+    .profile-card-heading {
+        align-items: flex-start;
+    }
+
+    .profile-card-heading h2 {
+        font-size: 17px;
+    }
+
+    .edit-status-badge {
+        align-self: flex-start;
     }
 
     .profile-form {
-        width: 100%;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-        min-width: 0;
+        padding: 22px 19px;
     }
 
     .form-row {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
+        grid-template-columns: 1fr;
+        gap: 0;
     }
 
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 14px;
-        font-weight: bold;
-        color: #374151;
-    }
-
-    .form-group label span {
-        color: #dc3545;
-    }
-
-    .form-group input {
-        display: block;
-        width: 100%;
-        max-width: 100%;
-        padding: 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 7px;
-        font-size: 15px;
-        background: white;
-    }
-
-    .form-group input:focus {
-        outline: none;
-        border-color: #007bff;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.12);
-    }
-
-    .account-type {
-        background: #f8fafc;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 16px;
-        margin: 10px 0 25px;
-    }
-
-    .account-type-label {
-        display: block;
-        font-size: 13px;
-        color: #6b7280;
-        margin-bottom: 8px;
-    }
-
-    .account-type strong {
-        display: block;
-        color: #0056b3;
-        font-size: 15px;
-    }
-
-    .account-type p {
-        color: #6b7280;
-        margin: 8px 0 0;
-        font-size: 13px;
+    .account-type-card {
+        padding: 14px;
     }
 
     .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        padding-top: 20px;
-        border-top: 1px solid #e5e7eb;
+        flex-direction: column-reverse;
+        align-items: stretch;
     }
 
     .cancel-button,
     .save-button {
-        display: inline-block;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 7px;
-        font-size: 14px;
-        font-weight: bold;
-        text-decoration: none;
-        cursor: pointer;
-        text-align: center;
+        width: 100%;
+        min-height: 47px;
     }
 
-    .cancel-button {
-        background: #e5e7eb;
-        color: #374151;
+    .form-error {
+        margin-right: 19px;
+        margin-left: 19px;
     }
 
-    .save-button {
-        background: #007bff;
-        color: white;
+}
+
+@media (max-width: 380px) {
+
+    .profile-heading-icon {
+        width: 40px;
+        height: 40px;
     }
 
-    .save-button:hover {
-        background: #0056b3;
+    .profile-heading-content h1 {
+        font-size: 23px;
     }
 
-    @media (max-width: 600px) {
-
-        .edit-profile-container {
-            padding: 10px 0 35px;
-        }
-
-        .edit-profile-card {
-            padding: 20px;
-        }
-
-        .page-heading h1 {
-            font-size: 27px;
-        }
-
-        .form-row {
-            grid-template-columns: 1fr;
-            gap: 0;
-        }
-
-        .form-actions {
-            flex-direction: column-reverse;
-        }
-
-        .cancel-button,
-        .save-button {
-            width: 100%;
-        }
-
+    .profile-card-heading {
+        gap: 10px;
     }
+
+    .section-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .account-type-card {
+        gap: 10px;
+    }
+
+    .account-type-icon {
+        width: 37px;
+        height: 37px;
+    }
+
+    .account-locked {
+        width: 29px;
+        height: 29px;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .edit-profile-page *,
+    .edit-profile-page *::before,
+    .edit-profile-page *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+
+}
 
 </style>
 

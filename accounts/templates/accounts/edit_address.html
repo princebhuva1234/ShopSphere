@@ -1,119 +1,237 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Edit Address - ShopSphere
+Edit Address | ShopSphere
 {% endblock %}
 
 {% block content %}
 
-<div class="address-form-container">
+<div class="address-page">
 
-    <h1>Edit Address</h1>
+<!-- Breadcrumb -->
+<nav class="address-breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'address_list' %}">My Addresses</a>
+    <span class="breadcrumb-separator">/</span>
+    <span>Edit Address</span>
+</nav>
 
-    <form method="POST" class="address-form">
+<!-- Page Heading -->
+<div class="address-page-header">
+    <div class="heading-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 21s7-5.5 7-12a7 7 0 1 0-14 0c0 6.5 7 12 7 12Z"
+                  stroke="currentColor" stroke-width="1.7"/>
+            <circle cx="12" cy="9" r="2.5"
+                    stroke="currentColor" stroke-width="1.7"/>
+        </svg>
+    </div>
+
+    <div>
+        <h1>Edit Address</h1>
+        <p>Update your delivery details for a smooth shopping experience.</p>
+    </div>
+</div>
+
+<!-- Address Form Card -->
+<div class="address-card">
+
+    <div class="address-card-header">
+        <div>
+            <h2>Delivery Information</h2>
+            <p>Enter the correct details for your deliveries.</p>
+        </div>
+
+        <span class="required-note">
+            <span class="required-star">*</span> Required fields
+        </span>
+    </div>
+
+    <form method="POST" class="address-form" id="editAddressForm">
 
         {% csrf_token %}
 
+        <!-- Full Name -->
         <div class="form-group">
-            <label for="full_name">Full Name</label>
+            <label for="full_name">
+                Full Name <span class="required-star">*</span>
+            </label>
+
             <input
                 type="text"
                 id="full_name"
                 name="full_name"
                 value="{{ address.full_name }}"
+                placeholder="Enter your full name"
+                maxlength="150"
+                autocomplete="name"
                 required
             >
         </div>
 
+        <!-- Phone Number -->
         <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input
-                type="text"
-                id="phone"
-                name="phone"
-                value="{{ address.phone }}"
-                maxlength="15"
-                required
-            >
+            <label for="phone">
+                Phone Number <span class="required-star">*</span>
+            </label>
+
+            <div class="input-with-icon">
+                <span class="input-prefix" aria-hidden="true">+91</span>
+
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value="{{ address.phone }}"
+                    placeholder="Enter your phone number"
+                    maxlength="15"
+                    autocomplete="tel-national"
+                    inputmode="tel"
+                    required
+                >
+            </div>
+
+            <small class="field-help">
+                Enter the phone number where the delivery partner can reach you.
+            </small>
         </div>
 
+        <!-- Street Address -->
         <div class="form-group">
-            <label for="address_line">Address</label>
+            <label for="address_line">
+                Street Address <span class="required-star">*</span>
+            </label>
+
             <textarea
                 id="address_line"
                 name="address_line"
                 rows="3"
+                maxlength="500"
+                placeholder="House number, building, street, area or landmark"
+                autocomplete="street-address"
                 required
             >{{ address.address_line }}</textarea>
         </div>
 
+        <!-- City and State -->
         <div class="form-row">
 
             <div class="form-group">
-                <label for="city">City</label>
+                <label for="city">
+                    City <span class="required-star">*</span>
+                </label>
+
                 <input
                     type="text"
                     id="city"
                     name="city"
                     value="{{ address.city }}"
+                    placeholder="Enter your city"
+                    maxlength="100"
+                    autocomplete="address-level2"
                     required
                 >
             </div>
 
             <div class="form-group">
-                <label for="state">State</label>
+                <label for="state">
+                    State <span class="required-star">*</span>
+                </label>
+
                 <input
                     type="text"
                     id="state"
                     name="state"
                     value="{{ address.state }}"
+                    placeholder="Enter your state"
+                    maxlength="100"
+                    autocomplete="address-level1"
                     required
                 >
             </div>
 
         </div>
 
+        <!-- Pincode -->
         <div class="form-group">
-            <label for="pincode">Pincode</label>
+            <label for="pincode">
+                PIN Code <span class="required-star">*</span>
+            </label>
+
             <input
                 type="text"
                 id="pincode"
                 name="pincode"
                 value="{{ address.pincode }}"
+                placeholder="Enter your PIN code"
                 maxlength="10"
+                autocomplete="postal-code"
+                inputmode="numeric"
                 required
             >
+
+            <small class="field-help">
+                Make sure your PIN code is correct to avoid delivery problems.
+            </small>
         </div>
 
-        <div class="checkbox-group">
+        <!-- Default Address -->
+        <div class="default-address-box">
+            <label for="is_default" class="default-address-label">
 
-            <input
-                type="checkbox"
-                id="is_default"
-                name="is_default"
-                {% if address.is_default %}checked{% endif %}
-            >
+                <span class="default-checkbox">
+                    <input
+                        type="checkbox"
+                        id="is_default"
+                        name="is_default"
+                        {% if address.is_default %}checked{% endif %}
+                    >
 
-            <label for="is_default">
-                Make this my default address
+                    <span class="custom-checkbox" aria-hidden="true">
+                        <svg viewBox="0 0 20 20" fill="none">
+                            <path d="m4 10 4 4 8-8"
+                                  stroke="currentColor"
+                                  stroke-width="2.2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </span>
+
+                <span class="default-address-text">
+                    <strong>Make this my default address</strong>
+                    <small>Use this address automatically during checkout.</small>
+                </span>
+
             </label>
-
         </div>
 
+        <!-- Buttons -->
         <div class="form-actions">
 
-            <a
-                href="{% url 'address_list' %}"
-                class="back-btn"
-            >
-                ← Back
+            <a href="{% url 'address_list' %}" class="back-btn">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="m15 18-6-6 6-6"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"/>
+                </svg>
+                Cancel
             </a>
 
-            <button
-                type="submit"
-                class="save-btn"
-            >
-                Update Address
+            <button type="submit" class="save-btn" id="saveAddressBtn">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 3h12l4 4v14H3V3h2Z"
+                          stroke="currentColor"
+                          stroke-width="1.7"
+                          stroke-linejoin="round"/>
+                    <path d="M7 3v6h10V3M7 21v-7h10v7"
+                          stroke="currentColor"
+                          stroke-width="1.7"
+                          stroke-linejoin="round"/>
+                </svg>
+
+                <span>Update Address</span>
             </button>
 
         </div>
@@ -122,120 +240,540 @@ Edit Address - ShopSphere
 
 </div>
 
+<!-- Security Note -->
+<div class="address-security-note">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="5" y="10" width="14" height="11" rx="2"
+              stroke="currentColor" stroke-width="1.7"/>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"
+              stroke="currentColor" stroke-width="1.7"
+              stroke-linecap="round"/>
+        <path d="M12 14v3"
+              stroke="currentColor" stroke-width="1.7"
+              stroke-linecap="round"/>
+    </svg>
+
+    <p>Your address information is used to help process and deliver your orders.</p>
+</div>
+```
+
+</div>
+
 <style>
 
-    .address-form-container {
-        max-width: 700px;
-        margin: auto;
+/* ========================================
+   SHOPSPHERE EDIT ADDRESS PAGE
+======================================== */
+
+.address-page {
+    --address-primary: #2563eb;
+    --address-primary-dark: #1d4ed8;
+    --address-text: #172033;
+    --address-muted: #64748b;
+    --address-border: #e2e8f0;
+
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 24px 20px 45px;
+    box-sizing: border-box;
+    color: var(--address-text);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.address-page * {
+    box-sizing: border-box;
+}
+
+/* Breadcrumb */
+
+.address-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+    color: var(--address-muted);
+    font-size: 13px;
+}
+
+.address-breadcrumb a {
+    color: var(--address-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.address-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: #94a3b8;
+}
+
+/* Page Heading */
+
+.address-page-header {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    margin-bottom: 28px;
+}
+
+.heading-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: var(--address-primary);
+}
+
+.heading-icon svg {
+    width: 29px;
+    height: 29px;
+}
+
+.address-page-header h1 {
+    margin: 0 0 8px;
+    font-size: clamp(25px, 4vw, 32px);
+    line-height: 1.2;
+    font-weight: 750;
+    letter-spacing: -0.7px;
+}
+
+.address-page-header p {
+    margin: 0;
+    color: var(--address-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Main Card */
+
+.address-card {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid var(--address-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.055);
+}
+
+.address-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 24px 30px;
+    border-bottom: 1px solid #edf0f5;
+    background: #fcfdff;
+}
+
+.address-card-header h2 {
+    margin: 0 0 7px;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.address-card-header p {
+    margin: 0;
+    color: var(--address-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.required-note {
+    flex-shrink: 0;
+    color: var(--address-muted);
+    font-size: 12px;
+}
+
+.required-star {
+    color: #dc2626;
+}
+
+/* Form */
+
+.address-form {
+    padding: 30px;
+}
+
+.form-group {
+    min-width: 0;
+    margin-bottom: 23px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 9px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.form-group input,
+.form-group textarea {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    border: 1px solid #d8e0eb;
+    border-radius: 9px;
+    outline: none;
+    background: #ffffff;
+    color: var(--address-text);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group textarea {
+    min-height: 105px;
+    resize: vertical;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #94a3b8;
+}
+
+.form-group input:hover,
+.form-group textarea:hover {
+    border-color: #b8c5d8;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--address-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+.field-help {
+    display: block;
+    margin-top: 8px;
+    color: var(--address-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Phone Input */
+
+.input-with-icon {
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    border: 1px solid #d8e0eb;
+    border-radius: 9px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-with-icon:focus-within {
+    border-color: var(--address-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+.input-prefix {
+    display: flex;
+    align-items: center;
+    padding: 0 13px;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.input-with-icon input {
+    min-width: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.input-with-icon input:focus {
+    border: none;
+    box-shadow: none;
+}
+
+/* Two-Column Row */
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.form-row .form-group {
+    margin-bottom: 23px;
+}
+
+/* Default Address */
+
+.default-address-box {
+    margin-top: 2px;
+    margin-bottom: 30px;
+    padding: 17px;
+    border: 1px solid #dbeafe;
+    border-radius: 11px;
+    background: #f8fbff;
+}
+
+.default-address-label {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    cursor: pointer;
+}
+
+.default-checkbox {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    height: 21px;
+}
+
+.default-checkbox input {
+    position: absolute;
+    width: 21px;
+    height: 21px;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    height: 21px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #ffffff;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.custom-checkbox svg {
+    width: 15px;
+    height: 15px;
+    opacity: 0;
+}
+
+.default-checkbox input:checked + .custom-checkbox {
+    border-color: var(--address-primary);
+    background: var(--address-primary);
+}
+
+.default-checkbox input:checked + .custom-checkbox svg {
+    opacity: 1;
+}
+
+.default-checkbox input:focus-visible + .custom-checkbox {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 3px;
+}
+
+.default-address-text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.default-address-text strong {
+    color: #1e293b;
+    font-size: 13px;
+}
+
+.default-address-text small {
+    color: var(--address-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Form Buttons */
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding-top: 23px;
+    border-top: 1px solid #edf0f5;
+}
+
+.back-btn,
+.save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 46px;
+    padding: 12px 20px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease,
+                box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.back-btn svg,
+.save-btn svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+}
+
+.back-btn {
+    border: 1px solid #dbe2ec;
+    background: #ffffff;
+    color: #475569;
+}
+
+.back-btn:hover {
+    border-color: #b8c5d8;
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+.save-btn {
+    border: 1px solid var(--address-primary);
+    background: var(--address-primary);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    border-color: var(--address-primary-dark);
+    background: var(--address-primary-dark);
+    box-shadow: 0 5px 12px rgba(37, 99, 235, 0.18);
+    transform: translateY(-1px);
+}
+
+.save-btn:focus-visible,
+.back-btn:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 3px;
+}
+
+.save-btn:disabled {
+    cursor: wait;
+    opacity: 0.7;
+    transform: none;
+}
+
+/* Security Note */
+
+.address-security-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 0 5px;
+    color: var(--address-muted);
+}
+
+.address-security-note svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #64748b;
+}
+
+.address-security-note p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Responsive Layout */
+
+@media (max-width: 650px) {
+
+    .address-page {
+        padding: 18px 13px 30px;
     }
 
-    .address-form-container h1 {
-        margin-bottom: 25px;
+    .address-page-header {
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .heading-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+    }
+
+    .heading-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .address-page-header h1 {
+        font-size: 25px;
+    }
+
+    .address-page-header p {
+        font-size: 13px;
+    }
+
+    .address-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+        padding: 21px 19px;
     }
 
     .address-form {
-        background: white;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 7px;
-        font-weight: bold;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 11px;
-        border: 1px solid #ccc;
-        border-radius: 7px;
-        font-size: 15px;
-        font-family: Arial, sans-serif;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-        outline: none;
-        border-color: #007bff;
+        padding: 22px 19px;
     }
 
     .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
+        grid-template-columns: 1fr;
+        gap: 0;
     }
 
-    .checkbox-group {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 25px;
-    }
-
-    .checkbox-group input {
-        width: auto;
-    }
-
-    .checkbox-group label {
-        cursor: pointer;
+    .form-row .form-group {
+        margin-bottom: 23px;
     }
 
     .form-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column-reverse;
+        align-items: stretch;
     }
 
-    .back-btn {
-        padding: 11px 18px;
-        background: #f1f1f1;
-        color: #333;
-        text-decoration: none;
-        border-radius: 7px;
-        font-weight: bold;
-    }
-
+    .back-btn,
     .save-btn {
-        padding: 12px 22px;
-        background: #007bff;
-        color: white;
-        border: none;
-        border-radius: 7px;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 15px;
+        width: 100%;
+        min-height: 47px;
     }
 
-    .save-btn:hover {
-        background: #0056d6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .address-page *,
+    .address-page *::before,
+    .address-page *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
     }
 
-    @media (max-width: 600px) {
-
-        .form-row {
-            grid-template-columns: 1fr;
-        }
-
-        .form-actions {
-            flex-direction: column;
-            gap: 12px;
-            align-items: stretch;
-        }
-
-        .back-btn,
-        .save-btn {
-            text-align: center;
-        }
-
-    }
+}
 
 </style>
 

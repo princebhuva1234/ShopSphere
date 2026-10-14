@@ -6,259 +6,257 @@ My Addresses - ShopSphere
 
 {% block content %}
 
-<div class="addresses-container">
-
-    <div class="page-header">
-        <div>
-            <h1>My Addresses</h1>
-            <p>Manage your saved delivery addresses.</p>
-        </div>
-
-         <a href="{% url 'add_address' %}" class="add-address-btn">
-            + Add Address
-         </a>
-      </div>
-
-    {% if addresses %}
-
-        <div class="address-grid">
-
-            {% for address in addresses %}
-
-                <div class="address-card">
-
-                    <div class="address-card-header">
-
-                        <h2>{{ address.full_name }}</h2>
-
-                        {% if address.is_default %}
-                            <span class="default-badge">
-                                Default
-                            </span>
-                        {% endif %}
-
-                    </div>
-
-                    <p>
-                        {{ address.address_line }}
-                    </p>
-
-                    <p>
-                        {{ address.city }},
-                        {{ address.state }}
-                        - {{ address.pincode }}
-                    </p>
-
-                    <p>
-                        <strong>Phone:</strong>
-                        {{ address.phone }}
-                    </p>
-
-                    <div class="address-actions">
-                        <a
-                            href="{% url 'edit_address' address.id %}"
-                            class="edit-btn"
-                        >
-                             Edit
-                        </a>
-
-                     <form
-                             method="POST"
-                             action="{% url 'delete_address' address.id %}"
-                             style="display: inline;"
-                             onsubmit="return confirm('Are you sure you want to delete this address?');"
->
-                        {% csrf_token %}
-
-                        <button type="submit" class="delete-btn">
-                             Delete
-                        </button>
-                    </form>
-
-                    </div>
-
+<div class="address-book-page">
+    <section class="address-hero">
+        <div class="address-hero-copy">
+            <div class="address-eyebrow"><span class="eyebrow-dot"></span> YOUR ACCOUNT</div>
+            <h1>My <span>Addresses</span></h1>
+            <p>Keep your delivery details ready for a quicker, smoother checkout.</p>
+            {% if addresses %}
+                <div class="address-count">
+                    <span class="count-icon" aria-hidden="true">⌂</span>
+                    {{ addresses|length }} saved address{{ addresses|length|pluralize }}
                 </div>
+            {% endif %}
+        </div>
+        <a href="{% url 'add_address' %}" class="add-address-btn">
+            <span aria-hidden="true">＋</span> Add Address
+        </a>
+        <div class="hero-decoration hero-decoration-one" aria-hidden="true"></div>
+        <div class="hero-decoration hero-decoration-two" aria-hidden="true"></div>
+    </section>
 
+    {% if messages %}
+        <div class="address-messages" aria-live="polite">
+            {% for message in messages %}
+                <div class="address-message {{ message.tags }}">
+                    <span class="message-mark" aria-hidden="true">{% if message.tags == 'error' %}×{% else %}✓{% endif %}</span>
+                    <span>{{ message }}</span>
+                </div>
             {% endfor %}
-
         </div>
-
-    {% else %}
-
-        <div class="empty-addresses">
-
-            <div class="empty-icon">
-                📍
-            </div>
-
-            <h2>No Saved Addresses</h2>
-
-            <p>
-                You don't have any delivery addresses yet.
-            </p>
-
-           <a href="{% url 'add_address' %}" class="add-address-empty-btn">
-                + Add Your First Address
-           </a>
-
-        </div>
-
     {% endif %}
 
+    {% if addresses %}
+        <div class="address-section-heading">
+            <div>
+                <h2>Your saved places</h2>
+                <p>Choose, update, or remove a delivery address.</p>
+            </div>
+            <div class="secure-note"><span aria-hidden="true">🔒</span> Private to your account</div>
+        </div>
+
+        <div class="address-grid">
+            {% for address in addresses %}
+                <article class="address-card {% if address.is_default %}is-default{% endif %}">
+                    <div class="card-topline">
+                        <div class="address-type-icon" aria-hidden="true">⌂</div>
+                        {% if address.is_default %}
+                            <span class="default-badge"><span aria-hidden="true">✓</span> Default address</span>
+                        {% else %}
+                            <span class="saved-badge">Saved address</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="address-person">
+                        <h3>{{ address.full_name }}</h3>
+                        <div class="person-label">DELIVER TO</div>
+                    </div>
+
+                    <div class="address-details">
+                        <div class="detail-icon" aria-hidden="true">⌖</div>
+                        <p>
+                            {{ address.address_line }}<br>
+                            {{ address.city }}, {{ address.state }} — {{ address.pincode }}
+                        </p>
+                    </div>
+
+                    <div class="address-phone">
+                        <span class="phone-icon" aria-hidden="true">☎</span>
+                        <span>{{ address.phone }}</span>
+                    </div>
+
+                    <div class="card-divider"></div>
+
+                    <div class="address-actions">
+                        <a href="{% url 'edit_address' address.id %}" class="edit-btn">
+                            <span aria-hidden="true">✎</span> Edit address
+                        </a>
+                        <form method="POST"
+                              action="{% url 'delete_address' address.id %}"
+                              class="delete-form"
+                              onsubmit="return confirm('Are you sure you want to delete this address?');">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn" aria-label="Delete address for {{ address.full_name }}">
+                                <span aria-hidden="true">♲</span> Delete
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+
+            <a href="{% url 'add_address' %}" class="add-address-card">
+                <span class="add-address-circle" aria-hidden="true">＋</span>
+                <strong>Add another address</strong>
+                <span>Save another place for delivery</span>
+            </a>
+        </div>
+
+        <div class="address-footnote">
+            <span aria-hidden="true">💡</span>
+            <p><strong>Helpful tip:</strong> Keep your phone number and PIN code accurate so your orders can reach you without delay.</p>
+        </div>
+    {% else %}
+        <section class="empty-addresses">
+            <div class="empty-illustration" aria-hidden="true">
+                <div class="empty-pin">⌖</div>
+                <span class="empty-spark spark-one"></span>
+                <span class="empty-spark spark-two"></span>
+                <span class="empty-spark spark-three"></span>
+            </div>
+            <span class="empty-kicker">NOTHING SAVED YET</span>
+            <h2>Your delivery book is empty</h2>
+            <p>Add your first address to make your next ShopSphere checkout faster and easier.</p>
+            <a href="{% url 'add_address' %}" class="add-address-btn empty-add-btn">
+                <span aria-hidden="true">＋</span> Add Your First Address
+            </a>
+            <div class="empty-privacy"><span aria-hidden="true">🔒</span> Your address details stay within your account.</div>
+        </section>
+    {% endif %}
 </div>
 
 <style>
-
-    .addresses-container {
-        max-width: 1000px;
-        margin: auto;
+    .address-book-page {
+        --ab-ink: #172033;
+        --ab-muted: #68758b;
+        --ab-line: #e5eaf3;
+        --ab-primary: #4f46e5;
+        --ab-primary-dark: #3730a3;
+        width: min(1120px, calc(100% - 36px));
+        margin: 34px auto 64px;
+        color: var(--ab-ink);
     }
 
-    .page-header {
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        margin-bottom: 25px;
+    .address-book-page * { box-sizing: border-box; }
+
+    .address-hero {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        gap: 28px;
+        min-height: 218px;
+        padding: 36px 40px;
+        margin-bottom: 30px;
+        color: #fff;
+        border-radius: 25px;
+        background: linear-gradient(120deg, #312e81 0%, #4f46e5 50%, #6366f1 100%);
+        box-shadow: 0 20px 45px rgba(79, 70, 229, .19);
     }
 
-    .page-header h1 {
-        margin: 0 0 8px;
+    .address-hero-copy { position: relative; z-index: 2; max-width: 640px; }
+    .address-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 13px; color: #dfe4ff; font-size: 11px; font-weight: 800; letter-spacing: 1.8px; }
+    .eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #a5f3fc; box-shadow: 0 0 0 4px rgba(165, 243, 252, .15); }
+    .address-hero h1 { margin: 0; color: #fff; font-size: clamp(30px, 4vw, 43px); line-height: 1.13; letter-spacing: -1.25px; font-weight: 800; }
+    .address-hero h1 span { color: #c7d2fe; }
+    .address-hero-copy > p { margin: 12px 0 0; color: #e0e7ff; font-size: 15px; line-height: 1.7; }
+    .address-count { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 7px 12px; color: #f5f3ff; font-size: 12px; font-weight: 700; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.17); border-radius: 999px; }
+    .count-icon { font-size: 16px; }
+
+    .add-address-btn { position: relative; z-index: 2; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 48px; padding: 13px 20px; border: 1px solid rgba(255,255,255,.55); border-radius: 12px; background: #fff; color: var(--ab-primary-dark); text-decoration: none; font-size: 14px; font-weight: 800; box-shadow: 0 7px 18px rgba(22, 18, 91, .15); transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
+    .add-address-btn > span { font-size: 20px; line-height: 1; }
+    .add-address-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(22, 18, 91, .2); background: #f5f3ff; }
+    .hero-decoration { position: absolute; z-index: -1; border: 1px solid rgba(255,255,255,.13); border-radius: 50%; pointer-events: none; }
+    .hero-decoration-one { width: 310px; height: 310px; right: 125px; top: -175px; }
+    .hero-decoration-two { width: 420px; height: 420px; right: -120px; bottom: -310px; box-shadow: 0 0 0 28px rgba(255,255,255,.035), 0 0 0 58px rgba(255,255,255,.025); }
+
+    .address-messages { display: grid; gap: 10px; margin: 0 0 26px; }
+    .address-message { display: flex; align-items: flex-start; gap: 10px; padding: 13px 16px; background: #ecfdf5; border: 1px solid #bbf7d0; border-radius: 12px; color: #166534; font-size: 13px; line-height: 1.5; }
+    .address-message.error { background: #fff1f2; border-color: #fecdd3; color: #9f1239; }
+    .message-mark { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: rgba(22,101,52,.1); font-weight: 900; }
+    .address-message.error .message-mark { background: rgba(159,18,57,.1); }
+
+    .address-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin: 0 2px 19px; }
+    .address-section-heading h2 { margin: 0; color: var(--ab-ink); font-size: 22px; font-weight: 800; letter-spacing: -.45px; }
+    .address-section-heading p { margin: 7px 0 0; color: var(--ab-muted); font-size: 13px; }
+    .secure-note { display: flex; align-items: center; gap: 7px; color: #64748b; font-size: 12px; font-weight: 600; white-space: nowrap; }
+
+    .address-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 19px; }
+    .address-card { position: relative; min-width: 0; padding: 24px; overflow: hidden; border: 1px solid var(--ab-line); border-radius: 20px; background: #fff; box-shadow: 0 7px 22px rgba(15,23,42,.045); transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; animation: addressFadeUp .45s both; }
+    .address-card:hover { transform: translateY(-3px); box-shadow: 0 16px 35px rgba(15,23,42,.085); border-color: #c7d2fe; }
+    .address-card.is-default { border-color: #c7d2fe; background: linear-gradient(145deg, #fff 0%, #fafaff 100%); }
+    .address-card.is-default::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #4f46e5, #818cf8); }
+    .card-topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 22px; }
+    .address-type-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; color: #4f46e5; background: #eef2ff; font-size: 25px; }
+    .default-badge, .saved-badge { display: inline-flex; align-items: center; gap: 5px; padding: 7px 10px; border-radius: 999px; font-size: 11px; line-height: 1; font-weight: 800; }
+    .default-badge { color: #4338ca; background: #e0e7ff; }
+    .saved-badge { color: #64748b; background: #f1f5f9; }
+    .address-person { margin-bottom: 16px; }
+    .address-person h3 { margin: 0; color: #172033; font-size: 19px; line-height: 1.4; font-weight: 800; overflow-wrap: anywhere; }
+    .person-label { margin-top: 5px; color: #94a3b8; font-size: 9px; font-weight: 800; letter-spacing: 1.5px; }
+    .address-details { display: flex; align-items: flex-start; gap: 10px; padding: 14px; background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; }
+    .detail-icon { flex-shrink: 0; color: #6366f1; font-size: 20px; line-height: 1.2; }
+    .address-details p { margin: 0; color: #475569; font-size: 13px; line-height: 1.75; overflow-wrap: anywhere; }
+    .address-phone { display: flex; align-items: center; gap: 9px; margin-top: 15px; color: #334155; font-size: 13px; font-weight: 700; }
+    .phone-icon { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 9px; color: #4f46e5; background: #eef2ff; }
+    .card-divider { height: 1px; margin: 20px 0 16px; background: #edf0f5; }
+    .address-actions { display: flex; align-items: center; gap: 10px; }
+    .edit-btn, .delete-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 10px 14px; border-radius: 10px; text-decoration: none; font-family: inherit; font-size: 12px; font-weight: 800; transition: transform .18s ease, background .18s ease, box-shadow .18s ease; cursor: pointer; }
+    .edit-btn { flex: 1; border: 1px solid #c7d2fe; color: #4338ca; background: #eef2ff; }
+    .edit-btn:hover { background: #e0e7ff; transform: translateY(-1px); }
+    .delete-form { margin: 0; }
+    .delete-btn { border: 1px solid #fecdd3; color: #be123c; background: #fff1f2; }
+    .delete-btn:hover { background: #ffe4e6; transform: translateY(-1px); }
+
+    .add-address-card { min-height: 275px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; border: 1.5px dashed #c7d2fe; border-radius: 20px; color: var(--ab-ink); background: linear-gradient(145deg, #fafaff, #f8faff); text-decoration: none; text-align: center; transition: transform .22s ease, border-color .22s ease, background .22s ease; }
+    .add-address-card:hover { transform: translateY(-3px); border-color: #818cf8; background: #f5f3ff; }
+    .add-address-circle { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 17px; background: #e0e7ff; color: #4f46e5; font-size: 29px; transition: transform .22s ease; }
+    .add-address-card:hover .add-address-circle { transform: rotate(90deg); }
+    .add-address-card strong { margin-top: 5px; font-size: 14px; font-weight: 800; }
+    .add-address-card > span:last-child { color: #7c879b; font-size: 12px; }
+    .address-footnote { display: flex; align-items: flex-start; gap: 10px; margin-top: 22px; padding: 15px 17px; border: 1px solid #e0e7ff; border-radius: 13px; background: #f5f7ff; color: #4f46e5; }
+    .address-footnote > span { flex-shrink: 0; }
+    .address-footnote p { margin: 0; color: #59647a; font-size: 12px; line-height: 1.7; }
+    .address-footnote strong { color: #3730a3; }
+
+    .empty-addresses { display: flex; flex-direction: column; align-items: center; padding: 54px 26px 48px; border: 1px solid var(--ab-line); border-radius: 24px; background: #fff; box-shadow: 0 10px 35px rgba(15,23,42,.045); text-align: center; }
+    .empty-illustration { position: relative; display: grid; place-items: center; width: 125px; height: 125px; margin-bottom: 24px; border-radius: 36px; background: linear-gradient(145deg, #eef2ff, #f5f3ff); }
+    .empty-pin { display: grid; place-items: center; width: 69px; height: 69px; border-radius: 24px; background: #fff; color: #4f46e5; box-shadow: 0 9px 22px rgba(79,70,229,.13); font-size: 43px; }
+    .empty-spark { position: absolute; width: 9px; height: 9px; border-radius: 3px; background: #818cf8; transform: rotate(45deg); }
+    .spark-one { top: 17px; right: 22px; }
+    .spark-two { left: 16px; top: 41px; width: 6px; height: 6px; background: #a5b4fc; }
+    .spark-three { right: 29px; bottom: 16px; width: 6px; height: 6px; background: #c4b5fd; }
+    .empty-kicker { color: #6366f1; font-size: 10px; font-weight: 900; letter-spacing: 1.8px; }
+    .empty-addresses h2 { margin: 10px 0 0; color: var(--ab-ink); font-size: clamp(22px, 3vw, 28px); font-weight: 800; letter-spacing: -.5px; }
+    .empty-addresses > p { max-width: 440px; margin: 12px 0 24px; color: var(--ab-muted); font-size: 14px; line-height: 1.8; }
+    .empty-add-btn { border: 0; color: #fff; background: linear-gradient(135deg, #4f46e5, #6366f1); box-shadow: 0 9px 18px rgba(79,70,229,.22); }
+    .empty-add-btn:hover { color: #fff; background: linear-gradient(135deg, #4338ca, #4f46e5); }
+    .empty-privacy { display: flex; align-items: center; gap: 7px; margin-top: 22px; color: #8a94a7; font-size: 11px; }
+
+    @keyframes addressFadeUp { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) { .address-book-page *, .address-book-page *::before, .address-book-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+    @media (max-width: 760px) {
+        .address-book-page { width: min(100% - 24px, 620px); margin-top: 20px; }
+        .address-hero { align-items: flex-start; flex-direction: column; min-height: 0; padding: 27px 24px; border-radius: 20px; gap: 22px; }
+        .address-hero .add-address-btn { width: 100%; }
+        .hero-decoration-one { right: -75px; top: -185px; }
+        .address-section-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+        .address-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+        .address-card { padding: 21px; }
+        .add-address-card { min-height: 185px; }
+        .empty-addresses { padding: 40px 20px 34px; }
     }
-
-    .page-header p {
-        margin: 0;
-        color: #666;
+    @media (max-width: 420px) {
+        .address-book-page { width: calc(100% - 20px); }
+        .address-hero h1 { font-size: 31px; }
+        .address-hero-copy > p { font-size: 13px; }
+        .address-card { padding: 17px; }
+        .address-actions { align-items: stretch; }
+        .edit-btn, .delete-btn { padding: 10px; font-size: 11px; }
+        .secure-note { white-space: normal; }
     }
-
-    .add-address-btn,
-    .add-address-empty-btn {
-        display: inline-block;
-        padding: 12px 20px;
-        background: #007bff;
-        color: white;
-        text-decoration: none;
-        border-radius: 7px;
-        font-weight: bold;
-    }
-
-    .add-address-btn:hover,
-    .add-address-empty-btn:hover {
-        background: #0056d6;
-    }
-
-    .address-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-
-    .address-card {
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-
-    .address-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .address-card-header h2 {
-        margin: 0;
-        font-size: 20px;
-    }
-
-    .default-badge {
-        padding: 6px 10px;
-        background: #d1e7dd;
-        color: #0f5132;
-        border-radius: 15px;
-        font-size: 13px;
-        font-weight: bold;
-    }
-
-    .address-card p {
-        color: #555;
-        margin: 8px 0;
-        line-height: 1.5;
-    }
-
-    .address-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .edit-btn,
-    .delete-btn {
-        padding: 9px 15px;
-        border-radius: 6px;
-        text-decoration: none;
-        font-weight: bold;
-    }
-
-    .edit-btn {
-        background: #e7f1ff;
-        color: #007bff;
-    }
-
-    .delete-btn {
-        padding: 9px 15px;
-        border: none;
-        border-radius: 6px;
-        background: #f8d7da;
-        color: #842029;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .delete-btn:hover {
-        background: #f1b0b7;
-    }
-
-    .empty-addresses {
-        background: white;
-        padding: 60px 30px;
-        text-align: center;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-
-    .empty-icon {
-        font-size: 50px;
-        margin-bottom: 15px;
-    }
-
-    .empty-addresses h2 {
-        margin-bottom: 10px;
-    }
-
-    .empty-addresses p {
-        color: #666;
-        margin-bottom: 25px;
-    }
-
-    @media (max-width: 768px) {
-
-        .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 15px;
-        }
-
-        .address-grid {
-            grid-template-columns: 1fr;
-        }
-
-    }
-
 </style>
 
 {% endblock %}

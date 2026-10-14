@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 
 {% block title %}
@@ -6,23 +7,180 @@ Payment Failed - ShopSphere
 
 {% block content %}
 
-<div class="failed-container">
+<style>
+    .failed-container {
+        max-width: 700px;
+        margin: 55px auto;
+        padding: 20px;
+    }
 
+    .failed-card {
+        background: #ffffff;
+        padding: 45px 35px;
+        text-align: center;
+        border-radius: 18px;
+        border: 1px solid #eeeeee;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .failed-icon {
+        width: 85px;
+        height: 85px;
+        margin: 0 auto 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #fdeaea;
+        color: #dc3545;
+        font-size: 42px;
+    }
+
+    .failed-card h1 {
+        margin: 0 0 15px;
+        color: #dc3545;
+        font-size: 30px;
+    }
+
+    .failed-message {
+        color: #666666;
+        font-size: 16px;
+        line-height: 1.7;
+        margin-bottom: 25px;
+    }
+
+    .order-info {
+        margin: 25px 0;
+        padding: 22px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        text-align: left;
+    }
+
+    .order-info h2 {
+        margin: 0 0 15px;
+        font-size: 19px;
+        color: #222222;
+    }
+
+    .order-info p {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin: 12px 0;
+        color: #555555;
+        font-size: 15px;
+    }
+
+    .order-info strong {
+        color: #222222;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+        display: inline-block;
+        padding: 13px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 14px;
+        transition: background 0.2s ease;
+    }
+
+    .primary-btn {
+        background: #dc3545;
+        color: #ffffff;
+    }
+
+    .primary-btn:hover {
+        background: #bb2d3b;
+        color: #ffffff;
+    }
+
+    .secondary-btn {
+        background: #f1f3f5;
+        color: #333333;
+        border: 1px solid #dee2e6;
+    }
+
+    .secondary-btn:hover {
+        background: #e2e6ea;
+        color: #222222;
+    }
+
+    .failed-note {
+        margin-top: 25px;
+        color: #777777;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 600px) {
+        .failed-container {
+            margin: 25px auto;
+            padding: 12px;
+        }
+
+        .failed-card {
+            padding: 30px 18px;
+        }
+
+        .failed-card h1 {
+            font-size: 25px;
+        }
+
+        .actions {
+            flex-direction: column;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+</style>
+
+<div class="failed-container">
     <div class="failed-card">
 
-        <div class="failed-icon">
-            ❌
+        <div class="failed-icon" aria-label="Payment failed">
+            &#10060;
         </div>
 
         <h1>Payment Failed</h1>
 
-        <p>
-            {{ message|default:"We could not complete your payment." }}
+        <p class="failed-message">
+            {{ message|default:"We could not complete your payment. Please try again." }}
         </p>
 
         {% if order %}
             <div class="order-info">
-                <strong>Order #{{ order.id }}</strong>
+                <h2>Order Information</h2>
+
+                <p>
+                    <strong>Order ID:</strong>
+                    <span>#{{ order.id }}</span>
+                </p>
+
+                <p>
+                    <strong>Total Amount:</strong>
+                    <span>₹{{ order.total_amount|floatformat:2 }}</span>
+                </p>
+
+                <p>
+                    <strong>Order Status:</strong>
+                    <span>{{ order.get_status_display }}</span>
+                </p>
             </div>
         {% endif %}
 
@@ -31,7 +189,7 @@ Payment Failed - ShopSphere
             {% if order %}
                 <a
                     href="{% url 'order_detail' order.id %}"
-                    class="primary-btn"
+                    class="secondary-btn"
                 >
                     View Order
                 </a>
@@ -39,7 +197,7 @@ Payment Failed - ShopSphere
 
             <a
                 href="{% url 'checkout' %}"
-                class="secondary-btn"
+                class="primary-btn"
             >
                 Try Again
             </a>
@@ -53,73 +211,13 @@ Payment Failed - ShopSphere
 
         </div>
 
+        <p class="failed-note">
+            If money was deducted from your account, please check your payment
+            status before attempting another payment. Contact support if the
+            issue continues.
+        </p>
+
     </div>
-
 </div>
-
-<style>
-
-    .failed-container {
-        max-width: 600px;
-        margin: 60px auto;
-        padding: 20px;
-    }
-
-    .failed-card {
-        background: white;
-        padding: 40px;
-        text-align: center;
-        border-radius: 14px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.10);
-    }
-
-    .failed-icon {
-        font-size: 60px;
-        margin-bottom: 15px;
-    }
-
-    .failed-card h1 {
-        margin-bottom: 12px;
-    }
-
-    .failed-card p {
-        color: #666;
-        line-height: 1.6;
-    }
-
-    .order-info {
-        margin: 25px 0;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-
-    .actions {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-top: 25px;
-    }
-
-    .primary-btn,
-    .secondary-btn {
-        padding: 11px 18px;
-        border-radius: 7px;
-        text-decoration: none;
-        font-weight: bold;
-    }
-
-    .primary-btn {
-        background: #007bff;
-        color: white;
-    }
-
-    .secondary-btn {
-        background: #f1f1f1;
-        color: #333;
-    }
-
-</style>
 
 {% endblock %}

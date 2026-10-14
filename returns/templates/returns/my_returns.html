@@ -3,96 +3,133 @@
 {% block title %}My Returns - ShopSphere{% endblock %}
 
 {% block content %}
-
-<div style="max-width:1100px;margin:40px auto;padding:20px;">
-
-    <h1>My Return Requests</h1>
+<div class="returns-page">
+    <div class="returns-hero">
+        <div class="hero-copy">
+            <div class="eyebrow"><span class="eyebrow-dot"></span> CUSTOMER CARE</div>
+            <h1>My <span>Return Requests</span></h1>
+            <p>Track your return requests, review refund amounts, and check the latest status in one place.</p>
+        </div>
+        <div class="hero-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+                <path d="M13 21.5 32 11l19 10.5v21L32 53 13 42.5v-21Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+                <path d="m13.5 21.8 18.4 10.4 18.6-10.4M32 32.2V52" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+                <path d="M24 17.7 42.5 28" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M23 37.5a10 10 0 0 0 16.8 7.3M40 42.5v3.8h-3.8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+    </div>
 
     {% if messages %}
-        {% for message in messages %}
-            <div style="padding:12px;margin:12px 0;background:#f3f4f6;border-radius:6px;">
-                {{ message }}
-            </div>
-        {% endfor %}
+        <div class="message-stack" aria-live="polite">
+            {% for message in messages %}
+                <div class="notice notice-{{ message.tags|default:'info' }}">
+                    <span class="notice-mark" aria-hidden="true">{% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}!{% else %}i{% endif %}</span>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
     {% if return_requests %}
+        <section class="returns-panel" aria-labelledby="returns-list-title">
+            <div class="panel-heading">
+                <div>
+                    <h2 id="returns-list-title">Return activity</h2>
+                    <p>Your submitted requests and their current details.</p>
+                </div>
+                <div class="count-pill">{{ return_requests|length }} request{{ return_requests|length|pluralize }}</div>
+            </div>
 
-        <div style="overflow-x:auto;">
-
-            <table style="width:100%;border-collapse:collapse;">
-
-                <thead>
-                    <tr style="background:#eff6ff;text-align:left;">
-
-                        <th style="padding:14px;">Request ID</th>
-                        <th style="padding:14px;">Order</th>
-                        <th style="padding:14px;">Reason</th>
-                        <th style="padding:14px;">Refund Amount</th>
-                        <th style="padding:14px;">Status</th>
-                        <th style="padding:14px;">Requested On</th>
-
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    {% for item in return_requests %}
-
-                        <tr style="border-bottom:1px solid #e5e7eb;">
-
-                            <td style="padding:14px;">
-                                #{{ item.id }}
-                            </td>
-
-                            <td style="padding:14px;">
-                                <a href="{% url 'order_detail' item.order.id %}">
-                                    Order #{{ item.order.id }}
-                                </a>
-                            </td>
-
-                            <td style="padding:14px;">
-                                {{ item.get_reason_display }}
-                            </td>
-
-                            <td style="padding:14px;">
-                                ₹{{ item.refund_amount|floatformat:2 }}
-                            </td>
-
-                            <td style="padding:14px;">
-                                <strong>{{ item.get_status_display }}</strong>
-                            </td>
-
-                            <td style="padding:14px;">
-                                {{ item.created_at|date:"d M Y, h:i A" }}
-                            </td>
-
+            <div class="table-wrap">
+                <table class="returns-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Request</th>
+                            <th scope="col">Order</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Refund amount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Requested on</th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in return_requests %}
+                            <tr>
+                                <td data-label="Request">
+                                    <span class="request-id">#{{ item.id }}</span>
+                                </td>
+                                <td data-label="Order">
+                                    <a class="order-link" href="{% url 'order_detail' item.order.id %}">
+                                        <span>Order #{{ item.order.id }}</span>
+                                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10h10M10 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    </a>
+                                </td>
+                                <td data-label="Reason"><span class="reason-text">{{ item.get_reason_display }}</span></td>
+                                <td data-label="Refund amount"><span class="refund-value">₹{{ item.refund_amount|floatformat:2 }}</span></td>
+                                <td data-label="Status"><span class="status-badge"><span class="status-dot"></span>{{ item.get_status_display }}</span></td>
+                                <td data-label="Requested on"><span class="date-text">{{ item.created_at|date:"d M Y" }}</span><span class="time-text">{{ item.created_at|date:"h:i A" }}</span></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
+            <div class="panel-footer">
+                <span class="footer-shield" aria-hidden="true">✓</span>
+                <span>Need help with a request? Open the related order to view its details.</span>
+                <a href="{% url 'my_orders' %}" class="footer-link">View my orders <span aria-hidden="true">→</span></a>
+            </div>
+        </section>
     {% else %}
-
-        <div style="padding:30px;text-align:center;background:#f9fafb;border-radius:10px;">
-
-            <h3>No return requests yet</h3>
-
-            <p>Your return requests will appear here.</p>
-
-            <a href="{% url 'my_orders' %}">
+        <section class="empty-state">
+            <div class="empty-art" aria-hidden="true">
+                <div class="empty-orbit orbit-one"></div>
+                <div class="empty-orbit orbit-two"></div>
+                <div class="empty-box">
+                    <svg viewBox="0 0 72 72" fill="none">
+                        <path d="m15 25 21-12 21 12v23L36 60 15 48V25Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="m15.5 25.5 20.5 12 20.5-12M36 37.5V59" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="m27 18 21 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <span class="spark spark-one">✦</span><span class="spark spark-two">✧</span><span class="spark spark-three">·</span>
+            </div>
+            <span class="empty-kicker">ALL CLEAR</span>
+            <h2>No return requests yet</h2>
+            <p>When you submit a return request for an eligible order, you’ll find its status and refund details here.</p>
+            <a href="{% url 'my_orders' %}" class="primary-action">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h2l1.5 8.1a2 2 0 0 0 2 1.6h5.8a2 2 0 0 0 1.9-1.4L18 7H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="16.5" r="1" fill="currentColor"/><circle cx="14.5" cy="16.5" r="1" fill="currentColor"/></svg>
                 View My Orders
+                <span aria-hidden="true">→</span>
             </a>
-
-        </div>
-
+        </section>
     {% endif %}
 
+    <div class="returns-help">
+        <div class="help-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="1.8"/><path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.8c-1.1 1-1.9 1.4-1.9 3M12 17.1v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="help-copy"><strong>Have a question about a return?</strong><span>Open the associated order for more information about your purchase.</span></div>
+        <a href="{% url 'my_orders' %}" class="help-link">Go to orders <span aria-hidden="true">↗</span></a>
+    </div>
 </div>
 
+<style>
+    .returns-page{--ret-ink:#172033;--ret-muted:#68738a;--ret-primary:#4f46e5;--ret-primary-dark:#3730a3;--ret-border:#e7eaf2;max-width:1220px;margin:0 auto;padding:36px 24px 64px;color:var(--ret-ink);animation:returnsFadeIn .45s ease both}
+    .returns-page *{box-sizing:border-box}
+    .returns-hero{position:relative;display:flex;align-items:center;justify-content:space-between;gap:28px;overflow:hidden;padding:35px 40px;margin-bottom:28px;border:1px solid #e3e7ff;border-radius:24px;background:radial-gradient(circle at 82% 20%,rgba(129,140,248,.2),transparent 30%),linear-gradient(120deg,#f7f7ff 0%,#eef2ff 56%,#f8faff 100%)}
+    .hero-copy{position:relative;z-index:1;max-width:740px}.eyebrow{display:flex;align-items:center;gap:9px;margin-bottom:13px;color:#5553b8;font-size:11px;font-weight:800;letter-spacing:1.8px}.eyebrow-dot{width:8px;height:8px;border-radius:50%;background:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.12)}
+    .returns-hero h1{margin:0;color:#171b36;font-size:clamp(29px,4vw,42px);font-weight:850;letter-spacing:-1.5px;line-height:1.15}.returns-hero h1 span{color:var(--ret-primary)}.returns-hero p{max-width:620px;margin:13px 0 0;color:#66708a;font-size:15px;line-height:1.75}
+    .hero-icon{flex:0 0 112px;width:112px;height:112px;display:grid;place-items:center;border:1px solid rgba(99,102,241,.18);border-radius:27px;background:rgba(255,255,255,.72);color:#5b58d6;box-shadow:0 16px 35px rgba(70,76,170,.1);transform:rotate(3deg);animation:returnsFloat 4s ease-in-out infinite}.hero-icon svg{width:70px;height:70px}
+    .message-stack{display:grid;gap:10px;margin:0 0 22px}.notice{display:flex;align-items:flex-start;gap:11px;padding:14px 16px;border:1px solid var(--ret-border);border-radius:13px;background:#fff;color:#39445a;font-size:14px;line-height:1.55;box-shadow:0 5px 15px rgba(26,35,65,.035)}.notice-mark{flex:0 0 22px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:#e8edff;color:#4f46e5;font-size:13px;font-weight:800}.notice-success{border-color:#c9f0dc;background:#f3fcf7}.notice-success .notice-mark{background:#d7f7e5;color:#13834d}.notice-error,.notice-danger{border-color:#f5cece;background:#fff7f7}.notice-error .notice-mark,.notice-danger .notice-mark{background:#fee2e2;color:#b42318}
+    .returns-panel{overflow:hidden;border:1px solid var(--ret-border);border-radius:20px;background:#fff;box-shadow:0 12px 38px rgba(29,39,75,.055)}.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:25px 27px;border-bottom:1px solid #edf0f6}.panel-heading h2{margin:0;color:#202943;font-size:20px;font-weight:800;letter-spacing:-.4px}.panel-heading p{margin:6px 0 0;color:var(--ret-muted);font-size:13px;line-height:1.6}.count-pill{flex-shrink:0;padding:8px 12px;border:1px solid #dfe3ff;border-radius:999px;background:#f4f5ff;color:#4944c6;font-size:12px;font-weight:750}
+    .table-wrap{width:100%;overflow-x:auto}.returns-table{width:100%;border-collapse:collapse;text-align:left;white-space:normal}.returns-table thead{background:#f8f9ff}.returns-table th{padding:15px 19px;color:#788198;font-size:10px;font-weight:800;letter-spacing:.85px;text-transform:uppercase;white-space:nowrap}.returns-table td{padding:19px;border-top:1px solid #eff1f6;color:#485269;font-size:13px;vertical-align:middle}.returns-table tbody tr{transition:background .2s ease}.returns-table tbody tr:hover{background:#fbfbff}.request-id{display:inline-flex;align-items:center;justify-content:center;min-width:46px;padding:7px 9px;border:1px solid #e3e5ff;border-radius:8px;background:#f4f5ff;color:#4f46e5;font-size:12px;font-weight:800}.order-link{display:inline-flex;align-items:center;gap:6px;color:#4f46e5;text-decoration:none;font-weight:750;white-space:nowrap}.order-link svg{width:17px;height:17px;transition:transform .2s ease}.order-link:hover{color:#3730a3}.order-link:hover svg{transform:translateX(3px)}.reason-text{display:inline-block;max-width:190px;color:#3b455c;line-height:1.55}.refund-value{color:#202943;font-size:14px;font-weight:800;white-space:nowrap}.status-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #e6e9ef;border-radius:999px;background:#f8fafc;color:#475569;font-size:11px;font-weight:750;white-space:nowrap}.status-dot{width:6px;height:6px;border-radius:50%;background:#94a3b8}.date-text,.time-text{display:block;white-space:nowrap}.date-text{color:#354057;font-weight:700;font-size:12px}.time-text{margin-top:4px;color:#9299aa;font-size:11px}.panel-footer{display:flex;align-items:center;gap:10px;padding:17px 25px;border-top:1px solid #edf0f6;background:#fcfcff;color:#798197;font-size:12px;line-height:1.5}.footer-shield{flex:0 0 22px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:#e5f9ed;color:#15834c;font-weight:900}.footer-link{margin-left:auto;flex-shrink:0;color:#4f46e5;text-decoration:none;font-weight:800;white-space:nowrap}.footer-link span{margin-left:4px;transition:margin .2s ease}.footer-link:hover span{margin-left:8px}
+    .empty-state{display:flex;flex-direction:column;align-items:center;padding:48px 25px 52px;border:1px solid var(--ret-border);border-radius:22px;background:linear-gradient(180deg,#fff 0%,#fbfbff 100%);text-align:center;box-shadow:0 12px 38px rgba(29,39,75,.045)}.empty-art{position:relative;width:190px;height:155px;display:grid;place-items:center;margin-bottom:13px}.empty-orbit{position:absolute;border:1px dashed #d9dcff;border-radius:50%;animation:returnsSpin 26s linear infinite}.orbit-one{width:160px;height:115px;transform:rotate(-26deg)}.orbit-two{width:130px;height:145px;transform:rotate(32deg);animation-direction:reverse}.empty-box{z-index:1;width:96px;height:96px;display:grid;place-items:center;border:1px solid #e1e5ff;border-radius:29px;background:linear-gradient(145deg,#f3f4ff,#fff);color:#6661de;box-shadow:0 17px 32px rgba(79,70,229,.12);animation:returnsFloat 4.5s ease-in-out infinite}.empty-box svg{width:69px;height:69px}.spark{position:absolute;color:#8581ec;font-weight:900}.spark-one{top:18px;left:34px;font-size:20px}.spark-two{right:26px;top:39px;font-size:25px}.spark-three{bottom:18px;right:43px;font-size:35px}.empty-kicker{color:#7772d9;font-size:10px;font-weight:850;letter-spacing:2px}.empty-state h2{margin:11px 0 9px;color:#1e2740;font-size:25px;font-weight:850;letter-spacing:-.65px}.empty-state>p{max-width:450px;margin:0;color:#737d93;font-size:14px;line-height:1.8}.primary-action{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:24px;padding:13px 18px;border:1px solid #4f46e5;border-radius:11px;background:linear-gradient(135deg,#635bfa,#4338ca);color:#fff;text-decoration:none;font-size:13px;font-weight:800;box-shadow:0 8px 17px rgba(79,70,229,.22);transition:transform .2s ease,box-shadow .2s ease}.primary-action svg{width:18px;height:18px}.primary-action>span{margin-left:5px;transition:transform .2s ease}.primary-action:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(79,70,229,.28)}.primary-action:hover>span{transform:translateX(3px)}
+    .returns-help{display:flex;align-items:center;gap:15px;margin-top:24px;padding:19px 21px;border:1px solid #e8e9fb;border-radius:16px;background:linear-gradient(110deg,#f8f8ff,#fbfcff)}.help-icon{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border:1px solid #e1e3ff;border-radius:13px;background:#fff;color:#5b55d6}.help-icon svg{width:22px;height:22px}.help-copy{display:grid;gap:5px}.help-copy strong{color:#29324b;font-size:13px}.help-copy span{color:#778198;font-size:12px;line-height:1.55}.help-link{margin-left:auto;flex-shrink:0;color:#4f46e5;font-size:12px;font-weight:800;text-decoration:none;white-space:nowrap}.help-link span{margin-left:4px}.help-link:hover{text-decoration:underline}
+    @keyframes returnsFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes returnsFloat{0%,100%{transform:translateY(0) rotate(3deg)}50%{transform:translateY(-6px) rotate(3deg)}}@keyframes returnsSpin{to{transform:rotate(334deg)}}
+    @media(max-width:900px){.returns-page{padding:27px 18px 48px}.returns-hero{padding:29px}.hero-icon{flex-basis:90px;width:90px;height:90px}.hero-icon svg{width:58px;height:58px}.returns-table{min-width:850px}.returns-table th,.returns-table td{padding:15px}}
+    @media(max-width:600px){.returns-page{padding:20px 13px 40px}.returns-hero{padding:25px 22px;border-radius:19px;align-items:flex-start}.hero-icon{display:none}.returns-hero h1{font-size:30px;letter-spacing:-1px}.returns-hero p{font-size:13px}.panel-heading{align-items:flex-start;padding:21px 18px}.panel-heading h2{font-size:18px}.count-pill{font-size:10px;padding:7px 9px}.returns-table{min-width:0;display:block}.returns-table thead{display:none}.returns-table tbody{display:grid;gap:0}.returns-table tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;padding:5px 17px 11px;border-top:1px solid #edf0f6}.returns-table tbody tr:first-child{border-top:0}.returns-table td{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:12px 0;border:0;min-width:0}.returns-table td::before{content:attr(data-label);color:#8b93a7;font-size:9px;font-weight:850;letter-spacing:.75px;text-transform:uppercase}.returns-table td:nth-child(3){grid-column:1/-1}.reason-text{max-width:none}.panel-footer{flex-wrap:wrap;padding:15px 17px}.footer-link{margin-left:32px}.empty-state{padding:35px 19px 38px}.empty-state h2{font-size:22px}.empty-state>p{font-size:13px}.returns-help{align-items:flex-start;padding:16px;gap:11px}.help-icon{flex-basis:36px;width:36px;height:36px}.help-copy{flex:1}.help-link{align-self:center;font-size:11px}.notice{font-size:13px}}
+    @media(prefers-reduced-motion:reduce){.returns-page,.hero-icon,.empty-box,.empty-orbit{animation:none!important}.returns-page *{scroll-behavior:auto!important;transition:none!important}}
+</style>
 {% endblock %}

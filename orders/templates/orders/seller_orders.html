@@ -1,1484 +1,557 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Seller Dashboard - ShopSphere
-{% endblock %}
+{% block title %}Seller Dashboard - ShopSphere{% endblock %}
 
 {% block content %}
-
 <div class="seller-dashboard">
+    <style>
+        .seller-dashboard {
+            --sd-primary: #4f46e5;
+            --sd-primary-dark: #3730a3;
+            --sd-primary-soft: #eef2ff;
+            --sd-teal: #0f9f8f;
+            --sd-text: #172033;
+            --sd-muted: #64748b;
+            --sd-border: #e2e8f0;
+            --sd-surface: #ffffff;
+            --sd-soft: #f8fafc;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 12px 0 48px;
+            color: var(--sd-text);
+        }
 
-    <!-- =====================================================
-         DASHBOARD HEADER
-    ====================================================== -->
+        .seller-dashboard * { box-sizing: border-box; }
+        .seller-dashboard a { text-decoration: none; }
+        .seller-dashboard button,
+        .seller-dashboard input { font: inherit; }
+        .seller-dashboard button,
+        .seller-dashboard a,
+        .seller-dashboard input { -webkit-tap-highlight-color: transparent; }
+        .seller-dashboard :is(a, button, input):focus-visible {
+            outline: 3px solid rgba(79, 70, 229, .28);
+            outline-offset: 3px;
+        }
 
-    <div class="dashboard-header">
+        /* Header */
+        .sd-hero {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            overflow: hidden;
+            padding: 32px;
+            margin-bottom: 24px;
+            color: #fff;
+            border-radius: 22px;
+            background: linear-gradient(120deg, #312e81 0%, #4f46e5 54%, #0f9f8f 130%);
+            box-shadow: 0 16px 34px rgba(79, 70, 229, .18);
+            animation: sdEnter .55s ease both;
+        }
+        .sd-hero::before,
+        .sd-hero::after {
+            content: "";
+            position: absolute;
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .sd-hero::before { width: 240px; height: 240px; right: 80px; top: -145px; }
+        .sd-hero::after { width: 180px; height: 180px; right: -60px; bottom: -115px; }
+        .sd-hero-content, .sd-hero-actions { position: relative; z-index: 1; }
+        .sd-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 6px 10px;
+            border: 1px solid rgba(255,255,255,.22);
+            border-radius: 999px;
+            color: #eef2ff;
+            background: rgba(255,255,255,.10);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+        }
+        .sd-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #6ee7b7; box-shadow: 0 0 0 4px rgba(110,231,183,.14); }
+        .sd-hero h1 {
+            margin: 0 0 8px;
+            color: #fff;
+            font-family: "Manrope", sans-serif;
+            font-size: clamp(26px, 3vw, 35px);
+            font-weight: 800;
+            letter-spacing: -.8px;
+            line-height: 1.2;
+        }
+        .sd-hero p { max-width: 560px; margin: 0; color: rgba(255,255,255,.83); font-size: 14px; line-height: 1.75; }
+        .sd-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .sd-button {
+            display: inline-flex;
+            min-height: 42px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 15px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.4;
+            text-align: center;
+            transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .sd-button:hover { transform: translateY(-2px); }
+        .sd-button-primary { color: #3730a3; background: #fff; box-shadow: 0 6px 15px rgba(15,23,42,.12); }
+        .sd-button-primary:hover { color: #312e81; background: #f8fafc; box-shadow: 0 9px 20px rgba(15,23,42,.15); }
+        .sd-button-light { border-color: rgba(255,255,255,.3); color: #fff; background: rgba(255,255,255,.09); }
+        .sd-button-light:hover { color: #fff; background: rgba(255,255,255,.17); }
 
-        <div>
-            <h1>Seller Dashboard</h1>
-            <p>Manage your products, stock and customer orders.</p>
+        /* Summary stats */
+        .sd-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .sd-stat {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 0;
+            padding: 20px;
+            border: 1px solid var(--sd-border);
+            border-radius: 16px;
+            background: var(--sd-surface);
+            box-shadow: 0 3px 12px rgba(15,23,42,.025);
+            animation: sdEnter .6s ease both;
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+        }
+        .sd-stat:nth-child(2) { animation-delay: 70ms; }
+        .sd-stat:nth-child(3) { animation-delay: 140ms; }
+        .sd-stat:hover { transform: translateY(-3px); border-color: #c7d2fe; box-shadow: 0 12px 26px rgba(15,23,42,.06); }
+        .sd-stat-icon { display: grid; flex: 0 0 47px; width: 47px; height: 47px; place-items: center; border-radius: 14px; font-size: 22px; }
+        .sd-stat-icon.purple { background: #eef2ff; }
+        .sd-stat-icon.teal { background: #e6fffa; }
+        .sd-stat-icon.amber { background: #fffbeb; }
+        .sd-stat-label { margin: 0 0 4px; color: var(--sd-muted); font-size: 12px; font-weight: 700; }
+        .sd-stat-value { margin: 0; color: var(--sd-text); font-family: "Manrope", sans-serif; font-size: 25px; font-weight: 800; line-height: 1.2; }
+        .sd-stat-note { margin: 5px 0 0; color: #94a3b8; font-size: 11px; }
+
+        /* Sections */
+        .sd-section { margin-top: 30px; }
+        .sd-section-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+        .sd-section-heading { margin: 0 0 5px; color: var(--sd-text); font-family: "Manrope", sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -.35px; }
+        .sd-section-subtitle { margin: 0; color: var(--sd-muted); font-size: 13px; line-height: 1.65; }
+        .sd-section-meta { padding: 7px 11px; border: 1px solid #e0e7ff; border-radius: 999px; color: #4338ca; background: #eef2ff; font-size: 11px; font-weight: 800; white-space: nowrap; }
+
+        /* Inventory */
+        .sd-inventory-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .sd-inventory-card {
+            display: flex;
+            min-width: 0;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--sd-border);
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 4px 14px rgba(15,23,42,.025);
+            animation: sdEnter .55s ease both;
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+        }
+        .sd-inventory-card:hover { transform: translateY(-3px); border-color: #d5dafb; box-shadow: 0 14px 30px rgba(15,23,42,.07); }
+        .sd-product-top { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 17px; padding: 18px 18px 15px; }
+        .sd-product-image { display: grid; width: 112px; height: 122px; place-items: center; overflow: hidden; border: 1px solid #eef2f7; border-radius: 13px; background: linear-gradient(145deg, #f8fafc, #f1f5f9); color: #94a3b8; font-size: 37px; }
+        .sd-product-image img { width: 100%; height: 100%; object-fit: contain; padding: 7px; transition: transform .3s ease; }
+        .sd-inventory-card:hover .sd-product-image img { transform: scale(1.045); }
+        .sd-product-details { min-width: 0; }
+        .sd-product-labels { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .sd-pill { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; line-height: 1.2; }
+        .sd-pill-active { color: #166534; background: #dcfce7; }
+        .sd-pill-inactive { color: #991b1b; background: #fee2e2; }
+        .sd-pill-stock { color: #166534; background: #ecfdf5; }
+        .sd-pill-low { color: #92400e; background: #fef3c7; }
+        .sd-pill-out { color: #991b1b; background: #fee2e2; }
+        .sd-product-title { margin: 0 0 7px; color: var(--sd-text); font-size: 16px; font-weight: 800; line-height: 1.45; overflow-wrap: anywhere; }
+        .sd-product-meta { margin: 4px 0; color: var(--sd-muted); font-size: 11px; line-height: 1.55; overflow-wrap: anywhere; }
+        .sd-product-price { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+        .sd-product-price strong { color: #047857; font-family: "Manrope", sans-serif; font-size: 19px; font-weight: 800; }
+        .sd-product-price del { color: #94a3b8; font-size: 12px; }
+        .sd-product-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+        .sd-action-link, .sd-action-button { display: inline-flex; min-height: 33px; align-items: center; justify-content: center; padding: 7px 10px; border: 1px solid transparent; border-radius: 8px; cursor: pointer; font-size: 10px; font-weight: 800; line-height: 1.3; transition: background .18s ease, transform .18s ease; }
+        .sd-action-link:hover, .sd-action-button:hover { transform: translateY(-1px); }
+        .sd-edit { color: #4338ca; background: #eef2ff; }
+        .sd-edit:hover { color: #3730a3; background: #e0e7ff; }
+        .sd-activate { color: #166534; background: #dcfce7; }
+        .sd-activate:hover { color: #14532d; background: #bbf7d0; }
+        .sd-deactivate { color: #991b1b; background: #fee2e2; }
+        .sd-deactivate:hover { color: #7f1d1d; background: #fecaca; }
+        .sd-product-actions form { display: inline-flex; margin: 0; }
+        .sd-stock-panel { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; margin-top: auto; padding: 15px 18px; border-top: 1px solid #eef2f7; background: #fafbff; }
+        .sd-stock-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; }
+        .sd-stock-field label { display: block; margin-bottom: 6px; color: #64748b; font-size: 10px; font-weight: 800; }
+        .sd-stock-field input { width: 100%; min-width: 0; min-height: 36px; padding: 8px 10px; border: 1px solid #dbe3ef; border-radius: 8px; color: #172033; background: #fff; font-size: 12px; }
+        .sd-stock-field input:focus { border-color: var(--sd-primary); outline: 3px solid rgba(79,70,229,.1); }
+        .sd-save-stock { min-height: 36px; padding: 8px 11px; border: 0; border-radius: 8px; color: #fff; background: var(--sd-primary); cursor: pointer; font-size: 10px; font-weight: 800; transition: background .18s ease, transform .18s ease; }
+        .sd-save-stock:hover { background: var(--sd-primary-dark); transform: translateY(-1px); }
+        .sd-view-link { align-self: end; color: #4338ca; font-size: 10px; font-weight: 800; white-space: nowrap; }
+        .sd-view-link:hover { color: #312e81; text-decoration: underline; }
+        .sd-hidden-note { align-self: end; max-width: 112px; color: #b91c1c; font-size: 10px; font-weight: 700; line-height: 1.4; text-align: right; }
+
+        /* Orders */
+        .sd-orders-list { display: flex; flex-direction: column; gap: 18px; }
+        .sd-order-card { overflow: hidden; border: 1px solid var(--sd-border); border-radius: 17px; background: #fff; box-shadow: 0 4px 14px rgba(15,23,42,.025); animation: sdEnter .55s ease both; transition: border-color .2s ease, box-shadow .2s ease; }
+        .sd-order-card:hover { border-color: #cbd5e1; box-shadow: 0 12px 28px rgba(15,23,42,.06); }
+        .sd-order-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 20px 22px; border-bottom: 1px solid #edf2f7; background: linear-gradient(100deg, #fbfcff, #fff); }
+        .sd-order-number { margin: 0 0 5px; color: #172033; font-family: "Manrope", sans-serif; font-size: 17px; font-weight: 800; }
+        .sd-order-date { margin: 0; color: #94a3b8; font-size: 11px; }
+        .sd-status { display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+        .sd-status::before { content: ""; width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: currentColor; }
+        .sd-status-pending { color: #92400e; background: #fef3c7; }
+        .sd-status-confirmed, .sd-status-delivered { color: #166534; background: #dcfce7; }
+        .sd-status-processing { color: #6d28d9; background: #ede9fe; }
+        .sd-status-shipped { color: #075985; background: #e0f2fe; }
+        .sd-status-cancelled { color: #991b1b; background: #fee2e2; }
+        .sd-payment-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 22px; border-bottom: 1px solid #f1f5f9; color: var(--sd-muted); font-size: 11px; }
+        .sd-payment-paid { color: #15803d; font-weight: 800; }
+        .sd-payment-pending { color: #a16207; font-weight: 800; }
+        .sd-payment-failed { color: #b91c1c; font-weight: 800; }
+        .sd-payment-refunded { color: #7e22ce; font-weight: 800; }
+        .sd-order-body { padding: 20px 22px; }
+        .sd-orders-product-heading { margin: 0 0 12px; color: #475569; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+        .sd-ordered-product { display: flex; align-items: center; gap: 13px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .sd-ordered-product:last-child { border-bottom: 0; }
+        .sd-order-product-image { display: grid; width: 58px; height: 58px; flex: 0 0 58px; place-items: center; overflow: hidden; border: 1px solid #edf2f7; border-radius: 11px; color: #94a3b8; background: #f8fafc; font-size: 23px; }
+        .sd-order-product-image img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+        .sd-ordered-product-info { flex: 1; min-width: 0; }
+        .sd-ordered-product-info h5 { margin: 0 0 4px; color: #172033; font-size: 12px; font-weight: 800; line-height: 1.5; overflow-wrap: anywhere; }
+        .sd-ordered-product-info p { margin: 3px 0; color: #94a3b8; font-size: 10px; line-height: 1.5; }
+        .sd-item-subtotal { color: #172033; font-size: 12px; font-weight: 800; white-space: nowrap; }
+        .sd-order-total { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 16px 0 2px; color: var(--sd-muted); font-size: 12px; }
+        .sd-order-total strong { color: #172033; font-family: "Manrope", sans-serif; font-size: 21px; font-weight: 800; }
+        .sd-status-management { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 22px; border-top: 1px solid #edf2f7; background: #fafbff; }
+        .sd-status-description { min-width: 0; }
+        .sd-status-description h4 { margin: 0 0 4px; color: #172033; font-size: 12px; font-weight: 800; }
+        .sd-status-description p { margin: 0; color: #94a3b8; font-size: 10px; line-height: 1.6; }
+        .sd-status-form { margin: 0; }
+        .sd-status-button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 13px; border: 0; border-radius: 9px; color: #fff; background: var(--sd-primary); cursor: pointer; font-size: 10px; font-weight: 800; white-space: nowrap; transition: transform .18s ease, background .18s ease; }
+        .sd-status-button:hover { background: var(--sd-primary-dark); transform: translateY(-1px); }
+        .sd-completed-label, .sd-cancelled-label, .sd-waiting-label { display: inline-flex; padding: 9px 11px; border-radius: 8px; font-size: 10px; font-weight: 800; line-height: 1.4; }
+        .sd-completed-label { color: #166534; background: #dcfce7; }
+        .sd-cancelled-label { color: #991b1b; background: #fee2e2; }
+        .sd-waiting-label { color: #92400e; background: #fef3c7; }
+        .sd-mixed-warning { max-width: 360px; padding: 10px 12px; border: 1px solid #fde68a; border-radius: 9px; color: #92400e; background: #fffbeb; font-size: 10px; line-height: 1.6; }
+        .sd-order-footer { display: flex; justify-content: flex-end; padding: 14px 22px; border-top: 1px solid #f1f5f9; }
+        .sd-view-order { display: inline-flex; align-items: center; gap: 7px; color: #4f46e5; font-size: 11px; font-weight: 800; }
+        .sd-view-order:hover { color: #3730a3; gap: 10px; }
+
+        /* Empty state */
+        .sd-empty { padding: 48px 22px; border: 1px dashed #cbd5e1; border-radius: 18px; background: #fff; text-align: center; }
+        .sd-empty-icon { display: grid; width: 66px; height: 66px; place-items: center; margin: 0 auto 16px; border-radius: 20px; background: #eef2ff; font-size: 31px; }
+        .sd-empty h3 { margin: 0 0 8px; color: #172033; font-family: "Manrope", sans-serif; font-size: 19px; font-weight: 800; }
+        .sd-empty p { max-width: 430px; margin: 0 auto 19px; color: #64748b; font-size: 12px; line-height: 1.8; }
+        .sd-empty .sd-button { color: #fff; background: var(--sd-primary); }
+        .sd-empty .sd-button:hover { color: #fff; background: var(--sd-primary-dark); }
+        .sd-dashboard-bottom { margin-top: 25px; padding: 15px 17px; border: 1px solid #e0e7ff; border-radius: 12px; color: #4338ca; background: #f5f7ff; font-size: 11px; line-height: 1.7; }
+
+        @keyframes sdEnter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 900px) {
+            .sd-hero { align-items: flex-start; flex-direction: column; padding: 26px; }
+            .sd-stats { gap: 12px; }
+            .sd-stat { align-items: flex-start; flex-direction: column; gap: 11px; padding: 16px; }
+            .sd-product-top { grid-template-columns: 90px minmax(0,1fr); gap: 13px; }
+            .sd-product-image { width: 90px; height: 104px; }
+            .sd-stock-panel { grid-template-columns: 1fr; }
+            .sd-view-link, .sd-hidden-note { justify-self: start; text-align: left; }
+        }
+        @media (max-width: 650px) {
+            .seller-dashboard { padding: 4px 0 35px; }
+            .sd-hero { padding: 22px 18px; border-radius: 17px; }
+            .sd-hero-actions { width: 100%; }
+            .sd-hero-actions .sd-button { flex: 1; }
+            .sd-stats { grid-template-columns: 1fr; gap: 10px; }
+            .sd-stat { align-items: center; flex-direction: row; padding: 14px; }
+            .sd-stat-icon { flex-basis: 42px; width: 42px; height: 42px; }
+            .sd-stat-value { font-size: 22px; }
+            .sd-section { margin-top: 25px; }
+            .sd-section-header { align-items: flex-start; flex-direction: column; }
+            .sd-inventory-grid { grid-template-columns: 1fr; }
+            .sd-order-header { align-items: flex-start; flex-direction: column; padding: 17px; }
+            .sd-payment-row { align-items: flex-start; padding: 12px 17px; }
+            .sd-order-body { padding: 16px 17px; }
+            .sd-status-management { align-items: stretch; flex-direction: column; padding: 15px 17px; }
+            .sd-status-form, .sd-status-button { width: 100%; }
+            .sd-order-footer { padding: 13px 17px; }
+        }
+        @media (max-width: 420px) {
+            .sd-product-top { grid-template-columns: 75px minmax(0,1fr); padding: 14px; gap: 10px; }
+            .sd-product-image { width: 75px; height: 88px; }
+            .sd-product-title { font-size: 14px; }
+            .sd-product-price strong { font-size: 17px; }
+            .sd-stock-panel { padding: 13px 14px; }
+            .sd-stock-form { grid-template-columns: 1fr; }
+            .sd-ordered-product { align-items: flex-start; gap: 10px; }
+            .sd-order-product-image { width: 48px; height: 48px; flex-basis: 48px; }
+            .sd-item-subtotal { font-size: 11px; }
+            .sd-order-total strong { font-size: 18px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .seller-dashboard *, .seller-dashboard *::before, .seller-dashboard *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+
+    <!-- Dashboard header -->
+    <header class="sd-hero">
+        <div class="sd-hero-content">
+            <div class="sd-eyebrow"><span class="sd-live-dot"></span> Seller workspace</div>
+            <h1>Welcome to your dashboard</h1>
+            <p>Manage your product catalogue, keep inventory accurate, and move customer orders through each delivery stage.</p>
         </div>
-
-        <div class="seller-badge">
-            🏪 Seller Account
+        <div class="sd-hero-actions">
+            <a href="{% url 'product_list' %}" class="sd-button sd-button-light">View Store ↗</a>
+            <a href="{% url 'seller_add_product' %}" class="sd-button sd-button-primary">＋ Add Product</a>
         </div>
+    </header>
 
-    </div>
-
-
-    <!-- =====================================================
-         INVENTORY MANAGEMENT
-    ====================================================== -->
-
-    <section class="inventory-section">
-
-        <div class="section-header">
-
+    <!-- Summary cards -->
+    <section class="sd-stats" aria-label="Seller dashboard summary">
+        <article class="sd-stat">
+            <div class="sd-stat-icon purple" aria-hidden="true">📦</div>
             <div>
-                <h2>📦 Inventory Management</h2>
-                <p>Manage your products, prices and stock.</p>
+                <p class="sd-stat-label">Your Products</p>
+                <p class="sd-stat-value">{{ seller_products|length }}</p>
+                <p class="sd-stat-note">Products in your catalogue</p>
             </div>
-
-            <div class="inventory-header-actions">
-
-                <span class="product-count">
-                    {{ seller_products|length }} Products
-                </span>
-
-                <a
-                    href="{% url 'seller_add_product' %}"
-                    class="add-product-button"
-                >
-                    + Add New Product
-                </a>
-
+        </article>
+        <article class="sd-stat">
+            <div class="sd-stat-icon teal" aria-hidden="true">🛍️</div>
+            <div>
+                <p class="sd-stat-label">Orders to Manage</p>
+                <p class="sd-stat-value">{{ orders|length }}</p>
+                <p class="sd-stat-note">Orders containing your products</p>
             </div>
+        </article>
+        <article class="sd-stat">
+            <div class="sd-stat-icon amber" aria-hidden="true">🔎</div>
+            <div>
+                <p class="sd-stat-label">Inventory Reminder</p>
+                <p class="sd-stat-value" style="font-size:19px;">Keep Stock Updated</p>
+                <p class="sd-stat-note">Review low-stock products below</p>
+            </div>
+        </article>
+    </section>
 
+    <!-- Inventory management -->
+    <section class="sd-section">
+        <div class="sd-section-header">
+            <div>
+                <h2 class="sd-section-heading">Inventory management</h2>
+                <p class="sd-section-subtitle">Update prices and stock, manage product visibility, and open product pages.</p>
+            </div>
+            <span class="sd-section-meta">{{ seller_products|length }} product(s)</span>
         </div>
-
 
         {% if seller_products %}
-
-            <div class="inventory-list">
-
+            <div class="sd-inventory-grid">
                 {% for product in seller_products %}
-
-                    <div class="inventory-card">
-
-                        <!-- =====================================
-                             PRODUCT IMAGE
-                        ====================================== -->
-
-                        <div class="inventory-image">
-
-                            {% with image=product.images.all.0 %}
-
-                                {% if image %}
-
-                                    <img
-                                        src="{{ image.image.url }}"
-                                        alt="{{ product.name }}"
-                                    >
-
-                                {% else %}
-
-                                    <div class="no-image">
-                                        📦
-                                    </div>
-
-                                {% endif %}
-
-                            {% endwith %}
-
-                        </div>
-
-
-                        <!-- =====================================
-                             PRODUCT INFORMATION
-                        ====================================== -->
-
-                        <div class="inventory-info">
-
-                            <h3>{{ product.name }}</h3>
-
-                            <p>
-                                Brand:
-                                {{ product.brand|default:"Not specified" }}
-                            </p>
-
-                            <p>
-                                Category:
-                                {{ product.category.name }}
-                            </p>
-
-
-                            <!-- PRICE -->
-
-                            <div class="inventory-price">
-
-                                {% if product.discount_price %}
-
-                                    <strong>
-                                        ₹{{ product.discount_price }}
-                                    </strong>
-
-                                    <del>
-                                        ₹{{ product.price }}
-                                    </del>
-
-                                {% else %}
-
-                                    <strong>
-                                        ₹{{ product.price }}
-                                    </strong>
-
-                                {% endif %}
-
-                            </div>
-
-
-                            <!-- ACTIVE STATUS -->
-
-                            {% if product.is_active %}
-
-                                <span class="product-status active">
-                                    Active
-                                </span>
-
-                            {% else %}
-
-                                <span class="product-status inactive">
-                                    Inactive
-                                </span>
-
-                            {% endif %}
-
-
-                            <!-- CURRENT STOCK -->
-
-                            {% if product.stock_quantity == 0 %}
-
-                                <p class="stock-status out-of-stock">
-                                    Out of stock
-                                </p>
-
-                            {% elif product.stock_quantity <= 5 %}
-
-                                <p class="stock-status low-stock">
-                                    Only {{ product.stock_quantity }} left
-                                </p>
-
-                            {% else %}
-
-                                <p class="stock-status in-stock">
-                                    In stock: {{ product.stock_quantity }}
-                                </p>
-
-                            {% endif %}
-
-
-                            <!-- =================================
-                                 EDIT PRODUCT BUTTON
-                            ================================== -->
-
-                            <div class="product-actions">
-
-                                <a
-                                    href="{% url 'seller_edit_product' product.id %}"
-                                    class="edit-product-button"
-                                >
-                                    ✏️ Edit Product
-                                </a>
-
-
-                                <!-- =================================
-                                     ACTIVATE / DEACTIVATE
-                                ================================== -->
-
-                                <form
-                                    method="POST"
-                                    action="{% url 'seller_toggle_product' product.id %}"
-                                    onsubmit="return confirm('{% if product.is_active %}Deactivate{% else %}Activate{% endif %} {{ product.name|escapejs }}?');"
-                                >
-
-                                    {% csrf_token %}
-
-                                    {% if product.is_active %}
-
-                                        <button
-                                            type="submit"
-                                            class="deactivate-product-button"
-                                        >
-                                            Deactivate
-                                        </button>
-
+                    <article class="sd-inventory-card">
+                        <div class="sd-product-top">
+                            <div class="sd-product-image">
+                                {% with image=product.images.all.0 %}
+                                    {% if image %}
+                                        <img src="{{ image.image.url }}" alt="{{ product.name }}" loading="lazy">
                                     {% else %}
-
-                                        <button
-                                            type="submit"
-                                            class="activate-product-button"
-                                        >
-                                            Activate
-                                        </button>
-
+                                        <span aria-label="No product image">📦</span>
                                     {% endif %}
-
-                                </form>
-
+                                {% endwith %}
                             </div>
-
+                            <div class="sd-product-details">
+                                <div class="sd-product-labels">
+                                    {% if product.is_active %}<span class="sd-pill sd-pill-active">Active</span>{% else %}<span class="sd-pill sd-pill-inactive">Inactive</span>{% endif %}
+                                    {% if product.stock_quantity <= 0 %}
+                                        <span class="sd-pill sd-pill-out">Out of stock</span>
+                                    {% elif product.stock_quantity <= 5 %}
+                                        <span class="sd-pill sd-pill-low">Low stock · {{ product.stock_quantity }}</span>
+                                    {% else %}
+                                        <span class="sd-pill sd-pill-stock">In stock · {{ product.stock_quantity }}</span>
+                                    {% endif %}
+                                </div>
+                                <h3 class="sd-product-title">{{ product.name }}</h3>
+                                <p class="sd-product-meta">Brand: {{ product.brand|default:"Not specified" }}</p>
+                                <p class="sd-product-meta">Category: {{ product.category.name|default:"Uncategorised" }}</p>
+                                <div class="sd-product-price">
+                                    {% if product.discount_price %}
+                                        <strong>₹{{ product.discount_price|floatformat:2 }}</strong>
+                                        <del>₹{{ product.price|floatformat:2 }}</del>
+                                    {% else %}
+                                        <strong>₹{{ product.price|floatformat:2 }}</strong>
+                                    {% endif %}
+                                </div>
+                                <div class="sd-product-actions">
+                                    <a href="{% url 'seller_edit_product' product.id %}" class="sd-action-link sd-edit">✏ Edit Product</a>
+                                    {% if product.is_active %}
+                                        <form method="POST" action="{% url 'seller_toggle_product' product.id %}" onsubmit="return confirm('Deactivate {{ product.name|escapejs }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="sd-action-button sd-deactivate">Deactivate</button>
+                                        </form>
+                                    {% else %}
+                                        <form method="POST" action="{% url 'seller_toggle_product' product.id %}" onsubmit="return confirm('Activate {{ product.name|escapejs }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="sd-action-button sd-activate">Activate</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
 
-
-                        <!-- =====================================
-                             UPDATE STOCK
-                        ====================================== -->
-
-                        <div class="stock-update">
-
-                            <h4>Update Stock</h4>
-
-                            <form
-                                method="POST"
-                                class="stock-form"
-                            >
-
+                        <div class="sd-stock-panel">
+                            <form method="POST" class="sd-stock-form">
                                 {% csrf_token %}
-
-                                <input
-                                    type="hidden"
-                                    name="action"
-                                    value="update_stock"
-                                >
-
-                                <input
-                                    type="hidden"
-                                    name="product_id"
-                                    value="{{ product.id }}"
-                                >
-
-                                <label for="stock-{{ product.id }}">
-                                    Stock Quantity
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="stock-{{ product.id }}"
-                                    name="stock_quantity"
-                                    value="{{ product.stock_quantity }}"
-                                    min="0"
-                                    step="1"
-                                    required
-                                >
-
-                                <button
-                                    type="submit"
-                                    class="update-stock-button"
-                                >
-                                    Save Stock
-                                </button>
-
+                                <input type="hidden" name="action" value="update_stock">
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <div class="sd-stock-field">
+                                    <label for="stock-{{ product.id }}">Stock quantity</label>
+                                    <input type="number" id="stock-{{ product.id }}" name="stock_quantity" value="{{ product.stock_quantity }}" min="0" step="1" required>
+                                </div>
+                                <button type="submit" class="sd-save-stock">Save Stock</button>
                             </form>
-
-                            <!-- VIEW PRODUCT -->
-
                             {% if product.is_active %}
-
-                                <a
-                                    href="{% url 'product_detail' product.slug %}"
-                                    class="view-product-button"
-                                    target="_blank"
-                                    rel="noopener"
-                                >
-                                    View in Store ↗
-                                </a>
-
+                                <a href="{% url 'product_detail' product.slug %}" class="sd-view-link" target="_blank" rel="noopener noreferrer">View in Store ↗</a>
                             {% else %}
-
-                                <span class="inactive-note">
-                                    Hidden from customer store
-                                </span>
-
+                                <span class="sd-hidden-note">Hidden from customer store</span>
                             {% endif %}
-
                         </div>
-
-                    </div>
-
+                    </article>
                 {% endfor %}
-
             </div>
-
-
         {% else %}
-
-            <!-- =============================================
-                 EMPTY INVENTORY
-            ============================================== -->
-
-            <div class="empty-inventory">
-
-                <div class="empty-icon">
-                    📦
-                </div>
-
-                <h3>No Products Yet</h3>
-
-                <p>
-                    Add your first product to start selling on ShopSphere.
-                </p>
-
-                <a
-                    href="{% url 'seller_add_product' %}"
-                    class="add-product-button empty-add-button"
-                >
-                    + Add Your First Product
-                </a>
-
+            <div class="sd-empty">
+                <div class="sd-empty-icon" aria-hidden="true">📦</div>
+                <h3>Your inventory is ready for its first product</h3>
+                <p>Add a product to begin building your ShopSphere catalogue. You can manage its images, pricing, visibility, and stock from this dashboard.</p>
+                <a href="{% url 'seller_add_product' %}" class="sd-button">＋ Add Your First Product</a>
             </div>
-
         {% endif %}
-
     </section>
 
-
-    <!-- =====================================================
-         CUSTOMER ORDERS
-    ====================================================== -->
-
-    <section class="orders-section">
-
-        <div class="section-header">
-
+    <!-- Customer orders -->
+    <section class="sd-section">
+        <div class="sd-section-header">
             <div>
-                <h2>🛍️ Customer Orders</h2>
-                <p>Manage orders containing your products.</p>
+                <h2 class="sd-section-heading">Customer orders</h2>
+                <p class="sd-section-subtitle">Review items from your catalogue and update order status when permitted.</p>
             </div>
-
+            <span class="sd-section-meta">{{ orders|length }} order(s)</span>
         </div>
 
-
         {% if orders %}
-
-            <div class="orders-list">
-
+            <div class="sd-orders-list">
                 {% for order in orders %}
-
-                    <div class="order-card">
-
-                        <!-- =====================================
-                             ORDER HEADER
-                        ====================================== -->
-
-                        <div class="order-header">
-
+                    <article class="sd-order-card">
+                        <div class="sd-order-header">
                             <div>
-
-                                <h3>Order #{{ order.id }}</h3>
-
-                                <p>
-                                    {{ order.created_at|date:"d M Y, h:i A" }}
-                                </p>
-
+                                <h3 class="sd-order-number">Order #{{ order.id }}</h3>
+                                <p class="sd-order-date">Placed {{ order.created_at|date:"d M Y, h:i A" }}</p>
                             </div>
-
-                            <span class="status-badge status-{{ order.status|lower }}">
-                                {{ order.get_status_display }}
-                            </span>
-
+                            <span class="sd-status sd-status-{{ order.status|lower }}">{{ order.get_status_display }}</span>
                         </div>
-
-
-                        <!-- =====================================
-                             PAYMENT
-                        ====================================== -->
 
                         {% if order.payment %}
-
-                            <div class="payment-summary">
-
-                                <span>
-                                    Payment Status
-                                </span>
-
-                                <strong class="payment-{{ order.payment.status|lower }}">
-                                    {{ order.payment.get_status_display }}
-                                </strong>
-
+                            <div class="sd-payment-row">
+                                <span>Payment status</span>
+                                <strong class="sd-payment-{{ order.payment.status|lower }}">{{ order.payment.get_status_display }}</strong>
                             </div>
-
                         {% endif %}
 
-
-                        <!-- =====================================
-                             ORDERED PRODUCTS
-                        ====================================== -->
-
-                        <div class="ordered-products">
-
-                            <h4>Your Products in This Order</h4>
-
+                        <div class="sd-order-body">
+                            <h4 class="sd-orders-product-heading">Your products in this order</h4>
                             {% for item in order.items.all %}
-
-                                {% if item.product.seller_id == request.user.id %}
-
-                                    <div class="ordered-product">
-
-                                        <!-- PRODUCT IMAGE -->
-
-                                        <div class="ordered-product-image">
-
+                                {% if item.product and item.product.seller_id == request.user.id %}
+                                    <div class="sd-ordered-product">
+                                        <div class="sd-order-product-image">
                                             {% with image=item.product.images.all.0 %}
-
                                                 {% if image %}
-
-                                                    <img
-                                                        src="{{ image.image.url }}"
-                                                        alt="{{ item.product.name }}"
-                                                    >
-
+                                                    <img src="{{ image.image.url }}" alt="{{ item.product.name }}" loading="lazy">
                                                 {% else %}
-
-                                                    <span>📦</span>
-
+                                                    <span aria-label="No product image">📦</span>
                                                 {% endif %}
-
                                             {% endwith %}
-
                                         </div>
-
-
-                                        <!-- PRODUCT DETAILS -->
-
-                                        <div class="ordered-product-info">
-
-                                            <h5>
-                                                {{ item.product.name }}
-                                            </h5>
-
-                                            <p>
-                                                Quantity:
-                                                <strong>
-                                                    {{ item.quantity }}
-                                                </strong>
-                                            </p>
-
-                                            <p>
-                                                Unit Price:
-                                                <strong>
-                                                    ₹{{ item.price }}
-                                                </strong>
-                                            </p>
-
+                                        <div class="sd-ordered-product-info">
+                                            <h5>{{ item.product.name }}</h5>
+                                            <p>Quantity: <strong>{{ item.quantity }}</strong></p>
+                                            <p>Unit price: <strong>₹{{ item.price|floatformat:2 }}</strong></p>
                                         </div>
-
-
-                                        <!-- SUBTOTAL -->
-
-                                        <div class="item-subtotal">
-                                            ₹{{ item.subtotal }}
-                                        </div>
-
+                                        <div class="sd-item-subtotal">₹{{ item.subtotal|floatformat:2 }}</div>
                                     </div>
-
                                 {% endif %}
-
                             {% endfor %}
-
-                        </div>
-
-
-                        <!-- =====================================
-                             ORDER TOTAL
-                        ====================================== -->
-
-                        <div class="order-total">
-
-                            <span>
-                                Customer Order Total
-                            </span>
-
-                            <strong>
-                                ₹{{ order.total_amount }}
-                            </strong>
-
-                        </div>
-
-
-                        <!-- =====================================
-                             STATUS MANAGEMENT
-                        ====================================== -->
-
-                        <div class="status-management">
-
-                            <div class="status-description">
-
-                                <h4>
-                                    Update Order Status
-                                </h4>
-
-                                <p>
-                                    Move the order to the next delivery stage.
-                                </p>
-
+                            <div class="sd-order-total">
+                                <span>Full customer order total</span>
+                                <strong>₹{{ order.total_amount|floatformat:2 }}</strong>
                             </div>
+                        </div>
 
-
+                        <div class="sd-status-management">
+                            <div class="sd-status-description">
+                                <h4>Order fulfilment</h4>
+                                <p>Move eligible orders through their next delivery stage.</p>
+                            </div>
                             {% if order.can_update_status %}
-
-
                                 {% if order.status == 'CONFIRMED' %}
-
-                                    <form method="POST" class="status-form">
-
+                                    <form method="POST" class="sd-status-form">
                                         {% csrf_token %}
-
-                                        <input
-                                            type="hidden"
-                                            name="order_id"
-                                            value="{{ order.id }}"
-                                        >
-
-                                        <input
-                                            type="hidden"
-                                            name="status"
-                                            value="PROCESSING"
-                                        >
-
-                                        <button
-                                            type="submit"
-                                            class="status-button"
-                                        >
-                                            Start Processing
-                                        </button>
-
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        <input type="hidden" name="status" value="PROCESSING">
+                                        <button type="submit" class="sd-status-button">Start Processing →</button>
                                     </form>
-
-
                                 {% elif order.status == 'PROCESSING' %}
-
-                                    <form method="POST" class="status-form">
-
+                                    <form method="POST" class="sd-status-form">
                                         {% csrf_token %}
-
-                                        <input
-                                            type="hidden"
-                                            name="order_id"
-                                            value="{{ order.id }}"
-                                        >
-
-                                        <input
-                                            type="hidden"
-                                            name="status"
-                                            value="SHIPPED"
-                                        >
-
-                                        <button
-                                            type="submit"
-                                            class="status-button"
-                                        >
-                                            Mark as Shipped
-                                        </button>
-
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        <input type="hidden" name="status" value="SHIPPED">
+                                        <button type="submit" class="sd-status-button">Mark as Shipped →</button>
                                     </form>
-
-
                                 {% elif order.status == 'SHIPPED' %}
-
-                                    <form method="POST" class="status-form">
-
+                                    <form method="POST" class="sd-status-form">
                                         {% csrf_token %}
-
-                                        <input
-                                            type="hidden"
-                                            name="order_id"
-                                            value="{{ order.id }}"
-                                        >
-
-                                        <input
-                                            type="hidden"
-                                            name="status"
-                                            value="DELIVERED"
-                                        >
-
-                                        <button
-                                            type="submit"
-                                            class="status-button"
-                                        >
-                                            Mark as Delivered
-                                        </button>
-
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        <input type="hidden" name="status" value="DELIVERED">
+                                        <button type="submit" class="sd-status-button">Mark as Delivered ✓</button>
                                     </form>
-
-
                                 {% elif order.status == 'DELIVERED' %}
-
-                                    <span class="completed-label">
-                                        ✓ Order Delivered
-                                    </span>
-
-
+                                    <span class="sd-completed-label">✓ Order Delivered</span>
                                 {% elif order.status == 'PENDING' %}
-
-                                    <span class="waiting-label">
-                                        Waiting for payment confirmation
-                                    </span>
-
-
+                                    <span class="sd-waiting-label">Waiting for payment confirmation</span>
                                 {% elif order.status == 'CANCELLED' %}
-
-                                    <span class="cancelled-label">
-                                        Order Cancelled
-                                    </span>
-
+                                    <span class="sd-cancelled-label">Order Cancelled</span>
                                 {% endif %}
-
-
                             {% else %}
-
-                                <div class="mixed-order-warning">
-
-                                    ⚠ This order contains products from
-                                    another seller. The overall order
-                                    status cannot be changed here.
-
-                                </div>
-
+                                <div class="sd-mixed-warning">⚠ This order contains products from another seller. The overall order status cannot be changed here.</div>
                             {% endif %}
-
                         </div>
 
-
-                        <!-- =====================================
-                             VIEW ORDER
-                        ====================================== -->
-
-                        <div class="order-footer">
-
-                            <a
-                                href="{% url 'order_detail' order.id %}"
-                                class="view-order-button"
-                            >
-                                View Full Order →
-                            </a>
-
+                        <div class="sd-order-footer">
+                            <a href="{% url 'order_detail' order.id %}" class="sd-view-order">View Full Order <span aria-hidden="true">→</span></a>
                         </div>
-
-                    </div>
-
+                    </article>
                 {% endfor %}
-
             </div>
-
-
         {% else %}
-
-            <!-- EMPTY ORDERS -->
-
-            <div class="empty-orders">
-
-                <div class="empty-icon">
-                    🛍️
-                </div>
-
-                <h3>No Orders Yet</h3>
-
-                <p>
-                    Orders containing your products will appear here.
-                </p>
-
+            <div class="sd-empty">
+                <div class="sd-empty-icon" aria-hidden="true">🛍️</div>
+                <h3>No customer orders yet</h3>
+                <p>Orders that contain your products will appear here. Keep product availability and stock details up to date while you wait.</p>
             </div>
-
         {% endif %}
-
     </section>
 
+    <div class="sd-dashboard-bottom">
+        <strong>Seller tip:</strong> Keep your stock quantities accurate and advance each eligible order only after the corresponding fulfilment step has been completed.
+    </div>
 </div>
-
-
-<!-- =========================================================
-     STYLES
-========================================================== -->
-
-<style>
-
-    /* =====================================================
-       MAIN DASHBOARD
-    ===================================================== */
-
-    .seller-dashboard {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 25px 20px 60px;
-    }
-
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-        margin-bottom: 35px;
-    }
-
-    .dashboard-header h1 {
-        margin: 0 0 8px;
-        font-size: 32px;
-    }
-
-    .dashboard-header p,
-    .section-header p {
-        margin: 0;
-        color: #777;
-    }
-
-    .seller-badge {
-        padding: 10px 16px;
-        border-radius: 20px;
-        background: #e9f2ff;
-        color: #0056b3;
-        font-weight: bold;
-        white-space: nowrap;
-    }
-
-
-    /* =====================================================
-       SECTION HEADER
-    ===================================================== */
-
-    .inventory-section,
-    .orders-section {
-        margin-bottom: 40px;
-    }
-
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-
-    .section-header h2 {
-        margin: 0 0 7px;
-        font-size: 23px;
-    }
-
-    .inventory-header-actions {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .product-count {
-        background: #e9f2ff;
-        color: #0056b3;
-        padding: 8px 12px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: bold;
-        white-space: nowrap;
-    }
-
-
-    /* =====================================================
-       ADD PRODUCT BUTTON
-    ===================================================== */
-
-    .add-product-button {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        gap: 7px;
-        padding: 11px 16px;
-        background: #198754;
-        color: white;
-        border: none;
-        border-radius: 7px;
-        font-size: 14px;
-        font-weight: bold;
-        text-decoration: none;
-        cursor: pointer;
-        white-space: nowrap;
-        transition: background 0.2s ease;
-    }
-
-    .add-product-button:hover {
-        background: #146c43;
-    }
-
-    .empty-add-button {
-        margin-top: 22px;
-    }
-
-
-    /* =====================================================
-       INVENTORY
-    ===================================================== */
-
-    .inventory-list {
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-    }
-
-    .inventory-card {
-        background: white;
-        border-radius: 12px;
-        padding: 22px;
-        display: grid;
-        grid-template-columns: 115px minmax(180px, 1fr) 210px;
-        align-items: center;
-        gap: 22px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
-    }
-
-    .inventory-image {
-        width: 115px;
-        height: 115px;
-        border-radius: 10px;
-        overflow: hidden;
-        background: #f5f5f5;
-    }
-
-    .inventory-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-
-    .no-image {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 35px;
-    }
-
-    .inventory-info {
-        min-width: 0;
-    }
-
-    .inventory-info h3 {
-        margin: 0 0 10px;
-        font-size: 18px;
-        overflow-wrap: anywhere;
-    }
-
-    .inventory-info > p {
-        margin: 5px 0;
-        font-size: 13px;
-        color: #666;
-    }
-
-    .inventory-price {
-        margin: 10px 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .inventory-price strong {
-        color: #198754;
-        font-size: 18px;
-    }
-
-    .inventory-price del {
-        color: #888;
-        font-size: 14px;
-    }
-
-
-    /* =====================================================
-       PRODUCT STATUS
-    ===================================================== */
-
-    .product-status {
-        display: inline-block;
-        padding: 5px 9px;
-        border-radius: 5px;
-        margin: 4px 5px 4px 0;
-        font-size: 12px;
-        font-weight: bold;
-    }
-
-    .product-status.active {
-        background: #d1e7dd;
-        color: #0f5132;
-    }
-
-    .product-status.inactive {
-        background: #f8d7da;
-        color: #842029;
-    }
-
-    .stock-status {
-        margin-top: 9px !important;
-        font-weight: bold;
-        font-size: 14px !important;
-    }
-
-    .stock-status.in-stock {
-        color: #198754;
-    }
-
-    .stock-status.low-stock {
-        color: #b77900;
-    }
-
-    .stock-status.out-of-stock {
-        color: #dc3545;
-    }
-
-
-    /* =====================================================
-       EDIT AND ACTIVATE / DEACTIVATE BUTTONS
-    ===================================================== */
-
-    .product-actions {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 9px;
-        margin-top: 15px;
-    }
-
-    .product-actions form {
-        margin: 0;
-    }
-
-    .edit-product-button,
-    .activate-product-button,
-    .deactivate-product-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 9px 11px;
-        border: none;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: bold;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .edit-product-button {
-        background: #e9f2ff;
-        color: #0056b3;
-    }
-
-    .edit-product-button:hover {
-        background: #d5e6ff;
-    }
-
-    .activate-product-button {
-        background: #d1e7dd;
-        color: #0f5132;
-    }
-
-    .activate-product-button:hover {
-        background: #badbcc;
-    }
-
-    .deactivate-product-button {
-        background: #f8d7da;
-        color: #842029;
-    }
-
-    .deactivate-product-button:hover {
-        background: #f1aeb5;
-    }
-
-
-    /* =====================================================
-       STOCK UPDATE FORM
-    ===================================================== */
-
-    .stock-update {
-        padding: 16px;
-        border-radius: 9px;
-        background: #f8f9fa;
-    }
-
-    .stock-update h4 {
-        margin: 0 0 12px;
-        font-size: 15px;
-    }
-
-    .stock-form label {
-        display: block;
-        margin-bottom: 7px;
-        font-size: 13px;
-        font-weight: bold;
-        color: #555;
-    }
-
-    .stock-form input[type="number"] {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        margin-bottom: 10px;
-        font-size: 15px;
-    }
-
-    .update-stock-button {
-        width: 100%;
-        padding: 11px 12px;
-        background: #198754;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .update-stock-button:hover {
-        background: #146c43;
-    }
-
-    .view-product-button {
-        display: block;
-        margin-top: 10px;
-        padding: 10px;
-        background: #e9f2ff;
-        color: #0056b3;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: bold;
-        text-align: center;
-        text-decoration: none;
-    }
-
-    .view-product-button:hover {
-        background: #d5e6ff;
-    }
-
-    .inactive-note {
-        display: block;
-        margin-top: 10px;
-        padding: 10px;
-        background: #f8d7da;
-        color: #842029;
-        border-radius: 6px;
-        font-size: 12px;
-        text-align: center;
-    }
-
-
-    /* =====================================================
-       ORDER LIST
-    ===================================================== */
-
-    .orders-list {
-        display: flex;
-        flex-direction: column;
-        gap: 22px;
-    }
-
-    .order-card {
-        background: white;
-        border-radius: 14px;
-        padding: 24px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-    }
-
-    .order-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 15px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #eee;
-    }
-
-    .order-header h3 {
-        margin: 0 0 5px;
-        font-size: 21px;
-    }
-
-    .order-header p {
-        margin: 0;
-        color: #777;
-        font-size: 13px;
-    }
-
-
-    /* =====================================================
-       ORDER STATUS BADGES
-    ===================================================== */
-
-    .status-badge {
-        display: inline-block;
-        padding: 7px 13px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: bold;
-        white-space: nowrap;
-    }
-
-    .status-pending {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .status-confirmed,
-    .status-delivered {
-        background: #d1e7dd;
-        color: #0f5132;
-    }
-
-    .status-processing {
-        background: #cff4fc;
-        color: #055160;
-    }
-
-    .status-shipped {
-        background: #cfe2ff;
-        color: #084298;
-    }
-
-    .status-cancelled {
-        background: #f8d7da;
-        color: #842029;
-    }
-
-
-    /* =====================================================
-       PAYMENT
-    ===================================================== */
-
-    .payment-summary {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 13px 0;
-        color: #666;
-        border-bottom: 1px solid #eee;
-    }
-
-    .payment-paid {
-        color: #198754;
-    }
-
-    .payment-pending {
-        color: #856404;
-    }
-
-    .payment-failed {
-        color: #dc3545;
-    }
-
-    .payment-refunded {
-        color: #6f42c1;
-    }
-
-
-    /* =====================================================
-       ORDERED PRODUCTS
-    ===================================================== */
-
-    .ordered-products {
-        padding: 20px 0 5px;
-    }
-
-    .ordered-products > h4 {
-        margin: 0 0 15px;
-        font-size: 17px;
-    }
-
-    .ordered-product {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 14px 0;
-        border-bottom: 1px solid #eee;
-    }
-
-    .ordered-product:last-child {
-        border-bottom: none;
-    }
-
-    .ordered-product-image {
-        width: 65px;
-        height: 65px;
-        flex-shrink: 0;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #f3f3f3;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 27px;
-    }
-
-    .ordered-product-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-
-    .ordered-product-info {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .ordered-product-info h5 {
-        margin: 0 0 6px;
-        font-size: 15px;
-    }
-
-    .ordered-product-info p {
-        margin: 3px 0;
-        color: #666;
-        font-size: 13px;
-    }
-
-    .item-subtotal {
-        font-weight: bold;
-        white-space: nowrap;
-    }
-
-    .order-total {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 0;
-        border-top: 1px solid #eee;
-        font-size: 15px;
-    }
-
-    .order-total strong {
-        font-size: 20px;
-    }
-
-
-    /* =====================================================
-       ORDER STATUS MANAGEMENT
-    ===================================================== */
-
-    .status-management {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-        margin-top: 10px;
-        padding: 18px;
-        background: #f8f9fa;
-        border-radius: 10px;
-    }
-
-    .status-description h4 {
-        margin: 0 0 5px;
-        font-size: 16px;
-    }
-
-    .status-description p {
-        margin: 0;
-        color: #777;
-        font-size: 13px;
-    }
-
-    .status-form {
-        margin: 0;
-    }
-
-    .status-button {
-        border: none;
-        padding: 11px 18px;
-        border-radius: 8px;
-        background: #007bff;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-
-    .status-button:hover {
-        background: #0056d6;
-    }
-
-    .completed-label,
-    .cancelled-label {
-        padding: 10px 15px;
-        border-radius: 8px;
-        font-weight: bold;
-        white-space: nowrap;
-    }
-
-    .completed-label {
-        background: #d1e7dd;
-        color: #0f5132;
-    }
-
-    .cancelled-label {
-        background: #f8d7da;
-        color: #842029;
-    }
-
-    .waiting-label {
-        color: #856404;
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .mixed-order-warning {
-        max-width: 500px;
-        padding: 10px 13px;
-        border-radius: 8px;
-        background: #fff3cd;
-        color: #856404;
-        font-size: 13px;
-    }
-
-    .order-footer {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 18px;
-    }
-
-    .view-order-button {
-        display: inline-block;
-        padding: 10px 17px;
-        border-radius: 8px;
-        background: #f1f3f5;
-        color: #333;
-        text-decoration: none;
-        font-weight: bold;
-    }
-
-    .view-order-button:hover {
-        background: #e2e6ea;
-    }
-
-
-    /* =====================================================
-       EMPTY STATES
-    ===================================================== */
-
-    .empty-inventory,
-    .empty-orders {
-        text-align: center;
-        padding: 55px 20px;
-        background: white;
-        border-radius: 14px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .empty-icon {
-        font-size: 48px;
-        margin-bottom: 12px;
-    }
-
-    .empty-inventory h3,
-    .empty-orders h3 {
-        margin: 10px 0;
-    }
-
-    .empty-inventory p,
-    .empty-orders p {
-        color: #777;
-        margin: 0;
-    }
-
-
-    /* =====================================================
-       RESPONSIVE LAYOUT
-    ===================================================== */
-
-    @media (max-width: 1000px) {
-
-        .inventory-card {
-            grid-template-columns: 100px minmax(0, 1fr);
-        }
-
-        .inventory-image {
-            width: 100px;
-            height: 100px;
-        }
-
-        .stock-update {
-            grid-column: 1 / -1;
-        }
-
-    }
-
-    @media (max-width: 700px) {
-
-        .seller-dashboard {
-            padding: 20px 10px 40px;
-        }
-
-        .dashboard-header {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .dashboard-header h1 {
-            font-size: 27px;
-        }
-
-        .section-header {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .inventory-header-actions {
-            justify-content: flex-start;
-            width: 100%;
-        }
-
-        .inventory-card {
-            padding: 15px;
-            gap: 13px;
-        }
-
-        .order-card {
-            padding: 16px;
-        }
-
-        .order-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .status-management {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .status-form,
-        .status-button {
-            width: 100%;
-        }
-
-        .ordered-product {
-            flex-wrap: wrap;
-        }
-
-        .item-subtotal {
-            margin-left: 80px;
-        }
-
-        .product-actions {
-            align-items: stretch;
-        }
-
-        .product-actions form {
-            display: flex;
-        }
-
-        .edit-product-button,
-        .activate-product-button,
-        .deactivate-product-button {
-            min-height: 38px;
-        }
-
-    }
-
-</style>
-
 {% endblock %}

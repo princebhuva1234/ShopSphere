@@ -1,436 +1,771 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Login - ShopSphere
-{% endblock %}
+{% block title %}Login - ShopSphere{% endblock %}
 
 {% block content %}
-
-<div class="login-container">
-
-    <!-- LOGIN CARD -->
-
-    <div class="login-card">
-
-        <!-- HEADER -->
-
-        <div class="login-header">
-
-            <div class="login-icon">
-                🛍️
-            </div>
-
-            <h1>Welcome Back!</h1>
-
-            <p>Login to your ShopSphere account.</p>
-
-        </div>
-
-
-        <!-- ERROR MESSAGE -->
-
-        {% if error %}
-
-            <div class="login-error">
-                {{ error }}
-            </div>
-
-        {% endif %}
-
-
-        <!-- LOGIN FORM -->
-
-        <form method="POST" class="login-form">
-
-            {% csrf_token %}
-
-
-            <!-- USERNAME -->
-
-            <div class="form-group">
-
-                <label for="username">
-                    Username
-                </label>
-
-                <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    placeholder="Enter your username"
-                    autocomplete="username"
-                    required
-                    autofocus
-                >
-
-            </div>
-
-
-            <!-- PASSWORD -->
-
-            <div class="form-group">
-
-                <label for="password">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    autocomplete="current-password"
-                    required
-                >
-
-            </div>
-
-
-            <!-- LOGIN BUTTON -->
-
-            <button
-                type="submit"
-                class="login-button"
-            >
-                Login
-            </button>
-
-
-            <!-- FORGOT PASSWORD BUTTON -->
-
-            <a
-                href="{% url 'password_reset' %}"
-                class="forgot-password-button"
-            >
-                🔒 Forgot Password?
-            </a>
-
-
-        </form>
-
-
-        <!-- REGISTER LINK -->
-
-        <div class="register-section">
-
-            <p>
-                Don't have an account?
-            </p>
-
-            <a href="{% url 'register' %}">
-                Create an Account
-            </a>
-
-        </div>
-
-
-        <!-- BACK TO SHOP -->
-
-        <a
-            href="{% url 'product_list' %}"
-            class="back-to-shop"
-        >
-            ← Back to Shopping
-        </a>
-
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     CSS
-====================================================== -->
-
 <style>
-
-    /* MAIN CONTAINER */
-
-    .login-container {
-        max-width: 460px;
-        margin: 35px auto 55px;
-        padding: 0 10px;
+    .ss-login-page {
+        --ss-login-primary: #4f46e5;
+        --ss-login-primary-dark: #3730a3;
+        --ss-login-ink: #172033;
+        --ss-login-muted: #68738a;
+        --ss-login-line: #e3e8f2;
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        padding: clamp(28px, 5vw, 64px) 20px;
+        background:
+            radial-gradient(ellipse at 8% 8%, rgba(99, 102, 241, .10), transparent 33%),
+            radial-gradient(ellipse at 92% 85%, rgba(20, 184, 166, .10), transparent 31%),
+            #f7f8fc;
     }
 
-
-    /* LOGIN CARD */
-
-    .login-card {
-        background: #ffffff;
-        padding: 35px;
-        border-radius: 15px;
-
-        box-shadow:
-            0 6px 25px rgba(0, 0, 0, 0.08);
+    .ss-login-page,
+    .ss-login-page * {
+        box-sizing: border-box;
     }
 
-
-    /* LOGIN HEADER */
-
-    .login-header {
-        text-align: center;
-        margin-bottom: 28px;
+    .ss-login-shell {
+        width: min(100%, 1010px);
+        min-height: 590px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+        overflow: hidden;
+        border: 1px solid rgba(226, 232, 240, .85);
+        border-radius: 28px;
+        background: #fff;
+        box-shadow: 0 28px 80px rgba(31, 41, 80, .13), 0 4px 14px rgba(31, 41, 80, .04);
+        animation: ssLoginEnter .55s ease both;
     }
 
+    .ss-login-visual {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100%;
+        overflow: hidden;
+        padding: 38px;
+        color: #fff;
+        background: linear-gradient(145deg, #312e81 0%, #4f46e5 48%, #6366f1 100%);
+    }
 
-    .login-icon {
-        width: 75px;
-        height: 75px;
+    .ss-login-visual::before,
+    .ss-login-visual::after {
+        position: absolute;
+        z-index: 0;
+        content: "";
+        border: 1px solid rgba(255, 255, 255, .18);
+        border-radius: 50%;
+        pointer-events: none;
+    }
 
+    .ss-login-visual::before {
+        width: 360px;
+        height: 360px;
+        top: -105px;
+        right: -160px;
+        box-shadow: 0 0 0 32px rgba(255, 255, 255, .035), 0 0 0 68px rgba(255, 255, 255, .025);
+    }
+
+    .ss-login-visual::after {
+        width: 300px;
+        height: 300px;
+        bottom: -205px;
+        left: -105px;
+        box-shadow: 0 0 0 32px rgba(255, 255, 255, .035), 0 0 0 66px rgba(255, 255, 255, .025);
+    }
+
+    .ss-login-brand,
+    .ss-login-visual-copy,
+    .ss-login-visual-foot {
+        position: relative;
+        z-index: 1;
+    }
+
+    .ss-login-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        width: fit-content;
+        color: #fff;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -.5px;
+        text-decoration: none;
+    }
+
+    .ss-login-brand-mark {
+        width: 43px;
+        height: 43px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, .35);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, .15);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16);
+        backdrop-filter: blur(8px);
+    }
+
+    .ss-login-brand-mark svg {
+        width: 23px;
+        height: 23px;
+    }
+
+    .ss-login-visual-copy {
+        margin: 64px 0;
+    }
+
+    .ss-login-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        padding: 8px 12px;
+        border: 1px solid rgba(255, 255, 255, .22);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .10);
+        color: rgba(255, 255, 255, .94);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+    }
+
+    .ss-login-eyebrow-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #5eead4;
+        box-shadow: 0 0 0 4px rgba(94, 234, 212, .15);
+    }
+
+    .ss-login-visual-copy h2 {
+        max-width: 370px;
+        margin: 0 0 17px;
+        color: #fff;
+        font-size: clamp(32px, 4vw, 45px);
+        font-weight: 800;
+        line-height: 1.12;
+        letter-spacing: -1.7px;
+    }
+
+    .ss-login-visual-copy h2 span {
+        color: #c7d2fe;
+    }
+
+    .ss-login-visual-copy p {
+        max-width: 350px;
+        margin: 0;
+        color: rgba(255, 255, 255, .78);
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .ss-login-perks {
+        display: grid;
+        gap: 15px;
+        margin: 29px 0 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .ss-login-perks li {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        color: rgba(255, 255, 255, .91);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .ss-login-check {
+        flex: 0 0 23px;
+        width: 23px;
+        height: 23px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, .23);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, .12);
+        color: #99f6e4;
+    }
+
+    .ss-login-check svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    .ss-login-visual-foot {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-top: 22px;
+        border-top: 1px solid rgba(255, 255, 255, .18);
+        color: rgba(255, 255, 255, .72);
+        font-size: 12px;
+    }
+
+    .ss-login-shield {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, .12);
+        color: #c7d2fe;
+    }
+
+    .ss-login-shield svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .ss-login-form-panel {
         display: flex;
         align-items: center;
         justify-content: center;
-
-        margin: 0 auto 18px;
-
-        background: #e9f2ff;
-        border-radius: 50%;
-
-        font-size: 36px;
+        padding: clamp(30px, 5vw, 62px);
     }
 
+    .ss-login-form-wrap {
+        width: 100%;
+        max-width: 390px;
+    }
 
-    .login-header h1 {
+    .ss-login-mobile-brand {
+        display: none;
+    }
+
+    .ss-login-heading {
+        margin-bottom: 31px;
+    }
+
+    .ss-login-heading .ss-login-kicker {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--ss-login-primary);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+    }
+
+    .ss-login-heading h1 {
         margin: 0 0 10px;
-
-        color: #111827;
-        font-size: 28px;
+        color: var(--ss-login-ink);
+        font-size: clamp(29px, 3vw, 35px);
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: -1.1px;
     }
 
-
-    .login-header p {
+    .ss-login-heading p {
         margin: 0;
-
-        color: #6b7280;
-        font-size: 15px;
-    }
-
-
-    /* ERROR MESSAGE */
-
-    .login-error {
-        padding: 13px 15px;
-        margin-bottom: 20px;
-
-        background: #f8d7da;
-        color: #842029;
-
-        border: 1px solid #f1aeb5;
-        border-radius: 7px;
-
+        color: var(--ss-login-muted);
         font-size: 14px;
+        line-height: 1.7;
     }
 
-
-    /* FORM */
-
-    .login-form {
-        width: 100%;
+    .ss-login-error {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 0 0 22px;
+        padding: 13px 14px;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        background: #fff1f2;
+        color: #b91c1c;
+        font-size: 13px;
+        line-height: 1.55;
     }
 
-
-    .form-group {
-        margin-bottom: 20px;
+    .ss-login-error svg {
+        flex: 0 0 18px;
+        width: 18px;
+        height: 18px;
+        margin-top: 1px;
     }
 
+    .ss-login-form {
+        display: grid;
+        gap: 20px;
+    }
 
-    .form-group label {
+    .ss-login-field label {
         display: block;
-
-        margin-bottom: 8px;
-
-        color: #374151;
-        font-size: 14px;
-        font-weight: bold;
+        margin: 0 0 9px;
+        color: #30394d;
+        font-size: 13px;
+        font-weight: 750;
     }
 
+    .ss-login-input-wrap {
+        position: relative;
+    }
 
-    .form-group input {
+    .ss-login-input-icon {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        width: 19px;
+        height: 19px;
+        color: #8b95aa;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .ss-login-input-wrap input {
         display: block;
-
         width: 100%;
-        max-width: 100%;
-
-        padding: 13px;
-
-        border: 1px solid #d1d5db;
-        border-radius: 7px;
-
-        background: #ffffff;
-
-        font-size: 15px;
-
-        box-sizing: border-box;
-
-        transition:
-            border-color 0.2s ease,
-            box-shadow 0.2s ease;
-    }
-
-
-    .form-group input:focus {
+        min-height: 52px;
+        padding: 14px 15px 14px 45px;
+        border: 1px solid #dce2ee;
+        border-radius: 12px;
         outline: none;
-
-        border-color: #007bff;
-
-        box-shadow:
-            0 0 0 3px rgba(0, 123, 255, 0.12);
+        background: #fbfcff;
+        color: var(--ss-login-ink);
+        font: inherit;
+        font-size: 14px;
+        transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
     }
 
+    .ss-login-input-wrap input::placeholder {
+        color: #a0a9ba;
+    }
 
-    /* LOGIN BUTTON */
+    .ss-login-input-wrap input:hover {
+        border-color: #c3cbe0;
+    }
 
-    .login-button {
-        display: block;
+    .ss-login-input-wrap input:focus {
+        border-color: var(--ss-login-primary);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, .11);
+    }
 
-        width: 100%;
+    .ss-login-input-wrap:focus-within .ss-login-input-icon {
+        color: var(--ss-login-primary);
+    }
 
-        margin-top: 25px;
-        padding: 14px;
+    .ss-login-password-input {
+        padding-right: 54px !important;
+    }
 
-        background: linear-gradient(
-            135deg,
-            #007bff,
-            #0056d6
-        );
-
-        color: #ffffff;
-
-        border: none;
-        border-radius: 8px;
-
-        font-size: 16px;
-        font-weight: bold;
-
+    .ss-login-toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 11px;
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 0;
+        border-radius: 9px;
+        background: transparent;
+        color: #7c879d;
         cursor: pointer;
-
-        transition:
-            background 0.2s ease,
-            transform 0.2s ease;
+        transform: translateY(-50%);
+        transition: background .2s ease, color .2s ease;
     }
 
-
-    .login-button:hover {
-        background: linear-gradient(
-            135deg,
-            #0056d6,
-            #0041a8
-        );
-
-        transform: translateY(-1px);
+    .ss-login-toggle-password:hover {
+        background: #eef0ff;
+        color: var(--ss-login-primary);
     }
 
+    .ss-login-toggle-password:focus-visible,
+    .ss-login-button:focus-visible,
+    .ss-login-links a:focus-visible {
+        outline: 3px solid rgba(79, 70, 229, .28);
+        outline-offset: 3px;
+    }
 
-    /* FORGOT PASSWORD BUTTON */
+    .ss-login-toggle-password svg {
+        width: 18px;
+        height: 18px;
+    }
 
-    .forgot-password-button {
-        display: block;
+    .ss-login-form-meta {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: -7px;
+    }
 
-        width: 100%;
-
-        margin-top: 12px;
-        padding: 13px;
-
-        box-sizing: border-box;
-
-        text-align: center;
-
-        background: #f1f5f9;
-        color: #0056b3;
-
-        border: 1px solid #dbe3ed;
-        border-radius: 8px;
-
+    .ss-login-form-meta a,
+    .ss-login-links a {
+        color: var(--ss-login-primary);
+        font-size: 12px;
+        font-weight: 750;
         text-decoration: none;
-
-        font-size: 15px;
-        font-weight: bold;
-
-        transition: all 0.2s ease;
+        transition: color .2s ease;
     }
 
-
-    .forgot-password-button:hover {
-        background: #e2ecf8;
-        border-color: #0056b3;
-    }
-
-
-    /* REGISTER SECTION */
-
-    .register-section {
-        text-align: center;
-
-        margin-top: 25px;
-        padding-top: 22px;
-
-        border-top: 1px solid #e5e7eb;
-    }
-
-
-    .register-section p {
-        margin: 0 0 8px;
-
-        color: #6b7280;
-        font-size: 14px;
-    }
-
-
-    .register-section a {
-        color: #0056b3;
-
-        font-weight: bold;
-        font-size: 15px;
-
-        text-decoration: none;
-    }
-
-
-    .register-section a:hover {
+    .ss-login-form-meta a:hover,
+    .ss-login-links a:hover {
+        color: var(--ss-login-primary-dark);
         text-decoration: underline;
+        text-underline-offset: 3px;
     }
 
-
-    /* BACK TO SHOP */
-
-    .back-to-shop {
-        display: block;
-
-        margin-top: 25px;
-
-        text-align: center;
-
-        color: #6b7280;
+    .ss-login-button {
+        position: relative;
+        width: 100%;
+        min-height: 53px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 2px;
+        padding: 14px 20px;
+        overflow: hidden;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(100deg, #4f46e5, #6366f1);
+        box-shadow: 0 10px 21px rgba(79, 70, 229, .23);
+        color: #fff;
+        font: inherit;
         font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    }
 
+    .ss-login-button::before {
+        position: absolute;
+        top: 0;
+        left: -110%;
+        width: 70%;
+        height: 100%;
+        content: "";
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .20), transparent);
+        transform: skewX(-20deg);
+        transition: left .55s ease;
+    }
+
+    .ss-login-button:hover {
+        box-shadow: 0 13px 25px rgba(79, 70, 229, .29);
+        filter: saturate(1.08);
+        transform: translateY(-2px);
+    }
+
+    .ss-login-button:hover::before {
+        left: 140%;
+    }
+
+    .ss-login-button svg {
+        width: 17px;
+        height: 17px;
+        transition: transform .2s ease;
+    }
+
+    .ss-login-button:hover svg {
+        transform: translateX(3px);
+    }
+
+    .ss-login-divider {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin: 25px 0 21px;
+        color: #9aa3b4;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .7px;
+        text-transform: uppercase;
+    }
+
+    .ss-login-divider::before,
+    .ss-login-divider::after {
+        height: 1px;
+        flex: 1;
+        content: "";
+        background: #e9edf4;
+    }
+
+    .ss-login-register {
+        margin: 0;
+        color: var(--ss-login-muted);
+        font-size: 13px;
+        text-align: center;
+    }
+
+    .ss-login-register a {
+        margin-left: 4px;
+        color: var(--ss-login-primary);
+        font-weight: 800;
         text-decoration: none;
     }
 
-
-    .back-to-shop:hover {
-        color: #0056b3;
+    .ss-login-register a:hover {
+        color: var(--ss-login-primary-dark);
+        text-decoration: underline;
+        text-underline-offset: 3px;
     }
 
-
-    /* MOBILE RESPONSIVENESS */
-
-    @media (max-width: 600px) {
-
-        .login-container {
-            margin: 20px auto 35px;
-        }
-
-        .login-card {
-            padding: 25px 20px;
-        }
-
-        .login-header h1 {
-            font-size: 25px;
-        }
-
+    .ss-login-back {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        width: fit-content;
+        margin: 28px auto 0;
+        color: #778197;
+        font-size: 12px;
+        font-weight: 650;
+        text-decoration: none;
+        transition: color .2s ease, gap .2s ease;
     }
 
+    .ss-login-back:hover {
+        gap: 10px;
+        color: var(--ss-login-primary);
+    }
+
+    .ss-login-back svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    @keyframes ssLoginEnter {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 780px) {
+        .ss-login-page {
+            padding: 28px 16px 38px;
+        }
+
+        .ss-login-shell {
+            width: min(100%, 520px);
+            min-height: auto;
+            grid-template-columns: 1fr;
+            border-radius: 23px;
+        }
+
+        .ss-login-visual {
+            display: none;
+        }
+
+        .ss-login-form-panel {
+            padding: clamp(27px, 7vw, 42px);
+        }
+
+        .ss-login-mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 33px;
+            color: #242b42;
+            font-size: 18px;
+            font-weight: 850;
+            letter-spacing: -.5px;
+            text-decoration: none;
+        }
+
+        .ss-login-mobile-brand-mark {
+            width: 39px;
+            height: 39px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            color: #fff;
+        }
+
+        .ss-login-mobile-brand-mark svg {
+            width: 21px;
+            height: 21px;
+        }
+
+        .ss-login-heading {
+            margin-bottom: 25px;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .ss-login-page {
+            padding: 18px 10px 28px;
+        }
+
+        .ss-login-shell {
+            border-radius: 19px;
+        }
+
+        .ss-login-form-panel {
+            padding: 25px 19px 29px;
+        }
+
+        .ss-login-heading h1 {
+            font-size: 29px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ss-login-page *,
+        .ss-login-page *::before,
+        .ss-login-page *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+            transition-duration: .01ms !important;
+        }
+    }
 </style>
 
+<section class="ss-login-page">
+    <div class="ss-login-shell">
+        <aside class="ss-login-visual" aria-label="ShopSphere welcome panel">
+            <a class="ss-login-brand" href="{% url 'product_list' %}" aria-label="ShopSphere home">
+                <span class="ss-login-brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 8h16l-1.3 12H5.3L4 8Z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/><path d="m9 13 2 2 4-4"/>
+                    </svg>
+                </span>
+                <span>ShopSphere</span>
+            </a>
+
+            <div class="ss-login-visual-copy">
+                <span class="ss-login-eyebrow"><span class="ss-login-eyebrow-dot"></span> Your shopping space</span>
+                <h2>Good to see you <span>again.</span></h2>
+                <p>Sign in to pick up where you left off. Your saved items, orders, and shopping experience are right where you need them.</p>
+
+                <ul class="ss-login-perks">
+                    <li>
+                        <span class="ss-login-check" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 10 4 4 8-8"/></svg></span>
+                        Keep track of your orders
+                    </li>
+                    <li>
+                        <span class="ss-login-check" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 10 4 4 8-8"/></svg></span>
+                        Save products to your wishlist
+                    </li>
+                    <li>
+                        <span class="ss-login-check" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 10 4 4 8-8"/></svg></span>
+                        Enjoy a smoother checkout
+                    </li>
+                </ul>
+            </div>
+
+            <div class="ss-login-visual-foot">
+                <span class="ss-login-shield" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 4.5-3 7.8-7 10-4-2.2-7-5.5-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                </span>
+                <span>Sign in securely to your ShopSphere account.</span>
+            </div>
+        </aside>
+
+        <div class="ss-login-form-panel">
+            <div class="ss-login-form-wrap">
+                <a class="ss-login-mobile-brand" href="{% url 'product_list' %}" aria-label="ShopSphere home">
+                    <span class="ss-login-mobile-brand-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.3 12H5.3L4 8Z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg>
+                    </span>
+                    <span>ShopSphere</span>
+                </a>
+
+                <header class="ss-login-heading">
+                    <span class="ss-login-kicker">Welcome back</span>
+                    <h1>Sign in to your account</h1>
+                    <p>Enter your details below to continue shopping.</p>
+                </header>
+
+                {% if error %}
+                    <div class="ss-login-error" role="alert" aria-live="polite">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                        <span>{{ error }}</span>
+                    </div>
+                {% endif %}
+
+                <form method="POST" class="ss-login-form">
+                    {% csrf_token %}
+
+                    <div class="ss-login-field">
+                        <label for="username">Username</label>
+                        <div class="ss-login-input-wrap">
+                            <svg class="ss-login-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                placeholder="Enter your username"
+                                autocomplete="username"
+                                value="{{ request.POST.username|default:'' }}"
+                                required
+                                autofocus
+                                autocapitalize="none"
+                                spellcheck="false"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="ss-login-field">
+                        <label for="password">Password</label>
+                        <div class="ss-login-input-wrap">
+                            <svg class="ss-login-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                            <input
+                                class="ss-login-password-input"
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                                aria-describedby="ss-login-password-hint"
+                            >
+                            <button class="ss-login-toggle-password" type="button" id="ss-login-toggle-password" aria-label="Show password" aria-pressed="false" title="Show password">
+                                <svg id="ss-login-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                        <span id="ss-login-password-hint" hidden>Use the password for your ShopSphere account.</span>
+                    </div>
+
+                    <div class="ss-login-form-meta">
+                        <a href="{% url 'password_reset' %}">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="ss-login-button">
+                        <span>Sign in</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </button>
+                </form>
+
+                <div class="ss-login-divider"><span>New to ShopSphere?</span></div>
+
+                <p class="ss-login-register">Don't have an account? <a href="{% url 'register' %}">Create an account</a></p>
+
+                <a href="{% url 'product_list' %}" class="ss-login-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h11"/></svg>
+                    Back to shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+(function () {
+    const toggleButton = document.getElementById('ss-login-toggle-password');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('ss-login-eye-icon');
+
+    if (!toggleButton || !passwordInput || !eyeIcon) return;
+
+    const eyeOpen = '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>';
+    const eyeClosed = '<path d="m3 3 18 18"/><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c6.4 0 10 7 10 7a16.6 16.6 0 0 1-4.1 4.8"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7c1 0 1.9-.2 2.8-.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>';
+
+    toggleButton.addEventListener('click', function () {
+        const showingPassword = passwordInput.type === 'password';
+        passwordInput.type = showingPassword ? 'text' : 'password';
+        toggleButton.setAttribute('aria-label', showingPassword ? 'Hide password' : 'Show password');
+        toggleButton.setAttribute('title', showingPassword ? 'Hide password' : 'Show password');
+        toggleButton.setAttribute('aria-pressed', showingPassword ? 'true' : 'false');
+        eyeIcon.innerHTML = showingPassword ? eyeClosed : eyeOpen;
+    });
+})();
+</script>
 {% endblock %}

@@ -7,130 +7,420 @@ Edit Review - ShopSphere
 {% block content %}
 
 <style>
-    .edit-review-page {
-        max-width: 700px;
-        margin: 40px auto;
-        padding: 20px;
-    }
-
-    .edit-review-container {
-        padding: 30px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .edit-review-container h1 {
-        margin-top: 0;
-        color: #222;
-    }
-
-    .edit-review-container label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-    }
-
-    .edit-review-container input,
-    .edit-review-container select,
-    .edit-review-container textarea {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 8px;
-        border: 1px solid #ddd;
-        border-radius: 7px;
+    .sr-edit-review,
+    .sr-edit-review * {
         box-sizing: border-box;
+    }
+
+    .sr-edit-review {
+        --sr-primary: #5145cd;
+        --sr-primary-dark: #4035b5;
+        --sr-ink: #172033;
+        --sr-muted: #68738a;
+        --sr-border: #e3e7f0;
+        --sr-surface: #ffffff;
+        --sr-soft: #f5f6ff;
+        width: min(100% - 32px, 760px);
+        margin: 42px auto 64px;
+        color: var(--sr-ink);
+        font-family: inherit;
+    }
+
+    .sr-edit-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 30px 32px;
+        border-radius: 22px 22px 0 0;
+        color: #fff;
+        background: linear-gradient(125deg, #312e81 0%, #5145cd 56%, #7773ee 100%);
+        isolation: isolate;
+    }
+
+    .sr-edit-hero::before,
+    .sr-edit-hero::after {
+        position: absolute;
+        z-index: -1;
+        content: "";
+        border: 1px solid rgba(255,255,255,.16);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .sr-edit-hero::before {
+        width: 230px;
+        height: 230px;
+        top: -130px;
+        right: -35px;
+    }
+
+    .sr-edit-hero::after {
+        width: 150px;
+        height: 150px;
+        top: -88px;
+        right: 20px;
+    }
+
+    .sr-edit-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 6px 11px;
+        color: rgba(255,255,255,.94);
+        background: rgba(255,255,255,.13);
+        border: 1px solid rgba(255,255,255,.2);
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
+
+    .sr-edit-hero h1 {
+        margin: 0 0 9px;
+        color: #fff;
+        font-size: clamp(26px, 4vw, 34px);
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: -.035em;
+    }
+
+    .sr-edit-hero p {
+        max-width: 530px;
+        margin: 0;
+        color: rgba(255,255,255,.83);
+        font-size: 14px;
+        line-height: 1.75;
+    }
+
+    .sr-edit-card {
+        padding: clamp(22px, 5vw, 36px);
+        background: var(--sr-surface);
+        border: 1px solid var(--sr-border);
+        border-top: 0;
+        border-radius: 0 0 22px 22px;
+        box-shadow: 0 18px 55px rgba(31, 41, 86, .09);
+        animation: sr-review-enter .45s ease both;
+    }
+
+    .sr-product-context {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 27px;
+        padding: 17px 18px;
+        background: var(--sr-soft);
+        border: 1px solid #e7e7ff;
+        border-radius: 15px;
+    }
+
+    .sr-product-context-icon {
+        display: grid;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        color: var(--sr-primary);
+        background: #e6e5ff;
+        border-radius: 13px;
+        font-size: 21px;
+    }
+
+    .sr-product-context-label {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--sr-muted);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .sr-product-context-name {
+        margin: 0;
+        color: var(--sr-ink);
+        font-size: 16px;
+        font-weight: 750;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    .sr-form-intro {
+        margin: 0 0 24px;
+        color: var(--sr-muted);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .sr-edit-form {
+        display: grid;
+        gap: 22px;
+    }
+
+    .sr-form-group {
+        min-width: 0;
+    }
+
+    .sr-form-group label {
+        display: block;
+        margin: 0 0 9px;
+        color: #29334a;
+        font-size: 13px;
+        font-weight: 750;
+    }
+
+    .sr-edit-form input:not([type="checkbox"]):not([type="radio"]),
+    .sr-edit-form select,
+    .sr-edit-form textarea {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-height: 48px;
+        padding: 12px 14px;
+        color: var(--sr-ink);
+        background: #fff;
+        border: 1px solid #dce1ed;
+        border-radius: 11px;
+        box-shadow: 0 1px 2px rgba(20, 30, 60, .025);
         font: inherit;
+        font-size: 14px;
+        line-height: 1.5;
+        transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
     }
 
-    .form-group {
-        margin-bottom: 20px;
+    .sr-edit-form textarea {
+        min-height: 150px;
+        resize: vertical;
     }
 
-    .field-error {
-        color: #d32f2f;
+    .sr-edit-form input:not([type="checkbox"]):not([type="radio"]):hover,
+    .sr-edit-form select:hover,
+    .sr-edit-form textarea:hover {
+        border-color: #b9b8f2;
+    }
+
+    .sr-edit-form input:focus-visible,
+    .sr-edit-form select:focus-visible,
+    .sr-edit-form textarea:focus-visible {
+        outline: none;
+        border-color: var(--sr-primary);
+        box-shadow: 0 0 0 4px rgba(81, 69, 205, .12);
+    }
+
+    .sr-help-text {
+        margin-top: 8px;
+        color: var(--sr-muted);
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .sr-help-text ul {
+        margin: 7px 0 0;
+        padding-left: 19px;
+    }
+
+    .sr-help-text li + li {
+        margin-top: 3px;
+    }
+
+    .sr-help-text a {
+        color: var(--sr-primary);
+    }
+
+    .sr-field-errors,
+    .sr-non-field-errors {
+        margin-top: 8px;
+        padding: 10px 12px;
+        color: #a32739;
+        background: #fff1f2;
+        border: 1px solid #fecdd3;
+        border-radius: 9px;
+        font-size: 12px;
+        line-height: 1.55;
+    }
+
+    .sr-non-field-errors {
+        margin: 0;
+        padding: 13px 15px;
         font-size: 13px;
     }
 
-    .save-button {
+    .sr-field-errors ul,
+    .sr-non-field-errors ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .sr-edit-actions {
+        display: grid;
+        gap: 11px;
+        margin-top: 3px;
+    }
+
+    .sr-save-button,
+    .sr-cancel-link {
+        display: inline-flex;
         width: 100%;
-        padding: 13px;
-        border: none;
-        border-radius: 7px;
-        background: #2874f0;
-        color: #fff;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-    }
-
-    .save-button:hover {
-        background: #1558c0;
-    }
-
-    .cancel-link {
-        display: block;
-        margin-top: 20px;
+        min-height: 49px;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 13px 18px;
+        border-radius: 11px;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 800;
         text-align: center;
-        color: #2874f0;
         text-decoration: none;
+        cursor: pointer;
+        transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .sr-save-button {
+        color: #fff;
+        background: linear-gradient(120deg, #5145cd, #6b63e9);
+        border: 1px solid transparent;
+        box-shadow: 0 7px 17px rgba(81, 69, 205, .2);
+    }
+
+    .sr-save-button:hover {
+        color: #fff;
+        background: linear-gradient(120deg, #4035b5, #5145cd);
+        box-shadow: 0 10px 23px rgba(81, 69, 205, .28);
+        transform: translateY(-1px);
+    }
+
+    .sr-cancel-link {
+        color: #454f67;
+        background: #fff;
+        border: 1px solid var(--sr-border);
+    }
+
+    .sr-cancel-link:hover {
+        color: var(--sr-primary);
+        background: #f8f8ff;
+        border-color: #c9c7fb;
+    }
+
+    .sr-edit-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 22px;
+        padding: 13px 15px;
+        color: #59647b;
+        background: #f8fafc;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        font-size: 12px;
+        line-height: 1.65;
+    }
+
+    .sr-edit-note span:first-child {
+        font-size: 16px;
+    }
+
+    @keyframes sr-review-enter {
+        from { opacity: 0; transform: translateY(9px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (min-width: 580px) {
+        .sr-edit-actions {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+    }
+
+    @media (max-width: 580px) {
+        .sr-edit-review {
+            width: min(100% - 22px, 760px);
+            margin: 22px auto 40px;
+        }
+
+        .sr-edit-hero {
+            padding: 24px 21px;
+            border-radius: 17px 17px 0 0;
+        }
+
+        .sr-edit-card {
+            padding: 21px 17px;
+            border-radius: 0 0 17px 17px;
+        }
+
+        .sr-product-context {
+            padding: 14px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sr-edit-card { animation: none; }
+        .sr-edit-form input,
+        .sr-edit-form select,
+        .sr-edit-form textarea,
+        .sr-save-button,
+        .sr-cancel-link { transition: none; }
     }
 </style>
 
-<div class="edit-review-page">
+<div class="sr-edit-review">
+    <header class="sr-edit-hero">
+        <div class="sr-edit-eyebrow"><span aria-hidden="true">✦</span> Your feedback matters</div>
+        <h1>Edit your review</h1>
+        <p>Update your rating or make changes to your feedback. Your updated review helps other shoppers make informed decisions.</p>
+    </header>
 
-    <div class="edit-review-container">
+    <section class="sr-edit-card" aria-label="Edit product review">
+        <div class="sr-product-context">
+            <div class="sr-product-context-icon" aria-hidden="true">✎</div>
+            <div>
+                <span class="sr-product-context-label">Reviewing product</span>
+                <p class="sr-product-context-name">{{ product.name }}</p>
+            </div>
+        </div>
 
-        <h1>✏️ Edit Your Review</h1>
+        <p class="sr-form-intro">Make your changes below, then save when you're happy with your review.</p>
 
-        <p>
-            Product: <strong>{{ product.name }}</strong>
-        </p>
-
-        <form method="POST">
+        <form method="POST" class="sr-edit-form">
             {% csrf_token %}
 
-            {% for field in form %}
-
-                <div class="form-group">
-
-                    <label for="{{ field.id_for_label }}">
-                        {{ field.label }}
-                    </label>
-
-                    {{ field }}
-
-                    {% for error in field.errors %}
-                        <div class="field-error">
-                            {{ error }}
-                        </div>
-                    {% endfor %}
-
-                </div>
-
-            {% endfor %}
-
             {% if form.non_field_errors %}
-                <div class="field-error">
+                <div class="sr-non-field-errors" role="alert">
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
 
-            <button type="submit" class="save-button">
-                Save Changes
-            </button>
+            {% for field in form %}
+                <div class="sr-form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
 
+                    {% if field.help_text %}
+                        <div class="sr-help-text">{{ field.help_text|safe }}</div>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="sr-field-errors" role="alert">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="sr-edit-actions">
+                <button type="submit" class="sr-save-button">
+                    <span aria-hidden="true">✓</span> Save Changes
+                </button>
+                <a href="{% url 'product_detail' product.slug %}" class="sr-cancel-link">
+                    <span aria-hidden="true">←</span> Back to Product
+                </a>
+            </div>
         </form>
 
-        <a
-            href="{% url 'product_detail' product.slug %}"
-            class="cancel-link"
-        >
-            ← Back to Product
-        </a>
-
-    </div>
-
+        <div class="sr-edit-note">
+            <span aria-hidden="true">🔒</span>
+            <span>Please keep your review honest, useful, and respectful. Your changes will be submitted through ShopSphere's existing review process.</span>
+        </div>
+    </section>
 </div>
 
 {% endblock %}

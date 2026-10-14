@@ -1,704 +1,983 @@
 {% extends 'base.html' %}
 
-{% block title %}Checkout - ShopSphere{% endblock %}
+{% block title %}Secure Checkout | ShopSphere{% endblock %}
 
-{% block content %}
-
+{% block extra_css %}
 <style>
-    .checkout-page {
-        max-width: 1150px;
-        margin: 35px auto;
-        padding: 0 20px 40px;
-        color: #222;
+    /* =========================================================
+       SHOPSPHERE CHECKOUT — COMPONENT-SCOPED DESIGN
+    ========================================================= */
+    .ss-checkout {
+        --ck-primary: #4f46e5;
+        --ck-primary-dark: #4338ca;
+        --ck-primary-soft: #eef2ff;
+        --ck-ink: #172033;
+        --ck-muted: #64748b;
+        --ck-border: #e2e8f0;
+        --ck-surface: #ffffff;
+        --ck-soft: #f8fafc;
+        --ck-green: #15803d;
+        --ck-shadow: 0 12px 35px rgba(15, 23, 42, .055);
+        width: 100%;
+        max-width: 1160px;
+        margin: 0 auto;
+        color: var(--ck-ink);
+        animation: ssCheckoutEnter .5s ease both;
     }
 
-    .checkout-heading {
-        margin-bottom: 25px;
-        font-size: 30px;
-        font-weight: 700;
-    }
+    .ss-checkout * { box-sizing: border-box; }
+    .ss-checkout button,
+    .ss-checkout input { font: inherit; }
 
-    .checkout-layout {
-        display: grid;
-        grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
-        gap: 25px;
-        align-items: start;
-    }
-
-    .checkout-card {
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 22px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-    }
-
-    .checkout-card h2 {
-        margin: 0 0 20px;
-        font-size: 21px;
-    }
-
-    .address-option {
+    .ss-checkout-hero {
         display: flex;
-        gap: 12px;
-        padding: 16px;
-        margin-bottom: 12px;
-        border: 1px solid #ddd;
-        border-radius: 9px;
-        cursor: pointer;
-    }
-
-    .address-option:hover {
-        border-color: #2874f0;
-        background: #f8faff;
-    }
-
-    .address-option input {
-        margin-top: 5px;
-        accent-color: #2874f0;
-    }
-
-    .address-option p {
-        margin: 5px 0;
-        line-height: 1.5;
-        color: #555;
-    }
-
-    .address-option strong {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .empty-address {
-        padding: 18px;
-        border: 1px dashed #ccc;
-        border-radius: 8px;
-        text-align: center;
-    }
-
-    .checkout-link {
-        display: inline-block;
-        margin-top: 10px;
-        color: #2874f0;
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .coupon-form {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-    }
-
-    .coupon-input {
-        flex: 1;
-        min-width: 0;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 7px;
-        font-size: 14px;
-    }
-
-    .coupon-input:focus {
-        outline: none;
-        border-color: #2874f0;
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 12px 18px;
-        border: none;
-        border-radius: 7px;
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        text-align: center;
-        text-decoration: none;
-    }
-
-    .btn-primary {
-        background: #2874f0;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: #1558c0;
-    }
-
-    .btn-remove {
-        background: white;
-        color: #dc2626;
-        border: 1px solid #dc2626;
-    }
-
-    .applied-coupon {
-        display: flex;
+        align-items: flex-end;
         justify-content: space-between;
+        gap: 20px;
+        margin: 0 0 28px;
+    }
+
+    .ss-checkout-eyebrow {
+        display: inline-flex;
         align-items: center;
-        gap: 12px;
-        padding: 14px;
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 8px;
+        gap: 8px;
+        margin: 0 0 8px;
+        color: var(--ck-primary);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
     }
 
-    .applied-coupon strong {
-        color: #166534;
+    .ss-checkout-eyebrow::before {
+        content: "";
+        width: 20px;
+        height: 2px;
+        border-radius: 9px;
+        background: currentColor;
     }
 
-    .applied-coupon p {
-        margin: 5px 0 0;
-        color: #166534;
-        font-size: 13px;
+    .ss-checkout-title {
+        margin: 0;
+        color: var(--ck-ink);
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: clamp(28px, 3.4vw, 38px);
+        font-weight: 800;
+        letter-spacing: -.045em;
+        line-height: 1.2;
     }
 
-    .order-item {
-        display: flex;
-        justify-content: space-between;
-        gap: 15px;
-        padding: 14px 0;
-        border-bottom: 1px solid #eee;
+    .ss-checkout-subtitle {
+        max-width: 570px;
+        margin: 10px 0 0;
+        color: var(--ck-muted);
+        font-size: 14px;
+        line-height: 1.75;
     }
 
-    .order-item:last-child {
-        border-bottom: none;
-    }
-
-    .order-item-name {
-        font-weight: 600;
-        line-height: 1.5;
-    }
-
-    .order-item-meta {
-        margin-top: 5px;
-        color: #666;
-        font-size: 13px;
-    }
-
-    .order-item-price {
-        text-align: right;
+    .ss-secure-chip {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 13px;
+        border: 1px solid #dbeafe;
+        border-radius: 999px;
+        color: #1d4ed8;
+        background: #eff6ff;
+        font-size: 12px;
+        font-weight: 700;
         white-space: nowrap;
     }
 
-    .original-price {
-        color: #777;
-        text-decoration: line-through;
-        font-size: 12px;
+    .ss-secure-icon {
+        display: grid;
+        width: 25px;
+        height: 25px;
+        place-items: center;
+        border-radius: 50%;
+        color: #1d4ed8;
+        background: #dbeafe;
+        font-size: 13px;
     }
 
-    .summary-row {
+    .ss-checkout-steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin: 0 0 25px;
+    }
+
+    .ss-checkout-step {
         display: flex;
-        justify-content: space-between;
-        gap: 15px;
-        margin: 15px 0;
-        font-size: 15px;
-    }
-
-    .summary-row span:last-child {
-        text-align: right;
-    }
-
-    .discount-value {
-        color: #16803c !important;
-        font-weight: 600;
-    }
-
-    .summary-divider {
-        border: none;
-        border-top: 1px solid #e5e7eb;
-        margin: 20px 0;
-    }
-
-    .summary-total {
-        font-size: 20px;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        padding: 12px 14px;
+        border: 1px solid var(--ck-border);
+        border-radius: 13px;
+        background: rgba(255,255,255,.72);
+        color: var(--ck-muted);
+        font-size: 12px;
         font-weight: 700;
     }
 
-    .payment-option {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        padding: 16px;
-        border: 1px solid #2874f0;
+    .ss-step-number {
+        display: grid;
+        flex-shrink: 0;
+        width: 29px;
+        height: 29px;
+        place-items: center;
+        border: 1px solid #c7d2fe;
         border-radius: 9px;
-        background: #f7faff;
+        color: var(--ck-primary);
+        background: var(--ck-primary-soft);
+        font-size: 12px;
+        font-weight: 800;
     }
 
-    .payment-option input {
-        margin-top: 5px;
-        accent-color: #2874f0;
+    .ss-checkout-step.is-current {
+        border-color: #c7d2fe;
+        color: var(--ck-primary-dark);
+        background: linear-gradient(135deg, #fff, #f5f3ff);
+        box-shadow: 0 5px 18px rgba(79,70,229,.06);
     }
 
-    .payment-option strong {
-        display: block;
+    .ss-checkout-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(320px, .9fr);
+        align-items: start;
+        gap: 23px;
+    }
+
+    .ss-checkout-main,
+    .ss-checkout-aside { min-width: 0; }
+
+    .ss-checkout-card {
+        overflow: hidden;
+        margin-bottom: 18px;
+        border: 1px solid var(--ck-border);
+        border-radius: 17px;
+        background: var(--ck-surface);
+        box-shadow: var(--ck-shadow);
+        animation: ssCardEnter .45s ease both;
+    }
+
+    .ss-card-heading {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 21px 22px 17px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .ss-card-icon {
+        display: grid;
+        flex-shrink: 0;
+        width: 39px;
+        height: 39px;
+        place-items: center;
+        border-radius: 12px;
+        color: var(--ck-primary);
+        background: var(--ck-primary-soft);
+        font-size: 17px;
+    }
+
+    .ss-card-heading h2 {
+        margin: 0;
+        color: var(--ck-ink);
+        font-family: "Manrope", "DM Sans", sans-serif;
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: -.025em;
+        line-height: 1.45;
+    }
+
+    .ss-card-heading p {
+        margin: 4px 0 0;
+        color: var(--ck-muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .ss-card-body { padding: 19px 22px 22px; }
+
+    /* Delivery addresses */
+    .ss-address-list { display: grid; gap: 11px; }
+
+    .ss-address-option {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 15px;
+        border: 1px solid var(--ck-border);
+        border-radius: 13px;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    .ss-address-option:hover {
+        border-color: #c7d2fe;
+        background: #fcfcff;
+        transform: translateY(-1px);
+    }
+
+    .ss-address-option:has(input:checked) {
+        border-color: var(--ck-primary);
+        background: #f8f7ff;
+        box-shadow: 0 0 0 3px rgba(79,70,229,.08);
+    }
+
+    .ss-address-option input[type="radio"] {
+        flex-shrink: 0;
+        width: 17px;
+        height: 17px;
+        min-height: 0;
+        margin: 3px 0 0;
+        accent-color: var(--ck-primary);
+        cursor: pointer;
+    }
+
+    .ss-address-content { flex: 1; min-width: 0; }
+
+    .ss-address-topline {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
         margin-bottom: 5px;
     }
 
-    .payment-option p {
-        margin: 0;
-        color: #666;
-        font-size: 13px;
-        line-height: 1.5;
+    .ss-address-name {
+        color: var(--ck-ink);
+        font-size: 14px;
+        font-weight: 800;
     }
 
-    .place-order-btn {
-        display: block;
+    .ss-default-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 7px;
+        border: 1px solid #c7d2fe;
+        border-radius: 5px;
+        color: var(--ck-primary-dark);
+        background: #eef2ff;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+    }
+
+    .ss-address-line {
+        margin: 3px 0 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.65;
+        overflow-wrap: anywhere;
+    }
+
+    .ss-address-phone { color: #475569; font-weight: 600; }
+
+    .ss-empty-address {
+        padding: 25px 17px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 13px;
+        background: #f8fafc;
+        text-align: center;
+    }
+
+    .ss-empty-icon {
+        display: grid;
+        width: 47px;
+        height: 47px;
+        margin: 0 auto 11px;
+        place-items: center;
+        border-radius: 15px;
+        color: var(--ck-primary);
+        background: var(--ck-primary-soft);
+        font-size: 21px;
+    }
+
+    .ss-empty-address h3 { margin: 0 0 5px; font-size: 14px; }
+    .ss-empty-address p { margin: 0; color: var(--ck-muted); font-size: 12px; }
+
+    .ss-text-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        color: var(--ck-primary);
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .ss-text-link:hover { color: var(--ck-primary-dark); text-decoration: underline; }
+
+    /* Coupons */
+    .ss-coupon-intro {
+        margin: 0;
+        color: var(--ck-muted);
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .ss-coupon-form {
+        display: flex;
+        gap: 9px;
+        margin-top: 14px;
+    }
+
+    .ss-coupon-input {
+        flex: 1;
         width: 100%;
-        margin-top: 22px;
-        padding: 15px;
-        background: #fb641b;
-        color: white;
-        border: none;
-        border-radius: 8px;
+        min-width: 0;
+        min-height: 45px;
+        padding: 11px 13px;
+        color: var(--ck-ink);
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 13px;
+        text-transform: uppercase;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .ss-coupon-input::placeholder { color: #94a3b8; text-transform: none; }
+    .ss-coupon-input:focus { outline: none; border-color: var(--ck-primary); box-shadow: 0 0 0 3px rgba(79,70,229,.09); }
+
+    .ss-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 43px;
+        padding: 10px 16px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 800;
+        text-align: center;
+        text-decoration: none;
         cursor: pointer;
-        font-size: 16px;
+        transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .ss-btn:hover { transform: translateY(-1px); }
+    .ss-btn:active { transform: translateY(0) scale(.985); }
+
+    .ss-btn-primary {
+        color: #fff;
+        background: var(--ck-primary);
+        box-shadow: 0 4px 11px rgba(79,70,229,.15);
+    }
+
+    .ss-btn-primary:hover { color: #fff; background: var(--ck-primary-dark); box-shadow: 0 7px 16px rgba(79,70,229,.20); }
+
+    .ss-btn-remove {
+        color: #b91c1c;
+        background: #fff;
+        border-color: #fecaca;
+    }
+
+    .ss-btn-remove:hover { color: #991b1b; background: #fef2f2; border-color: #fca5a5; }
+
+    .ss-coupon-applied {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 13px;
+        padding: 15px;
+        border: 1px solid #bbf7d0;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #f0fdf4, #ffffff);
+    }
+
+    .ss-coupon-applied-left { display: flex; align-items: flex-start; gap: 11px; min-width: 0; }
+
+    .ss-coupon-check {
+        display: grid;
+        flex-shrink: 0;
+        width: 31px;
+        height: 31px;
+        place-items: center;
+        border-radius: 9px;
+        color: #15803d;
+        background: #dcfce7;
+        font-weight: 900;
+    }
+
+    .ss-coupon-code { display: block; color: #166534; font-size: 13px; font-weight: 900; overflow-wrap: anywhere; }
+    .ss-coupon-saving { margin: 4px 0 0; color: #15803d; font-size: 12px; line-height: 1.6; }
+
+    /* Payment method */
+    .ss-payment-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 15px;
+        border: 1px solid #c7d2fe;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #f8f7ff, #fff);
+    }
+
+    .ss-payment-option input[type="radio"] {
+        flex-shrink: 0;
+        width: 17px;
+        height: 17px;
+        min-height: 0;
+        margin: 4px 0 0;
+        accent-color: var(--ck-primary);
+    }
+
+    .ss-payment-brand {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 5px;
+    }
+
+    .ss-payment-name { color: var(--ck-ink); font-size: 13px; font-weight: 900; }
+
+    .ss-test-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 7px;
+        border-radius: 5px;
+        color: #92400e;
+        background: #fef3c7;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: .05em;
+        white-space: nowrap;
+        text-transform: uppercase;
+    }
+
+    .ss-payment-description { margin: 0; color: var(--ck-muted); font-size: 12px; line-height: 1.7; }
+
+    .ss-payment-methods {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+
+    .ss-payment-methods span {
+        display: inline-flex;
+        padding: 4px 7px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        color: #475569;
+        background: rgba(255,255,255,.8);
+        font-size: 10px;
         font-weight: 700;
     }
 
-    .place-order-btn:hover {
-        background: #e85b16;
+    /* Order summary */
+    .ss-summary-card { position: sticky; top: 102px; }
+
+    .ss-order-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
+        margin-left: auto;
+        padding: 0 7px;
+        border-radius: 8px;
+        color: var(--ck-primary);
+        background: var(--ck-primary-soft);
+        font-size: 11px;
+        font-weight: 900;
     }
 
-    .place-order-btn:disabled {
-        opacity: 0.65;
-        cursor: not-allowed;
+    .ss-order-items { padding: 6px 22px 10px; }
+
+    .ss-order-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f5f9;
     }
 
-    .secure-note {
-        margin-top: 14px;
-        text-align: center;
-        color: #666;
+    .ss-order-item:last-child { border-bottom: none; }
+
+    .ss-product-icon {
+        display: grid;
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        overflow: hidden;
+        border: 1px solid #e9edf5;
+        border-radius: 11px;
+        color: #94a3b8;
+        background: #f8fafc;
+        font-size: 21px;
+    }
+
+    .ss-product-icon img { display: block; width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+
+    .ss-order-item-info { flex: 1; min-width: 0; }
+
+    .ss-order-item-name {
+        display: -webkit-box;
+        overflow: hidden;
+        color: var(--ck-ink);
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+
+    .ss-order-item-meta { margin-top: 4px; color: var(--ck-muted); font-size: 11px; }
+
+    .ss-order-item-amount { flex-shrink: 0; text-align: right; }
+    .ss-order-item-price { color: var(--ck-ink); font-size: 12px; font-weight: 900; white-space: nowrap; }
+    .ss-order-item-original { margin-top: 3px; color: #94a3b8; font-size: 10px; text-decoration: line-through; }
+    .ss-order-line-total { margin-top: 5px; color: #64748b; font-size: 10px; white-space: nowrap; }
+
+    .ss-price-breakdown { padding: 17px 22px 22px; border-top: 1px solid #f1f5f9; }
+
+    .ss-summary-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 14px;
+        margin: 0 0 13px;
+        color: #64748b;
         font-size: 12px;
         line-height: 1.5;
     }
 
-    .checkout-messages {
-        margin-bottom: 20px;
+    .ss-summary-row > span:last-child { color: var(--ck-ink); font-weight: 700; text-align: right; white-space: nowrap; }
+    .ss-summary-row .ss-free { color: var(--ck-green) !important; }
+    .ss-summary-row .ss-discount { color: var(--ck-green) !important; }
+
+    .ss-summary-divider { height: 1px; margin: 16px 0; border: 0; background: var(--ck-border); }
+
+    .ss-summary-total {
+        align-items: center;
+        margin-bottom: 5px;
+        color: var(--ck-ink);
+        font-size: 14px;
+        font-weight: 800;
     }
 
-    .checkout-message {
-        padding: 13px 15px;
-        margin-bottom: 10px;
-        border-radius: 7px;
-        background: #eff6ff;
-        color: #1d4ed8;
+    .ss-summary-total > span:last-child { color: var(--ck-ink); font-size: 23px; font-weight: 900; letter-spacing: -.04em; }
+
+    .ss-total-note { margin: 7px 0 0; color: var(--ck-muted); font-size: 10px; line-height: 1.6; }
+    .ss-savings-note { margin: 14px 0 0; padding: 10px 11px; border-radius: 9px; color: #166534; background: #f0fdf4; font-size: 11px; font-weight: 700; line-height: 1.6; }
+
+    .ss-place-order {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 52px;
+        margin-top: 20px;
+        padding: 14px 17px;
+        border: 1px solid transparent;
+        border-radius: 12px;
+        color: #fff;
+        background: linear-gradient(135deg, #5b52ee, #4338ca);
+        box-shadow: 0 8px 18px rgba(79,70,229,.21);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 900;
+        transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .ss-place-order:hover:not(:disabled) {
+        background: linear-gradient(135deg, #4f46e5, #3730a3);
+        box-shadow: 0 11px 24px rgba(79,70,229,.27);
+        transform: translateY(-2px);
+    }
+
+    .ss-place-order:active:not(:disabled) { transform: translateY(0) scale(.99); }
+
+    .ss-place-order:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+    .ss-place-order-arrow { font-size: 18px; transition: transform .2s ease; }
+    .ss-place-order:hover:not(:disabled) .ss-place-order-arrow { transform: translateX(3px); }
+
+    .ss-checkout-assurance {
+        display: flex;
+        justify-content: center;
+        gap: 7px;
+        margin: 14px 0 0;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.7;
+        text-align: center;
+    }
+
+    .ss-checkout-assurance span:first-child { color: #15803d; }
+
+    .ss-continue-shopping {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 5px 0 4px;
+        color: var(--ck-primary);
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: gap .2s ease, color .2s ease;
+    }
+
+    .ss-continue-shopping:hover { gap: 11px; color: var(--ck-primary-dark); }
+
+    /* Django messages inside the checkout content */
+    .ss-checkout-messages { margin-bottom: 18px; }
+
+    .ss-checkout-message {
+        padding: 12px 15px;
+        margin: 0 0 9px;
         border: 1px solid #bfdbfe;
+        border-radius: 11px;
+        color: #1d4ed8;
+        background: #eff6ff;
+        font-size: 13px;
+        line-height: 1.65;
     }
 
-    .checkout-message.error {
-        background: #fef2f2;
-        color: #b91c1c;
-        border-color: #fecaca;
+    .ss-checkout-message.error,
+    .ss-checkout-message.danger { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+    .ss-checkout-message.success { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+    .ss-checkout-message.warning { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+
+    @keyframes ssCheckoutEnter {
+        from { opacity: 0; transform: translateY(9px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
-    .checkout-message.success {
-        background: #f0fdf4;
-        color: #166534;
-        border-color: #bbf7d0;
+    @keyframes ssCardEnter {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
-    .checkout-message.warning {
-        background: #fffbeb;
-        color: #92400e;
-        border-color: #fde68a;
+    @media (max-width: 900px) {
+        .ss-checkout-layout { grid-template-columns: minmax(0, 1fr); }
+        .ss-summary-card { position: static; }
+        .ss-checkout-aside { display: grid; grid-template-columns: minmax(0, 1fr); }
     }
 
-    @media (max-width: 800px) {
-        .checkout-layout {
-            grid-template-columns: 1fr;
-        }
-
-        .checkout-heading {
-            font-size: 25px;
-        }
+    @media (max-width: 600px) {
+        .ss-checkout-hero { align-items: flex-start; flex-direction: column; gap: 14px; margin-bottom: 21px; }
+        .ss-checkout-title { font-size: 29px; }
+        .ss-checkout-subtitle { font-size: 13px; }
+        .ss-checkout-steps { gap: 6px; }
+        .ss-checkout-step { align-items: flex-start; flex-direction: column; gap: 7px; padding: 10px; font-size: 10px; }
+        .ss-step-number { width: 25px; height: 25px; }
+        .ss-card-heading { padding: 17px 16px 14px; }
+        .ss-card-body { padding: 15px 16px 17px; }
+        .ss-order-items { padding-right: 16px; padding-left: 16px; }
+        .ss-price-breakdown { padding: 16px; }
+        .ss-card-heading h2 { font-size: 15px; }
+        .ss-coupon-form { flex-direction: column; }
+        .ss-coupon-form .ss-btn { width: 100%; }
+        .ss-coupon-applied { align-items: flex-start; flex-direction: column; }
+        .ss-address-option { padding: 13px; }
+        .ss-order-item { gap: 9px; }
+        .ss-product-icon { width: 42px; height: 42px; }
+        .ss-summary-total > span:last-child { font-size: 21px; }
     }
 
-    @media (max-width: 480px) {
-        .checkout-page {
-            padding: 0 12px 30px;
-        }
-
-        .checkout-card {
-            padding: 17px;
-        }
-
-        .coupon-form {
-            flex-direction: column;
-        }
-
-        .applied-coupon {
-            align-items: flex-start;
-            flex-direction: column;
+    @media (prefers-reduced-motion: reduce) {
+        .ss-checkout,
+        .ss-checkout-card,
+        .ss-checkout * {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 </style>
+{% endblock %}
 
-<div class="checkout-page">
+{% block content %}
+<div class="ss-checkout">
 
-    <h1 class="checkout-heading">Secure Checkout</h1>
+    <header class="ss-checkout-hero">
+        <div>
+            <p class="ss-checkout-eyebrow">Almost yours</p>
+            <h1 class="ss-checkout-title">Secure checkout</h1>
+            <p class="ss-checkout-subtitle">
+                Confirm your delivery details, apply any available savings, and review your order before payment.
+            </p>
+        </div>
+        <div class="ss-secure-chip">
+            <span class="ss-secure-icon" aria-hidden="true">✓</span>
+            Secure payment
+        </div>
+    </header>
 
-    <!-- DJANGO MESSAGES -->
+    <div class="ss-checkout-steps" aria-label="Checkout progress">
+        <div class="ss-checkout-step is-current">
+            <span class="ss-step-number">1</span>
+            <span>Delivery details</span>
+        </div>
+        <div class="ss-checkout-step is-current">
+            <span class="ss-step-number">2</span>
+            <span>Review order</span>
+        </div>
+        <div class="ss-checkout-step">
+            <span class="ss-step-number">3</span>
+            <span>Secure payment</span>
+        </div>
+    </div>
+
     {% if messages %}
-        <div class="checkout-messages">
+        <div class="ss-checkout-messages" aria-live="polite">
             {% for message in messages %}
-                <div class="checkout-message {{ message.tags }}">
-                    {{ message }}
-                </div>
+                <div class="ss-checkout-message {{ message.tags }}">{{ message }}</div>
             {% endfor %}
         </div>
     {% endif %}
 
-    <div class="checkout-layout">
+    <div class="ss-checkout-layout">
 
-        <!-- LEFT COLUMN -->
-        <div>
+        <div class="ss-checkout-main">
 
             <!-- DELIVERY ADDRESS -->
-            <div class="checkout-card">
-
-                <h2>1. Delivery Address</h2>
-
-                {% if addresses %}
-
-                    {% for address in addresses %}
-
-                        <label class="address-option">
-
-                            <input
-                                type="radio"
-                                name="address_id"
-                                value="{{ address.id }}"
-                                form="place-order-form"
-                                {% if address.is_default %}
-                                    checked
-                                {% elif forloop.first and not addresses.0.is_default %}
-                                    checked
-                                {% endif %}
-                                required
-                            >
-
-                            <div>
-
-                                <strong>
-                                    {{ address.full_name }}
-                                </strong>
-
-                                <p>
-                                    {{ address.address_line }}
-                                </p>
-
-                                <p>
-                                    {{ address.city }},
-                                    {{ address.state }}
-                                    - {{ address.pincode }}
-                                </p>
-
-                                <p>
-                                    Phone: {{ address.phone }}
-                                </p>
-
-                                {% if address.is_default %}
-                                    <p><strong>Default Address</strong></p>
-                                {% endif %}
-
-                            </div>
-
-                        </label>
-
-                    {% endfor %}
-
-                {% else %}
-
-                    <div class="empty-address">
-
-                        <p>
-                            You have not added a delivery address.
-                        </p>
-
-                        <a
-                            href="{% url 'address_list' %}"
-                            class="checkout-link"
-                        >
-                            Add Delivery Address
-                        </a>
-
+            <section class="ss-checkout-card" aria-labelledby="ss-address-heading">
+                <div class="ss-card-heading">
+                    <div class="ss-card-icon" aria-hidden="true">⌖</div>
+                    <div>
+                        <h2 id="ss-address-heading">Delivery address</h2>
+                        <p>Where should we deliver your order?</p>
                     </div>
+                </div>
 
-                {% endif %}
-
-            </div>
+                <div class="ss-card-body">
+                    {% if addresses %}
+                        <div class="ss-address-list">
+                            {% for address in addresses %}
+                                <label class="ss-address-option">
+                                    <input
+                                        type="radio"
+                                        name="address_id"
+                                        value="{{ address.id }}"
+                                        form="place-order-form"
+                                        {% if address.is_default %}checked{% elif forloop.first and not addresses.0.is_default %}checked{% endif %}
+                                        required
+                                    >
+                                    <div class="ss-address-content">
+                                        <div class="ss-address-topline">
+                                            <span class="ss-address-name">{{ address.full_name }}</span>
+                                            {% if address.is_default %}
+                                                <span class="ss-default-badge">Default address</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="ss-address-line">{{ address.address_line }}</p>
+                                        <p class="ss-address-line">{{ address.city }}, {{ address.state }} — {{ address.pincode }}</p>
+                                        <p class="ss-address-line ss-address-phone">Phone: {{ address.phone }}</p>
+                                    </div>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'address_list' %}" class="ss-text-link">Manage saved addresses <span aria-hidden="true">→</span></a>
+                    {% else %}
+                        <div class="ss-empty-address">
+                            <div class="ss-empty-icon" aria-hidden="true">⌂</div>
+                            <h3>No delivery address yet</h3>
+                            <p>Add an address so we know where to send your order.</p>
+                            <a href="{% url 'address_list' %}" class="ss-text-link">+ Add delivery address</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
 
             <!-- COUPON -->
-            <div class="checkout-card">
-
-                <h2>2. Apply Coupon</h2>
-
-                {% if coupon %}
-
-                    <div class="applied-coupon">
-
-                        <div>
-
-                            <strong>
-                                ✓ {{ coupon.code }}
-                            </strong>
-
-                            <p>
-                                You saved ₹{{ discount|floatformat:2 }}.
-                            </p>
-
-                        </div>
-
-                        <form
-                            method="post"
-                            action="{% url 'remove_coupon' %}"
-                        >
-
-                            {% csrf_token %}
-
-                            <button
-                                type="submit"
-                                class="btn btn-remove"
-                            >
-                                Remove
-                            </button>
-
-                        </form>
-
+            <section class="ss-checkout-card" aria-labelledby="ss-coupon-heading">
+                <div class="ss-card-heading">
+                    <div class="ss-card-icon" aria-hidden="true">％</div>
+                    <div>
+                        <h2 id="ss-coupon-heading">Offers &amp; coupons</h2>
+                        <p>Have a code? Apply it to your order.</p>
                     </div>
+                </div>
 
-                {% else %}
-
-                    <p>
-                        Enter your coupon code to receive a discount.
-                    </p>
-
-                    <form
-                        method="post"
-                        action="{% url 'apply_coupon' %}"
-                        class="coupon-form"
-                    >
-
-                        {% csrf_token %}
-
-                        <input
-                            type="text"
-                            name="coupon_code"
-                            class="coupon-input"
-                            placeholder="Enter coupon code"
-                            maxlength="50"
-                            autocomplete="off"
-                            required
-                        >
-
-                        <button
-                            type="submit"
-                            class="btn btn-primary"
-                        >
-                            Apply Coupon
-                        </button>
-
-                    </form>
-
-                {% endif %}
-
-            </div>
+                <div class="ss-card-body">
+                    {% if coupon %}
+                        <div class="ss-coupon-applied">
+                            <div class="ss-coupon-applied-left">
+                                <span class="ss-coupon-check" aria-hidden="true">✓</span>
+                                <div>
+                                    <span class="ss-coupon-code">{{ coupon.code }} applied</span>
+                                    <p class="ss-coupon-saving">You're saving ₹{{ discount|floatformat:2 }} on this order.</p>
+                                </div>
+                            </div>
+                            <form method="post" action="{% url 'remove_coupon' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="ss-btn ss-btn-remove">Remove coupon</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <p class="ss-coupon-intro">Enter your coupon code below to see if you qualify for a discount.</p>
+                        <form method="post" action="{% url 'apply_coupon' %}" class="ss-coupon-form">
+                            {% csrf_token %}
+                            <input
+                                type="text"
+                                name="coupon_code"
+                                class="ss-coupon-input"
+                                placeholder="Enter coupon code"
+                                maxlength="50"
+                                autocomplete="off"
+                                autocapitalize="characters"
+                                aria-label="Coupon code"
+                                required
+                            >
+                            <button type="submit" class="ss-btn ss-btn-primary">Apply code <span aria-hidden="true">→</span></button>
+                        </form>
+                    {% endif %}
+                </div>
+            </section>
 
             <!-- PAYMENT METHOD -->
-            <div class="checkout-card">
-
-                <h2>3. Payment Method</h2>
-
-                <label class="payment-option">
-
-                    <input
-                        type="radio"
-                        name="payment_method"
-                        value="RAZORPAY"
-                        form="place-order-form"
-                        checked
-                        required
-                    >
-
+            <section class="ss-checkout-card" aria-labelledby="ss-payment-heading">
+                <div class="ss-card-heading">
+                    <div class="ss-card-icon" aria-hidden="true">▣</div>
                     <div>
-
-                        <strong>Razorpay Secure Payment</strong>
-
-                        <p>
-                            Pay using payment methods supported by
-                            Razorpay, including eligible cards,
-                            UPI, and net banking.
-                        </p>
-
+                        <h2 id="ss-payment-heading">Payment method</h2>
+                        <p>Choose how you'd like to pay.</p>
                     </div>
+                </div>
 
-                </label>
-
-            </div>
+                <div class="ss-card-body">
+                    <label class="ss-payment-option">
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="RAZORPAY"
+                            form="place-order-form"
+                            checked
+                            required
+                        >
+                        <div style="flex: 1; min-width: 0;">
+                            <div class="ss-payment-brand">
+                                <span class="ss-payment-name">Razorpay secure checkout</span>
+                                <span class="ss-test-badge">Secure gateway</span>
+                            </div>
+                            <p class="ss-payment-description">
+                                Complete your payment through Razorpay. Available options depend on your checkout session and supported payment methods.
+                            </p>
+                            <div class="ss-payment-methods" aria-label="Payment methods may include">
+                                <span>UPI</span>
+                                <span>Cards</span>
+                                <span>Net banking</span>
+                                <span>Wallets where available</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </section>
 
         </div>
 
-        <!-- RIGHT COLUMN -->
-        <div>
+        <!-- ORDER SUMMARY -->
+        <aside class="ss-checkout-aside" aria-label="Order summary">
+            <section class="ss-checkout-card ss-summary-card" aria-labelledby="ss-order-heading">
+                <div class="ss-card-heading">
+                    <div class="ss-card-icon" aria-hidden="true">▤</div>
+                    <div>
+                        <h2 id="ss-order-heading">Order summary</h2>
+                        <p>Check your items before placing the order.</p>
+                    </div>
+                    {% if cart_items %}
+                        <span class="ss-order-count">{{ cart_items|length }}</span>
+                    {% endif %}
+                </div>
 
-            <!-- ORDER ITEMS -->
-            <div class="checkout-card">
-
-                <h2>Your Order</h2>
-
-                {% for item in cart_items %}
-
-                    <div class="order-item">
-
-                        <div>
-
-                            <div class="order-item-name">
-                                {{ item.product.name }}
+                <div class="ss-order-items">
+                    {% for item in cart_items %}
+                        <div class="ss-order-item">
+                            <div class="ss-product-icon" aria-hidden="true">
+                                {% with product_image=item.product.images.first %}
+                                    {% if product_image %}
+                                        <img src="{{ product_image.image.url }}" alt="">
+                                    {% else %}
+                                        ◇
+                                    {% endif %}
+                                {% endwith %}
                             </div>
-
-                            <div class="order-item-meta">
-                                Quantity: {{ item.quantity }}
+                            <div class="ss-order-item-info">
+                                <div class="ss-order-item-name">{{ item.product.name }}</div>
+                                <div class="ss-order-item-meta">Qty: {{ item.quantity }}</div>
                             </div>
-
-                        </div>
-
-                        <div class="order-item-price">
-
-                            {% if item.product.discount_price %}
-                                <strong>
-                                    ₹{{ item.product.discount_price|floatformat:2 }}
-                                </strong>
-
-                                <div class="original-price">
-                                    ₹{{ item.product.price|floatformat:2 }}
-                                </div>
-                            {% else %}
-                                <strong>
-                                    ₹{{ item.product.price|floatformat:2 }}
-                                </strong>
-                            {% endif %}
-
-                            <div class="order-item-meta">
-                                Line total:
+                            <div class="ss-order-item-amount">
                                 {% if item.product.discount_price %}
-                                    ₹{% widthratio item.product.discount_price 1 item.quantity %}
+                                    <div class="ss-order-item-price">₹{{ item.product.discount_price|floatformat:2 }}</div>
+                                    <div class="ss-order-item-original">₹{{ item.product.price|floatformat:2 }}</div>
                                 {% else %}
-                                    ₹{% widthratio item.product.price 1 item.quantity %}
+                                    <div class="ss-order-item-price">₹{{ item.product.price|floatformat:2 }}</div>
                                 {% endif %}
+                                <div class="ss-order-line-total">Line: ₹{{ item.subtotal|floatformat:2 }}</div>
                             </div>
-
                         </div>
+                    {% empty %}
+                        <p class="ss-coupon-intro" style="padding: 16px 0;">Your cart is empty.</p>
+                    {% endfor %}
+                </div>
 
+                <div class="ss-price-breakdown">
+                    <div class="ss-summary-row">
+                        <span>Subtotal</span>
+                        <span>₹{{ subtotal|floatformat:2 }}</span>
+                    </div>
+                    <div class="ss-summary-row">
+                        <span>Delivery charges</span>
+                        <span class="ss-free">FREE</span>
                     </div>
 
-                {% empty %}
+                    {% if coupon and discount > 0 %}
+                        <div class="ss-summary-row">
+                            <span>Coupon ({{ coupon.code }})</span>
+                            <span class="ss-discount">− ₹{{ discount|floatformat:2 }}</span>
+                        </div>
+                    {% endif %}
 
-                    <p>Your cart is empty.</p>
+                    <hr class="ss-summary-divider">
 
-                {% endfor %}
-
-            </div>
-
-            <!-- PRICE SUMMARY -->
-            <div class="checkout-card">
-
-                <h2>Price Details</h2>
-
-                <div class="summary-row">
-
-                    <span>Subtotal</span>
-
-                    <span>
-                        ₹{{ subtotal|floatformat:2 }}
-                    </span>
-
-                </div>
-
-                <div class="summary-row">
-
-                    <span>Delivery Charges</span>
-
-                    <span class="discount-value">FREE</span>
-
-                </div>
-
-                {% if coupon and discount > 0 %}
-
-                    <div class="summary-row">
-
-                        <span>
-                            Coupon ({{ coupon.code }})
-                        </span>
-
-                        <span class="discount-value">
-                            − ₹{{ discount|floatformat:2 }}
-                        </span>
-
+                    <div class="ss-summary-row ss-summary-total">
+                        <span>Total amount</span>
+                        <span>₹{{ total|floatformat:2 }}</span>
                     </div>
+                    <p class="ss-total-note">Final amount based on the current cart and applied discounts.</p>
 
-                {% endif %}
+                    {% if coupon and discount > 0 %}
+                        <p class="ss-savings-note">✓ Great choice! You're saving ₹{{ discount|floatformat:2 }} with this coupon.</p>
+                    {% endif %}
 
-                <hr class="summary-divider">
+                    <form method="post" action="{% url 'start_payment' %}" id="place-order-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="checkout_token" value="{{ checkout_token }}">
+                        <button
+                            type="submit"
+                            class="ss-place-order"
+                            {% if not addresses or not cart_items %}disabled{% endif %}
+                        >
+                            <span>Place order · ₹{{ total|floatformat:2 }}</span>
+                            <span class="ss-place-order-arrow" aria-hidden="true">→</span>
+                        </button>
+                    </form>
 
-                <div class="summary-row summary-total">
-
-                    <span>Total Amount</span>
-
-                    <span>
-                        ₹{{ total|floatformat:2 }}
-                    </span>
-
+                    <p class="ss-checkout-assurance"><span aria-hidden="true">✓</span><span>Secure payment powered by Razorpay. Never share your OTP or PIN.</span></p>
                 </div>
+            </section>
 
-                {% if coupon and discount > 0 %}
-
-                    <p class="discount-value">
-                        Congratulations! You saved
-                        ₹{{ discount|floatformat:2 }}.
-                    </p>
-
-                {% endif %}
-
-                <!-- PLACE ORDER FORM -->
-                <form
-                    method="post"
-                    action="{% url 'start_payment' %}"
-                    id="place-order-form"
-                >
-
-                    {% csrf_token %}
-
-                    <input
-                        type="hidden"
-                        name="checkout_token"
-                        value="{{ checkout_token }}"
-                    >
-
-                    <button
-                        type="submit"
-                        class="place-order-btn"
-                        {% if not addresses or not cart_items %}
-                            disabled
-                        {% endif %}
-                    >
-                        Place Order — ₹{{ total|floatformat:2 }}
-                    </button>
-
-                </form>
-
-                <p class="secure-note">
-                    Your payment will be processed securely through
-                    Razorpay. Do not refresh or close the page while
-                    payment is being processed.
-                </p>
-
-            </div>
-
-        </div>
+            <a href="{% url 'product_list' %}" class="ss-continue-shopping"><span aria-hidden="true">←</span> Continue shopping</a>
+        </aside>
 
     </div>
-
 </div>
-
 {% endblock %}
